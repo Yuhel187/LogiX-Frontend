@@ -6,9 +6,8 @@ Start with the smallest authoritative surface.
 
 - `WORKFLOW.md`: request shape, planning, judgment, operation, validation, and
   completion.
-- `ARCHITECTURE.md`: current product, code, state, update, and ownership
-  boundaries.
-- `HARNESS.md`: product principles and installed-core model.
+- `ARCHITECTURE.md`: frontend code placement, dependency, state, and
+  server/client boundaries.
 - `product/`: current product behavior and installation contract.
 - `decisions/`: lasting choices future work must inherit.
 - `plans/`: one durable working-memory document for work that needs it.
@@ -24,17 +23,18 @@ The consumer's README, product documents, architecture, code, tests, CI,
 runtime signals, and application behavior remain authoritative. Harness does
 not overwrite those with upstream product assumptions.
 
-## Source Repository
+## Frontend Repository
 
-- Root `README.md`: product overview, installation, maintenance, EOL, and
-  development.
-- `crates/harness/`: safe core installer/updater.
-- `scripts/`: platform bootstrap, release, and validation entrypoints.
-- `tests/`: behavior ownership and repository contract.
+- Root `README.md`: onboarding and shared commands.
+- `src/app/`: Next.js routes and route composition.
+- `src/features/`: business-facing frontend modules.
+- `src/components/`: UI primitives and shared domain-agnostic composition.
+- `src/lib/`: cross-cutting frontend infrastructure.
 
-## History
+## Start Here By Task
 
-The former SQLite control plane, protocol v1, story packets, migration evidence,
-and compatibility documentation are preserved by Git history and immutable
-`harness-cli-v*` tags. They are intentionally absent from the current tree so
-search and agent retrieval return current product authority.
+- Adding a page or component: read `ARCHITECTURE.md`.
+- Calling or changing an API: read `product/frontend-api-contract.md` and the
+  accepted backend contract.
+- Changing a lasting boundary: add or supersede a record in `decisions/`.
+- Enforcing a rule: follow `patterns/encoding-invariants.md`.

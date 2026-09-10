@@ -23,6 +23,15 @@ architecture map is `../LogiX-Backend/docs/architecture/README.md`.
 - New screens should compose existing primitives before introducing custom
   equivalents.
 
+Detailed ownership is defined by:
+
+- [`../ARCHITECTURE.md`](../ARCHITECTURE.md) for routes, features, components,
+  shared infrastructure, dependencies, and server/client boundaries.
+- [`frontend-api-contract.md`](frontend-api-contract.md) for API calls,
+  transport types, mapping, errors, caching, and mutations.
+- [`../decisions/0001-frontend-module-api-contract.md`](../decisions/0001-frontend-module-api-contract.md)
+  for the accepted architectural decision.
+
 ## Proof Commands
 
 ```text

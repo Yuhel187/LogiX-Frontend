@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LogiX Frontend
 
-## Getting Started
+LogiX Frontend is the Next.js App Router Experience layer for the LogiX
+distribution platform. Backend services own business rules, authorization,
+tenant isolation, persistence, and state transitions; this repository owns the
+web experience and consumes accepted API contracts.
 
-First, run the development server:
+## Requirements
+
+- Node.js 22
+- pnpm 11.9.0
+
+## Start Development
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install --frozen-lockfile
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Read Before Coding
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- [`AGENTS.md`](AGENTS.md): repository scope and developer entry rules.
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): where pages, features,
+  components, hooks, state, and shared infrastructure belong.
+- [`docs/product/frontend-api-contract.md`](docs/product/frontend-api-contract.md):
+  where APIs and types belong and how contracts cross the backend boundary.
+- [`docs/product/frontend-stack.md`](docs/product/frontend-stack.md): framework,
+  UI, styling, and baseline proof commands.
 
-## Learn More
+## Shared Validation
 
-To learn more about Next.js, take a look at the following resources:
+Run the complete repository validation before requesting review:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+pnpm validate
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Focused commands:
 
-## Deploy on Vercel
+```bash
+pnpm lint
+pnpm typecheck
+pnpm build
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Browser-visible changes also require validation through the running application;
+static commands do not prove interaction, accessibility, or responsive behavior.

@@ -46,6 +46,23 @@ unless the request explicitly crosses the frontend/backend contract boundary.
 - Backend API contracts are external inputs; do not invent response shapes when
   the backend contract or an accepted product document is unavailable.
 
+### Frontend Contract Routing
+
+Before adding or moving frontend code, read `docs/ARCHITECTURE.md`. It owns the
+placement and dependency contract for `app`, `features`, `components`, and
+`lib`. For API calls, transport types, errors, caching, request context, or
+mutations, also read `docs/product/frontend-api-contract.md`.
+
+- Pages and layouts own routing and composition, not reusable business logic.
+- Endpoint-specific operations live under `src/features/<domain>/api`; raw HTTP
+  is confined to `src/lib/api` and explicitly approved `app/api` adapters.
+- Keep backend DTOs generated or traceable to an accepted backend contract;
+  keep feature/view types with their feature and component props local.
+- Server Components are the default. Keep Client Component boundaries small and
+  never import server-only modules into them.
+- Treat these boundaries as review contracts. If a lasting boundary changes,
+  update the accepted decision and owner documents in the same change.
+
 ### Product And Architecture Boundary
 
 The frontend implements the Experience layer from the LogiX architecture. The
