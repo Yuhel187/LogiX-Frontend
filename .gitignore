@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Harness core maintenance binary
+scripts/bin/harness
+scripts/bin/harness.exe
