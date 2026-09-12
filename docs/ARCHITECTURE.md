@@ -40,6 +40,7 @@ src/
   components/
     ui/                      shadcn/domain-agnostic primitives
     shared/                  domain-agnostic composed UI
+  locales/                   global JSON locale dictionaries (vi.json, en.json)
   lib/
     api/                     endpoint-agnostic transport and errors
       generated/             generated backend transport contracts only
@@ -57,12 +58,13 @@ Use the first matching rule:
 
 1. Does it define a URL or route lifecycle? Put it in `src/app`.
 2. Is it used only by one route subtree? Colocate it in `_components` or `_lib`.
-3. Does it know a LogiX business concept? Put it in `src/features/<domain>`.
-4. Is it a visual primitive with no domain knowledge? Put it in
+3. Is it a global application locale dictionary? Put it in `src/locales/` (`vi.json`, `en.json`).
+4. Does it know a LogiX business concept? Put it in `src/features/<domain>`.
+5. Is it a visual primitive with no domain knowledge? Put it in
    `src/components/ui`.
-5. Is it composed UI shared across domains but still domain-agnostic? Put it in
+6. Is it composed UI shared across domains but still domain-agnostic? Put it in
    `src/components/shared`.
-6. Is it endpoint-agnostic infrastructure? Put it in `src/lib`.
+7. Is it endpoint-agnostic infrastructure? Put it in `src/lib`.
 
 Do not create global `services`, `hooks`, `utils`, or `types` folders as
 catch-alls. Shared code must still have a single named responsibility.
@@ -152,6 +154,8 @@ catch-alls. Shared code must still have a single named responsibility.
 ## Review Contract
 
 Code review verifies the dependency matrix, HTTP ownership, feature isolation,
+UI completeness (mandatory VI/EN locales, Light/Dark theme compatibility, and full responsive design across mobile/tablet/desktop breakpoints for all pages and components),
+brand asset usage (official `/logo_logix.png` and `/fav_logo_logix.png` in `public/`),
 and Client/Server boundary described above. These are architecture rules, not
 automated checks. When an exception is genuinely needed, update or supersede
 the accepted decision and this document instead of relying on an undocumented

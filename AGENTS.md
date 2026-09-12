@@ -108,7 +108,11 @@ visual or interaction change is verified from TypeScript and lint alone.
 - Preserve the Tailwind v4 setup in `src/app/globals.css`; do not introduce a
   Tailwind v3 config or migrate CSS variables without an accepted design
   decision.
-- Keep light and dark theme tokens compatible with the existing `.dark` theme.
+- When displaying logos or site icons, ALWAYS use the official assets in `public/` (`/logo_logix.png` for application logos and `/fav_logo_logix.png` for favicons/browser icons). Do not invent inline placeholder SVG logos when public brand assets exist.
+- All user-visible copy MUST be localized and maintained in separate JSON locale files under `src/locales/` (`src/locales/vi.json` for Vietnamese and `src/locales/en.json` for English). Hardcoded strings without localization are strictly forbidden.
+- Use `Inter` font (`subsets: ["latin", "vietnamese"]`) across the entire application to ensure proper Vietnamese diacritic rendering.
+- Every UI change MUST support and be verified for both Light and Dark themes, maintaining full token compatibility with light mode and the `.dark` theme without broken contrast or hardcoded color values.
+- Every UI design and component modification MUST mandatorily include full responsive layout support across all device breakpoints (mobile, tablet, desktop). Unhandled overflow, horizontal scrolling, overlapping elements, or fixed non-responsive widths on components are strictly forbidden.
 - Keep client-only state and browser APIs in Client Components.
 - Keep user-visible behavior accessible: labels, keyboard interaction, focus
   states, and responsive layouts are part of the frontend contract.
