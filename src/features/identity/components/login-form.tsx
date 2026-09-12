@@ -1,0 +1,186 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { Mail, Lock, ArrowRight } from "lucide-react";
+import { LocaleSwitcher, type Locale } from "@/components/shared/locale-switcher";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
+import type { Dictionary } from "@/locales";
+
+interface LoginFormProps {
+  t: Dictionary["auth"];
+  currentLocale: Locale;
+  onLocaleChange: (locale: Locale) => void;
+  onSubmitSuccess?: () => void;
+}
+
+export function LoginForm({
+  t,
+  currentLocale,
+  onLocaleChange,
+  onSubmitSuccess,
+}: LoginFormProps) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      if (onSubmitSuccess) onSubmitSuccess();
+    }, 800);
+  };
+
+  return (
+    <div className="relative flex flex-col justify-between min-h-screen p-6 sm:p-10 bg-white dark:bg-[#090b0c] text-zinc-900 dark:text-zinc-100 transition-colors duration-300">
+      {/* Top Right Controls (VI/EN & Theme Switcher) */}
+      <div className="flex items-center justify-end gap-3 w-full">
+        <LocaleSwitcher currentLocale={currentLocale} onLocaleChange={onLocaleChange} />
+        <ThemeToggle />
+      </div>
+
+      {/* Main Form Box */}
+      <div className="w-full max-w-sm mx-auto my-auto space-y-7 py-6">
+        {/* Mobile Logo (Wareflex style) */}
+        <div className="lg:hidden flex justify-center pb-4">
+          <Image
+            src="/logo_logix.png"
+            alt="LogiX Logo"
+            width={720}
+            height={216}
+            priority
+            className="h-32 sm:h-40 max-w-70 w-auto object-contain"
+          />
+        </div>
+
+        {/* Header Title & Subtitle */}
+        <div className="text-center lg:text-left space-y-1.5">
+          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100">
+            {t.loginTitle}
+          </h2>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            {t.loginSubtitle}
+          </p>
+        </div>
+
+        {/* Form Inputs */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Email Field */}
+          <div className="space-y-1.5">
+            <label
+              htmlFor="email"
+              className="block text-xs mb-2 font-semibold text-zinc-700 dark:text-zinc-300"
+            >
+              {t.emailLabel}
+            </label>
+            <div className="relative flex items-center">
+              <Mail className="absolute left-3.5 h-4 w-4 text-zinc-400 dark:text-zinc-500 pointer-events-none" />
+              <input
+                id="email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder={t.emailPlaceholder}
+                className="w-full h-11 pl-10 pr-4 bg-zinc-50 dark:bg-[#111315] border border-zinc-200 dark:border-zinc-800/80 rounded-xl text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+              />
+            </div>
+          </div>
+
+          {/* Password Field */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between mb-2">
+              <label
+                htmlFor="password"
+                className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+              >
+                {t.passwordLabel}
+              </label>
+              <Link
+                href="/forgot-password"
+                className="text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
+              >
+                {t.forgotPasswordLink}
+              </Link>
+            </div>
+            <div className="relative flex items-center">
+              <Lock className="absolute left-3.5 h-4 w-4 text-zinc-400 dark:text-zinc-500 pointer-events-none" />
+              <input
+                id="password"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder={t.passwordPlaceholder}
+                className="w-full h-11 pl-10 pr-4 bg-zinc-50 dark:bg-[#111315] border border-zinc-200 dark:border-zinc-800/80 rounded-xl text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+              />
+            </div>
+          </div>
+
+          {/* Primary Submit Button */}
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full h-11 mt-10 bg-[#10b981] hover:bg-[#059669] text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.99] disabled:opacity-60 cursor-pointer text-sm"
+          >
+            <span>{isLoading ? "..." : t.submitButton}</span>
+            {!isLoading && <ArrowRight className="h-4 w-4" />}
+          </button>
+        </form>
+
+        {/* Divider */}
+        <div className="relative flex items-center justify-center pt-1">
+          <div className="w-full border-t border-zinc-200 dark:border-zinc-800/80" />
+          <span className="absolute px-3 bg-white dark:bg-[#090b0c] text-[10px] font-semibold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase">
+            {t.orContinueWith}
+          </span>
+        </div>
+
+        {/* Google SSO Button */}
+        <button
+          type="button"
+          className="w-full h-11 bg-white hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-semibold rounded-xl border border-zinc-200 dark:border-zinc-800 flex items-center justify-center gap-3 transition-all shadow-xs active:scale-[0.99] cursor-pointer text-sm"
+        >
+          <svg className="w-4 h-4" viewBox="0 0 24 24">
+            <path
+              fill="#4285F4"
+              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+            />
+            <path
+              fill="#34A853"
+              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+            />
+            <path
+              fill="#FBBC05"
+              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+            />
+            <path
+              fill="#EA4335"
+              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+            />
+          </svg>
+          <span>{t.googleButton}</span>
+        </button>
+
+        {/* Footer Register Link */}
+        <div className="text-center text-xs text-zinc-600 dark:text-zinc-400">
+          <span>{t.noAccountText} </span>
+          <Link
+            href="/register"
+            className="font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
+          >
+            {t.registerText}
+          </Link>
+        </div>
+      </div>
+
+      {/* Footer Copyright */}
+      <div className="text-center py-2 text-[11px] text-zinc-400 dark:text-zinc-600">
+        {t.copyright}
+      </div>
+    </div>
+  );
+}
