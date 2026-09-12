@@ -1,0 +1,53 @@
+{
+  "common": {
+    "all": "All",
+    "close": "Close",
+    "cancel": "Cancel",
+    "save": "Save",
+    "search": "Search",
+    "online": "Online",
+    "offline": "Offline"
+  },
+  "nav": {
+    "brandSubtitle": "Inteligent Logistic",
+    "systemManagement": "System Management",
+    "overview": "Overview",
+    "generalConfig": "General Settings",
+    "feature1": "Feature 1",
+    "moduleA": "Module A",
+    "moduleB": "Module B",
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar"
+  },
+  "header": {
+    "searchPlaceholder": "Search orders, tracking codes, trips...",
+    "notifications": "Notifications",
+    "newBadge": "{count} new",
+    "markAllAsRead": "Mark as read",
+    "viewAllHistory": "View all activity history",
+    "userRole": "Dispatcher",
+    "adminBadge": "Operations Admin Access"
+  },
+  "userMenu": {
+    "profile": "Profile",
+    "settings": "Account Settings",
+    "help": "Help & Shortcuts",
+    "logout": "Log out"
+  },
+  "theme": {
+    "toggle": "Toggle theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "language": {
+    "switchLanguage": "Change language",
+    "select": "Select language",
+    "vi": "Tiếng Việt",
+    "en": "English"
+  },
+  "home": {
+    "welcomeTitle": "Welcome to LogiX Enterprise",
+    "welcomeDescription": "This is the main workspace layout template. Select an option from the sidebar to begin, or start customizing this template for your application needs."
+  }
+}
