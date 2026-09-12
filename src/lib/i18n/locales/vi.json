@@ -1,0 +1,53 @@
+{
+  "common": {
+    "all": "Tất cả",
+    "close": "Đóng",
+    "cancel": "Hủy",
+    "save": "Lưu",
+    "search": "Tìm kiếm",
+    "online": "Trực tuyến",
+    "offline": "Ngoại tuyến"
+  },
+  "nav": {
+    "brandSubtitle": "Inteligent Logistic",
+    "systemManagement": "Quản lý Hệ thống",
+    "overview": "Tổng quan",
+    "generalConfig": "Cấu hình chung",
+    "feature1": "Tính năng 1",
+    "moduleA": "Phân hệ A",
+    "moduleB": "Phân hệ B",
+    "collapse": "Thu gọn sidebar",
+    "expand": "Mở rộng sidebar"
+  },
+  "header": {
+    "searchPlaceholder": "Tìm kiếm đơn hàng, mã vận đơn, chuyến xe...",
+    "notifications": "Thông báo",
+    "newBadge": "{count} mới",
+    "markAllAsRead": "Đánh dấu đã đọc",
+    "viewAllHistory": "Xem tất cả lịch sử hoạt động",
+    "userRole": "Điều phối viên",
+    "adminBadge": "Quyền Quản trị viên Vận hành"
+  },
+  "userMenu": {
+    "profile": "Hồ sơ cá nhân",
+    "settings": "Cài đặt tài khoản",
+    "help": "Hướng dẫn & Phím tắt",
+    "logout": "Đăng xuất"
+  },
+  "theme": {
+    "toggle": "Chuyển đổi giao diện",
+    "light": "Sáng (Light)",
+    "dark": "Tối (Dark)",
+    "system": "Theo hệ thống"
+  },
+  "language": {
+    "switchLanguage": "Chuyển đổi ngôn ngữ",
+    "select": "Chọn ngôn ngữ",
+    "vi": "Tiếng Việt",
+    "en": "English"
+  },
+  "home": {
+    "welcomeTitle": "Chào mừng đến với LogiX Enterprise",
+    "welcomeDescription": "Đây là mẫu giao diện không gian làm việc tổng thể. Chọn một mục từ thanh bên để bắt đầu hoặc tùy biến mẫu này theo nhu cầu ứng dụng của bạn."
+  }
+}
