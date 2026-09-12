@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Inter, Geist, Geist_Mono } from "next/font/google";
+import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,11 +11,6 @@ const inter = Inter({
   subsets: ["latin", "vietnamese"],
   variable: "--font-sans",
   display: "swap",
-});
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
@@ -47,12 +42,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       suppressHydrationWarning
       className={cn(
         "h-full antialiased font-sans",
-        geistSans.variable,
         geistMono.variable,
         inter.variable
       )}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground font-sans" suppressHydrationWarning>
+      <body
+        className={cn(
+          "min-h-full flex flex-col bg-background text-foreground font-sans",
+          inter.className
+        )}
+        suppressHydrationWarning
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
