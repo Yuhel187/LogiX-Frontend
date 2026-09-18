@@ -3,42 +3,49 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Mail, Lock, ArrowRight } from "lucide-react";
-import { LocaleSwitcher, type Locale } from "@/components/shared/locale-switcher";
+import { LocaleSwitcher } from "@/components/shared/locale-switcher";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
-import type { Dictionary } from "@/locales";
+import { useAuth } from "@/lib/auth";
+import { useTranslation } from "@/lib/i18n";
+import { formatAuthError } from "../utils/error-formatter";
 
 interface LoginFormProps {
-  t: Dictionary["auth"];
-  currentLocale: Locale;
-  onLocaleChange: (locale: Locale) => void;
   onSubmitSuccess?: () => void;
 }
 
-export function LoginForm({
-  t,
-  currentLocale,
-  onLocaleChange,
-  onSubmitSuccess,
-}: LoginFormProps) {
+export function LoginForm({ onSubmitSuccess }: LoginFormProps) {
+  const router = useRouter();
+  const { login } = useAuth();
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => {
+    try {
+      await login({ email, password });
+      if (onSubmitSuccess) {
+        onSubmitSuccess();
+      } else {
+        router.push("/");
+      }
+    } catch (err: unknown) {
+      setErrorMessage(formatAuthError(err, t, "auth.loginErrorDefault"));
+    } finally {
       setIsLoading(false);
-      if (onSubmitSuccess) onSubmitSuccess();
-    }, 800);
+    }
   };
 
   return (
     <div className="relative flex flex-col justify-between min-h-screen p-6 sm:p-10 bg-white dark:bg-[#090b0c] text-zinc-900 dark:text-zinc-100 transition-colors duration-300">
       {/* Top Right Controls (VI/EN & Theme Switcher) */}
       <div className="flex items-center justify-end gap-3 w-full">
-        <LocaleSwitcher currentLocale={currentLocale} onLocaleChange={onLocaleChange} />
+        <LocaleSwitcher />
         <ThemeToggle />
       </div>
 
@@ -59,22 +66,28 @@ export function LoginForm({
         {/* Header Title & Subtitle */}
         <div className="text-center lg:text-left space-y-1.5">
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100">
-            {t.loginTitle}
+            {t("auth.loginTitle")}
           </h2>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            {t.loginSubtitle}
+            {t("auth.loginSubtitle")}
           </p>
         </div>
 
         {/* Form Inputs */}
         <form onSubmit={handleSubmit} className="space-y-4">
+          {errorMessage && (
+            <div className="p-3 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 rounded-xl">
+              {errorMessage}
+            </div>
+          )}
+
           {/* Email Field */}
           <div className="space-y-1.5">
             <label
               htmlFor="email"
               className="block text-xs mb-2 font-semibold text-zinc-700 dark:text-zinc-300"
             >
-              {t.emailLabel}
+              {t("auth.emailLabel")}
             </label>
             <div className="relative flex items-center">
               <Mail className="absolute left-3.5 h-4 w-4 text-zinc-400 dark:text-zinc-500 pointer-events-none" />
@@ -83,8 +96,11 @@ export function LoginForm({
                 type="email"
                 required
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={t.emailPlaceholder}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (errorMessage) setErrorMessage(null);
+                }}
+                placeholder={t("auth.emailPlaceholder")}
                 className="w-full h-11 pl-10 pr-4 bg-zinc-50 dark:bg-[#111315] border border-zinc-200 dark:border-zinc-800/80 rounded-xl text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
               />
             </div>
@@ -97,13 +113,13 @@ export function LoginForm({
                 htmlFor="password"
                 className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300"
               >
-                {t.passwordLabel}
+                {t("auth.passwordLabel")}
               </label>
               <Link
                 href="/forgot-password"
                 className="text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
               >
-                {t.forgotPasswordLink}
+                {t("auth.forgotPasswordLink")}
               </Link>
             </div>
             <div className="relative flex items-center">
@@ -113,8 +129,11 @@ export function LoginForm({
                 type="password"
                 required
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={t.passwordPlaceholder}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (errorMessage) setErrorMessage(null);
+                }}
+                placeholder={t("auth.passwordPlaceholder")}
                 className="w-full h-11 pl-10 pr-4 bg-zinc-50 dark:bg-[#111315] border border-zinc-200 dark:border-zinc-800/80 rounded-xl text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
               />
             </div>
@@ -126,7 +145,7 @@ export function LoginForm({
             disabled={isLoading}
             className="w-full h-11 mt-10 bg-[#10b981] hover:bg-[#059669] text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.99] disabled:opacity-60 cursor-pointer text-sm"
           >
-            <span>{isLoading ? "..." : t.submitButton}</span>
+            <span>{isLoading ? "..." : t("auth.submitButton")}</span>
             {!isLoading && <ArrowRight className="h-4 w-4" />}
           </button>
         </form>
@@ -135,7 +154,7 @@ export function LoginForm({
         <div className="relative flex items-center justify-center pt-1">
           <div className="w-full border-t border-zinc-200 dark:border-zinc-800/80" />
           <span className="absolute px-3 bg-white dark:bg-[#090b0c] text-[10px] font-semibold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase">
-            {t.orContinueWith}
+            {t("auth.orContinueWith")}
           </span>
         </div>
 
@@ -162,24 +181,24 @@ export function LoginForm({
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
             />
           </svg>
-          <span>{t.googleButton}</span>
+          <span>{t("auth.googleButton")}</span>
         </button>
 
         {/* Footer Register Link */}
         <div className="text-center text-xs text-zinc-600 dark:text-zinc-400">
-          <span>{t.noAccountText} </span>
+          <span>{t("auth.noAccountText")} </span>
           <Link
             href="/register"
             className="font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
           >
-            {t.registerText}
+            {t("auth.registerText")}
           </Link>
         </div>
       </div>
 
       {/* Footer Copyright */}
       <div className="text-center py-2 text-[11px] text-zinc-400 dark:text-zinc-600">
-        {t.copyright}
+        {t("auth.copyright")}
       </div>
     </div>
   );

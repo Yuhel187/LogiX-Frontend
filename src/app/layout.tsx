@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/shared/theme-provider";
 import { LanguageProvider } from "@/lib/i18n";
+import { AuthProvider } from "@/lib/auth";
 
 const inter = Inter({
   subsets: ["latin", "vietnamese"],
@@ -60,7 +61,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           disableTransitionOnChange
         >
           <LanguageProvider>
-            <TooltipProvider delayDuration={200}>{children}</TooltipProvider>
+            <AuthProvider>
+              <TooltipProvider delayDuration={200}>{children}</TooltipProvider>
+            </AuthProvider>
           </LanguageProvider>
         </ThemeProvider>
       </body>
