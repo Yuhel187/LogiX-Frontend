@@ -57,7 +57,7 @@ export function RegisterForm({ onSubmitSuccess }: RegisterFormProps) {
           router.push("/");
         }
       }, 500);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setErrorMessage(formatAuthError(err, t, "auth.registerErrorDefault"));
       setIsLoading(false);
     }

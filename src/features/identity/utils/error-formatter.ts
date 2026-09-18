@@ -8,7 +8,7 @@ export function formatAuthError(
   const message =
     typeof rawError === "string"
       ? rawError
-      : (rawError as { message?: string })?.message || "";
+      : (rawError instanceof Error ? rawError.message : (rawError as Record<string, unknown>)?.["message"] as string) || "";
 
   if (!message) {
     return t(defaultKey) || "An error occurred.";

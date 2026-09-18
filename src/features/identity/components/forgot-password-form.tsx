@@ -28,7 +28,7 @@ export function ForgotPasswordForm() {
         setDevToken(res.devToken);
       }
       setIsSent(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setErrorMessage(formatAuthError(err, t, "auth.forgotPasswordErrorDefault"));
     } finally {
       setIsLoading(false);

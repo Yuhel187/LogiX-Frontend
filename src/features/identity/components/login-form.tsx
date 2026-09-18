@@ -34,7 +34,7 @@ export function LoginForm({ onSubmitSuccess }: LoginFormProps) {
       } else {
         router.push("/");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setErrorMessage(formatAuthError(err, t, "auth.loginErrorDefault"));
     } finally {
       setIsLoading(false);

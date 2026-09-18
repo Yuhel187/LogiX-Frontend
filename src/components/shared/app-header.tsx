@@ -36,7 +36,7 @@ import { useAuth } from "@/lib/auth";
 export function AppHeader() {
   const { toggleMobile } = useSidebar();
   const { t } = useTranslation();
-  const { user, activeTenant, tenants, switchTenant, logout } = useAuth();
+  const { user, activeTenant, logout } = useAuth();
   const [unreadCount, setUnreadCount] = React.useState(3);
 
   const notifications = [

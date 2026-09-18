@@ -59,7 +59,7 @@ export function SetPasswordForm({ onSubmitSuccess }: SetPasswordFormProps) {
           router.push("/login");
         }
       }, 1500);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setErrorMessage(formatAuthError(err, t, "auth.resetPasswordErrorDefault"));
     } finally {
       setIsLoading(false);
