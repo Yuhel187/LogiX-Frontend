@@ -17,7 +17,8 @@
     "moduleA": "Module A",
     "moduleB": "Module B",
     "collapse": "Collapse sidebar",
-    "expand": "Expand sidebar"
+    "expand": "Expand sidebar",
+    "loadingWorkspace": "Loading workspace..."
   },
   "header": {
     "searchPlaceholder": "Search orders, tracking codes, trips...",
@@ -92,6 +93,24 @@
     "emailSentSubtitle": "We have sent password reset instructions to",
     "resendEmailText": "Didn't receive the email?",
     "resendLink": "Resend",
-    "targetEmailLabel": "Account Email"
+    "targetEmailLabel": "Account Email",
+    "loginErrorDefault": "Login failed. Please check your credentials.",
+    "loginSuccessRedirecting": "Login successful! Redirecting to workspace...",
+    "passwordMismatchError": "Confirm password does not match.",
+    "registerSuccessMessage": "Registration successful! Redirecting to workspace...",
+    "registerErrorDefault": "Registration failed. Please try again.",
+    "forgotPasswordSuccessMessage": "Password reset link sent to your email.",
+    "forgotPasswordErrorDefault": "Failed to send reset link. Please try again.",
+    "missingTokenError": "Missing reset token in link. Please check your email.",
+    "resetPasswordSuccessMessage": "Password reset successfully! Redirecting to login...",
+    "resetPasswordErrorDefault": "Failed to reset password. Please try again.",
+    "devResetLinkTitle": "[Dev Mode] Quick reset link:",
+    "devResetLinkClick": "Click here to reset password",
+    "invalidCredentialsError": "Email or password is incorrect.",
+    "accountLockedError": "Your account has been locked or disabled.",
+    "noActiveOrganizationError": "You do not belong to any active organization.",
+    "emailAlreadyRegisteredError": "This email is already registered.",
+    "accountExistsLoginPromptError": "Account already exists. Please sign in or create a new organization after signing in.",
+    "serviceUnavailableError": "Authentication service is not responding. Please try again later."
   }
 }

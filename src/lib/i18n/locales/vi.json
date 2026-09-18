@@ -17,7 +17,8 @@
     "moduleA": "Phân hệ A",
     "moduleB": "Phân hệ B",
     "collapse": "Thu gọn sidebar",
-    "expand": "Mở rộng sidebar"
+    "expand": "Mở rộng sidebar",
+    "loadingWorkspace": "Đang tải không gian làm việc..."
   },
   "header": {
     "searchPlaceholder": "Tìm kiếm đơn hàng, mã vận đơn, chuyến xe...",
@@ -92,6 +93,24 @@
     "emailSentSubtitle": "Chúng tôi đã gửi hướng dẫn đặt lại mật khẩu đến",
     "resendEmailText": "Chưa nhận được email?",
     "resendLink": "Gửi lại",
-    "targetEmailLabel": "Tài khoản Email"
+    "targetEmailLabel": "Tài khoản Email",
+    "loginErrorDefault": "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.",
+    "loginSuccessRedirecting": "Đăng nhập thành công! Đang chuyển đến không gian làm việc...",
+    "passwordMismatchError": "Mật khẩu xác nhận không khớp.",
+    "registerSuccessMessage": "Đăng ký thành công! Đang chuyển đến không gian làm việc...",
+    "registerErrorDefault": "Đăng ký thất bại. Vui lòng thử lại.",
+    "forgotPasswordSuccessMessage": "Đã gửi liên kết khôi phục mật khẩu đến email của bạn.",
+    "forgotPasswordErrorDefault": "Gửi yêu cầu khôi phục thất bại. Vui lòng thử lại.",
+    "missingTokenError": "Thiếu mã xác thực (token) trong liên kết. Vui lòng kiểm tra lại email.",
+    "resetPasswordSuccessMessage": "Đặt lại mật khẩu thành công! Đang chuyển đến trang đăng nhập...",
+    "resetPasswordErrorDefault": "Đặt lại mật khẩu thất bại. Vui lòng thử lại.",
+    "devResetLinkTitle": "[Dev Mode] Link đặt lại mật khẩu nhanh:",
+    "devResetLinkClick": "Bấm vào đây để đặt lại mật khẩu",
+    "invalidCredentialsError": "Email hoặc mật khẩu không chính xác.",
+    "accountLockedError": "Tài khoản của bạn đã bị khóa hoặc ngừng hoạt động.",
+    "noActiveOrganizationError": "Bạn chưa tham gia tổ chức nào hoặc tài khoản tại tổ chức đã bị ngưng hoạt động.",
+    "emailAlreadyRegisteredError": "Email này đã được đăng ký tài khoản.",
+    "accountExistsLoginPromptError": "Tài khoản này đã tồn tại trên hệ thống. Vui lòng đăng nhập hoặc tạo tổ chức mới sau khi đăng nhập.",
+    "serviceUnavailableError": "Dịch vụ xác thực hiện không phản hồi. Vui lòng thử lại sau."
   }
 }

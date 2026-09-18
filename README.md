@@ -17,7 +17,7 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Open `http://localhost:3000`.
+Open `http://localhost:3009`.
 
 ## Read Before Coding
 

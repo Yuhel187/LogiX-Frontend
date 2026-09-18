@@ -31,10 +31,12 @@ import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { LanguageToggle } from "@/components/shared/language-toggle";
 import { useSidebar } from "@/components/shared/sidebar-context";
 import { useTranslation } from "@/lib/i18n";
+import { useAuth } from "@/lib/auth";
 
 export function AppHeader() {
   const { toggleMobile } = useSidebar();
   const { t } = useTranslation();
+  const { user, activeTenant, tenants, switchTenant, logout } = useAuth();
   const [unreadCount, setUnreadCount] = React.useState(3);
 
   const notifications = [
@@ -190,15 +192,15 @@ export function AppHeader() {
             >
               <Avatar className="size-7.5 border border-border/80">
                 <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs">
-                  NA
+                  {user?.displayName ? user.displayName.slice(0, 2).toUpperCase() : "LX"}
                 </AvatarFallback>
               </Avatar>
               <div className="hidden text-left md:block">
                 <p className="text-xs font-semibold text-foreground leading-none">
-                  Nguyễn Văn An
+                  {user?.displayName || "LogiX User"}
                 </p>
                 <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">
-                  {t("header.userRole")}
+                  {activeTenant?.role || t("header.userRole")}
                 </p>
               </div>
               <ChevronDown className="size-4 text-muted-foreground hidden md:block" />
@@ -207,10 +209,14 @@ export function AppHeader() {
           <DropdownMenuContent align="end" className="w-56 shadow-lg">
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
-                <p className="text-xs font-semibold text-foreground">Nguyễn Văn An</p>
-                <p className="text-[11px] text-muted-foreground">an.nguyen@logix.vn</p>
+                <p className="text-xs font-semibold text-foreground">
+                  {user?.displayName || "LogiX User"}
+                </p>
+                <p className="text-[11px] text-muted-foreground">
+                  {user?.email || "user@logix.vn"}
+                </p>
                 <span className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
-                  <CheckCircle2 className="size-3.5" /> {t("header.adminBadge")}
+                  <CheckCircle2 className="size-3.5" /> {activeTenant?.name || t("header.adminBadge")}
                 </span>
               </div>
             </DropdownMenuLabel>
@@ -230,7 +236,10 @@ export function AppHeader() {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer text-xs text-destructive focus:text-destructive">
+            <DropdownMenuItem
+              onClick={() => logout()}
+              className="cursor-pointer text-xs text-destructive focus:text-destructive"
+            >
               <LogOut className="mr-2 size-4" />
               <span>{t("userMenu.logout")}</span>
             </DropdownMenuItem>

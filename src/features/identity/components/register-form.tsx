@@ -3,43 +3,71 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Mail, Lock, ArrowRight } from "lucide-react";
-import { LocaleSwitcher, type Locale } from "@/components/shared/locale-switcher";
+import { LocaleSwitcher } from "@/components/shared/locale-switcher";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
-import type { Dictionary } from "@/locales";
+import { useAuth } from "@/lib/auth";
+import { useTranslation } from "@/lib/i18n";
+import { formatAuthError } from "../utils/error-formatter";
 
 interface RegisterFormProps {
-  t: Dictionary["auth"];
-  currentLocale: Locale;
-  onLocaleChange: (locale: Locale) => void;
   onSubmitSuccess?: () => void;
 }
 
-export function RegisterForm({
-  t,
-  currentLocale,
-  onLocaleChange,
-  onSubmitSuccess,
-}: RegisterFormProps) {
+export function RegisterForm({ onSubmitSuccess }: RegisterFormProps) {
+  const router = useRouter();
+  const { register, login } = useAuth();
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const clearAlerts = () => {
+    if (errorMessage) setErrorMessage(null);
+    if (successMessage) setSuccessMessage(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (password !== confirmPassword) {
+      setErrorMessage(t("auth.passwordMismatchError"));
+      return;
+    }
+
     setIsLoading(true);
-    setTimeout(() => {
+    try {
+      await register({
+        email,
+        password,
+        displayName: email.split("@")[0],
+      });
+      // Tự động đăng nhập và vào ngay không gian làm việc (workspace)
+      await login({ email, password });
+      setErrorMessage(null);
+      setSuccessMessage(t("auth.registerSuccessMessage"));
+      setTimeout(() => {
+        if (onSubmitSuccess) {
+          onSubmitSuccess();
+        } else {
+          router.push("/");
+        }
+      }, 500);
+    } catch (err: any) {
+      setErrorMessage(formatAuthError(err, t, "auth.registerErrorDefault"));
       setIsLoading(false);
-      if (onSubmitSuccess) onSubmitSuccess();
-    }, 800);
+    }
   };
 
   return (
     <div className="relative flex flex-col justify-between min-h-screen p-6 sm:p-10 bg-white dark:bg-[#090b0c] text-zinc-900 dark:text-zinc-100 transition-colors duration-300">
       {/* Top Right Controls (VI/EN & Theme Switcher) */}
       <div className="flex items-center justify-end gap-3 w-full">
-        <LocaleSwitcher currentLocale={currentLocale} onLocaleChange={onLocaleChange} />
+        <LocaleSwitcher />
         <ThemeToggle />
       </div>
 
@@ -60,22 +88,33 @@ export function RegisterForm({
         {/* Header Title & Subtitle */}
         <div className="text-center lg:text-left space-y-1.5">
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100">
-            {t.registerTitle}
+            {t("auth.registerTitle")}
           </h2>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            {t.registerSubtitle}
+            {t("auth.registerSubtitle")}
           </p>
         </div>
 
         {/* Form Inputs */}
         <form onSubmit={handleSubmit} className="space-y-4">
+          {errorMessage && (
+            <div className="p-3 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 rounded-xl">
+              {errorMessage}
+            </div>
+          )}
+          {successMessage && (
+            <div className="p-3 text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 rounded-xl">
+              {successMessage}
+            </div>
+          )}
+
           {/* Email Field */}
           <div className="space-y-1.5">
             <label
               htmlFor="register-email"
               className="block text-xs mb-2 font-semibold text-zinc-700 dark:text-zinc-300"
             >
-              {t.emailLabel}
+              {t("auth.emailLabel")}
             </label>
             <div className="relative flex items-center">
               <Mail className="absolute left-3.5 h-4 w-4 text-zinc-400 dark:text-zinc-500 pointer-events-none" />
@@ -84,8 +123,11 @@ export function RegisterForm({
                 type="email"
                 required
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={t.emailRegisterPlaceholder}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  clearAlerts();
+                }}
+                placeholder={t("auth.emailRegisterPlaceholder")}
                 className="w-full h-11 pl-10 pr-4 bg-zinc-50 dark:bg-[#111315] border border-zinc-200 dark:border-zinc-800/80 rounded-xl text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
               />
             </div>
@@ -97,7 +139,7 @@ export function RegisterForm({
               htmlFor="register-password"
               className="block text-xs mb-2 font-semibold text-zinc-700 dark:text-zinc-300"
             >
-              {t.passwordLabel}
+              {t("auth.passwordLabel")}
             </label>
             <div className="relative flex items-center">
               <Lock className="absolute left-3.5 h-4 w-4 text-zinc-400 dark:text-zinc-500 pointer-events-none" />
@@ -106,8 +148,11 @@ export function RegisterForm({
                 type="password"
                 required
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={t.passwordPlaceholder}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  clearAlerts();
+                }}
+                placeholder={t("auth.passwordPlaceholder")}
                 className="w-full h-11 pl-10 pr-4 bg-zinc-50 dark:bg-[#111315] border border-zinc-200 dark:border-zinc-800/80 rounded-xl text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
               />
             </div>
@@ -119,7 +164,7 @@ export function RegisterForm({
               htmlFor="confirm-password"
               className="block text-xs mb-2 font-semibold text-zinc-700 dark:text-zinc-300"
             >
-              {t.confirmPasswordLabel}
+              {t("auth.confirmPasswordLabel")}
             </label>
             <div className="relative flex items-center">
               <Lock className="absolute left-3.5 h-4 w-4 text-zinc-400 dark:text-zinc-500 pointer-events-none" />
@@ -128,8 +173,11 @@ export function RegisterForm({
                 type="password"
                 required
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder={t.confirmPasswordPlaceholder}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  clearAlerts();
+                }}
+                placeholder={t("auth.confirmPasswordPlaceholder")}
                 className="w-full h-11 pl-10 pr-4 bg-zinc-50 dark:bg-[#111315] border border-zinc-200 dark:border-zinc-800/80 rounded-xl text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
               />
             </div>
@@ -141,7 +189,7 @@ export function RegisterForm({
             disabled={isLoading}
             className="w-full h-11 mt-6 bg-[#10b981] hover:bg-[#059669] text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.99] disabled:opacity-60 cursor-pointer text-sm"
           >
-            <span>{isLoading ? "..." : t.registerSubmitButton}</span>
+            <span>{isLoading ? "..." : t("auth.registerSubmitButton")}</span>
             {!isLoading && <ArrowRight className="h-4 w-4" />}
           </button>
         </form>
@@ -150,7 +198,7 @@ export function RegisterForm({
         <div className="relative flex items-center justify-center pt-1">
           <div className="w-full border-t border-zinc-200 dark:border-zinc-800/80" />
           <span className="absolute px-3 bg-white dark:bg-[#090b0c] text-[10px] font-semibold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase">
-            {t.orContinueWith}
+            {t("auth.orContinueWith")}
           </span>
         </div>
 
@@ -177,24 +225,24 @@ export function RegisterForm({
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
             />
           </svg>
-          <span>{t.googleButton}</span>
+          <span>{t("auth.googleButton")}</span>
         </button>
 
         {/* Footer Login Link */}
         <div className="text-center text-xs text-zinc-600 dark:text-zinc-400">
-          <span>{t.alreadyHaveAccountText} </span>
+          <span>{t("auth.alreadyHaveAccountText")} </span>
           <Link
             href="/login"
             className="font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
           >
-            {t.loginNowText}
+            {t("auth.loginNowText")}
           </Link>
         </div>
       </div>
 
       {/* Footer Copyright */}
       <div className="text-center py-2 text-[11px] text-zinc-400 dark:text-zinc-600">
-        {t.copyright}
+        {t("auth.copyright")}
       </div>
     </div>
   );
