@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { usePathname } from "next/navigation";
 import {
   Bell,
   CheckCircle2,
@@ -10,6 +11,7 @@ import {
   LogOut,
   Menu,
   Package,
+  PanelLeft,
   Search,
   Settings,
   Truck,
@@ -34,10 +36,22 @@ import { useTranslation } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
 
 export function AppHeader() {
-  const { toggleMobile } = useSidebar();
+  const pathname = usePathname();
+  const { toggleMobile, isCollapsed, toggleCollapse } = useSidebar();
   const { t } = useTranslation();
   const { user, activeTenant, logout } = useAuth();
   const [unreadCount, setUnreadCount] = React.useState(3);
+
+  const getPageTitle = () => {
+    if (pathname === "/") return t("nav.overview");
+    if (
+      pathname.startsWith("/organization") ||
+      pathname.startsWith("/settings/organization")
+    )
+      return t("tenant.pageTitle");
+    return "";
+  };
+  const pageTitle = getPageTitle();
 
   const notifications = [
     {
@@ -67,18 +81,38 @@ export function AppHeader() {
   ];
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center justify-between border-b border-border/70 bg-background/80 px-4 backdrop-blur-md sm:px-6">
-      {/* Left: Mobile menu toggle */}
-      <div className="flex items-center gap-3">
+    <header className="sticky top-0 z-20 flex h-18 shrink-0 items-center justify-between border-b border-border/70 bg-background/80 px-4 backdrop-blur-md sm:px-6">
+      {/* Left: Sidebar toggle + Current Section Title */}
+      <div className="flex items-center gap-3 sm:gap-3.5">
+        {/* Mobile menu toggle */}
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden size-9 rounded-lg"
+          className="md:hidden size-10 rounded-xl text-muted-foreground hover:text-foreground"
           onClick={toggleMobile}
           aria-label={t("nav.collapse")}
         >
           <Menu className="size-5" />
         </Button>
+
+        {/* Desktop sidebar toggle button matching reference */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="hidden md:flex size-10 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors cursor-pointer"
+          onClick={toggleCollapse}
+          aria-label={isCollapsed ? t("nav.expand") : t("nav.collapse")}
+          title={isCollapsed ? t("nav.expand") : t("nav.collapse")}
+        >
+          <PanelLeft className="size-5" />
+        </Button>
+
+        {/* Page Title next to toggle button */}
+        {pageTitle && (
+          <span className="text-lg font-bold text-foreground tracking-tight select-none">
+            {pageTitle}
+          </span>
+        )}
       </div>
 
       {/* Center/Search palette */}
@@ -86,7 +120,7 @@ export function AppHeader() {
         <button
           type="button"
           onClick={() => {}}
-          className="flex w-full items-center justify-between rounded-lg border border-input/80 bg-muted/30 px-3 py-2 text-xs text-muted-foreground shadow-2xs transition-colors hover:border-ring hover:bg-muted/60 focus:outline-hidden"
+          className="flex w-full items-center justify-between rounded-xl border border-input/80 bg-muted/30 px-3.5 py-2.5 text-sm text-muted-foreground shadow-2xs transition-colors hover:border-ring hover:bg-muted/60 focus:outline-hidden"
         >
           <span className="flex items-center gap-2.5">
             <Search className="size-4 text-muted-foreground" />
@@ -181,66 +215,68 @@ export function AppHeader() {
         {/* Theme Toggle Button */}
         <ThemeToggle />
 
-        <div className="h-4 w-px bg-border/60 mx-0.5 hidden sm:block" />
+        <div className="h-5 w-px bg-border/60 mx-1 hidden sm:block" />
 
         {/* User Profile Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="flex items-center gap-2.5 h-9 p-1 pl-1.5 pr-2.5 rounded-lg hover:bg-accent focus-visible:ring-1"
+              className="flex items-center gap-3 h-11 px-3 rounded-xl border border-border/70 bg-background/70 hover:bg-accent/80 transition-all cursor-pointer focus-visible:ring-1"
             >
-              <Avatar className="size-7.5 border border-border/80">
+              <Avatar className="size-8.5 border border-border/80 rounded-xl">
                 <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs">
                   {user?.displayName ? user.displayName.slice(0, 2).toUpperCase() : "LX"}
                 </AvatarFallback>
               </Avatar>
-              <div className="hidden text-left md:block">
-                <p className="text-xs font-semibold text-foreground leading-none">
+              <div className="hidden text-left md:block min-w-0">
+                <p className="text-sm font-semibold text-foreground leading-tight truncate">
                   {user?.displayName || "LogiX User"}
                 </p>
-                <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">
+                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider leading-tight mt-0.5">
                   {activeTenant?.role || t("header.userRole")}
                 </p>
               </div>
               <ChevronDown className="size-4 text-muted-foreground hidden md:block" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 shadow-lg">
-            <DropdownMenuLabel>
+          <DropdownMenuContent align="end" className="w-72 p-2 rounded-2xl shadow-2xl border border-border/70 bg-popover/95 backdrop-blur-md">
+            <DropdownMenuLabel className="p-2 pb-2.5">
               <div className="flex flex-col space-y-1">
-                <p className="text-xs font-semibold text-foreground">
+                <p className="text-sm font-bold text-foreground">
                   {user?.displayName || "LogiX User"}
                 </p>
-                <p className="text-[11px] text-muted-foreground">
+                <p className="text-xs text-muted-foreground truncate">
                   {user?.email || "user@logix.vn"}
                 </p>
-                <span className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
-                  <CheckCircle2 className="size-3.5" /> {activeTenant?.name || t("header.adminBadge")}
-                </span>
+                <div className="pt-1">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
+                    <CheckCircle2 className="size-3.5" /> {activeTenant?.name || t("header.adminBadge")}
+                  </span>
+                </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem className="cursor-pointer text-xs">
-                <User className="mr-2 size-4" />
+            <DropdownMenuSeparator className="my-1" />
+            <DropdownMenuGroup className="space-y-0.5">
+              <DropdownMenuItem className="cursor-pointer px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-accent transition-colors gap-3">
+                <User className="size-4.5 text-muted-foreground" />
                 <span>{t("userMenu.profile")}</span>
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer text-xs">
-                <Settings className="mr-2 size-4" />
+              <DropdownMenuItem className="cursor-pointer px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-accent transition-colors gap-3">
+                <Settings className="size-4.5 text-muted-foreground" />
                 <span>{t("userMenu.settings")}</span>
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer text-xs">
-                <HelpCircle className="mr-2 size-4" />
+              <DropdownMenuItem className="cursor-pointer px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-accent transition-colors gap-3">
+                <HelpCircle className="size-4.5 text-muted-foreground" />
                 <span>{t("userMenu.help")}</span>
               </DropdownMenuItem>
             </DropdownMenuGroup>
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator className="my-1" />
             <DropdownMenuItem
               onClick={() => logout()}
-              className="cursor-pointer text-xs text-destructive focus:text-destructive"
+              className="cursor-pointer px-3 py-2.5 rounded-xl text-sm font-semibold text-destructive focus:text-destructive hover:bg-destructive/10 transition-colors gap-3"
             >
-              <LogOut className="mr-2 size-4" />
+              <LogOut className="size-4.5" />
               <span>{t("userMenu.logout")}</span>
             </DropdownMenuItem>
           </DropdownMenuContent>

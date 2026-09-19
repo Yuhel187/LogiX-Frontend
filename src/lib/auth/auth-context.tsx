@@ -9,8 +9,11 @@ import {
   refreshApi,
   logoutApi,
   getProfileApi,
+  getTenantsApi,
   switchTenantApi,
   createOrganizationApi,
+  updateOrganizationApi,
+  setDefaultTenantApi,
   updateProfileApi,
 } from "@/features/identity/api/auth.api";
 import type {
@@ -22,6 +25,7 @@ import type {
   ForgotPasswordData,
   ResetPasswordData,
   CreateOrganizationData,
+  UpdateOrganizationData,
   UpdateProfileData,
 } from "@/features/identity/schemas/auth.schema";
 
@@ -39,7 +43,9 @@ interface AuthContextType {
   resetPassword: (data: ResetPasswordData) => Promise<{ message: string }>;
   logout: () => Promise<void>;
   switchTenant: (tenantId: string) => Promise<void>;
-  createOrganization: (data: CreateOrganizationData) => Promise<void>;
+  createOrganization: (data: CreateOrganizationData) => Promise<{ id: string; code: string; name: string; role: string; isDefault: boolean; message: string } | undefined>;
+  updateOrganization: (tenantId: string, data: UpdateOrganizationData) => Promise<void>;
+  setDefaultTenant: (tenantId: string) => Promise<void>;
   updateProfile: (data: UpdateProfileData) => Promise<void>;
   refreshSession: () => Promise<void>;
 }
@@ -95,7 +101,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refreshSession = useCallback(async () => {
     try {
       const res = await refreshApi();
-      applyAuthData(res.accessToken, res.user, res.activeTenant, res.tenants);
+      let activeTenantData = res.activeTenant;
+      let tenantListData = res.tenants;
+
+      // Luôn đảm bảo lấy đầy đủ activeTenant và danh sách tenants
+      if (!activeTenantData || !tenantListData || tenantListData.length === 0) {
+        try {
+          const profile = await getProfileApi(res.accessToken);
+          activeTenantData = profile.activeTenant || activeTenantData;
+          tenantListData = profile.tenants || tenantListData;
+        } catch {
+          // Ignore profile fetch failure
+        }
+      }
+
+      applyAuthData(res.accessToken, res.user, activeTenantData, tenantListData);
     } catch {
       // If refresh fails, try restoring with stored token or clear
       try {
@@ -181,16 +201,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // Ignore
     }
-    // Refresh full profile to update tenant list
-    const profile = await getProfileApi(res.accessToken);
-    setTenants(profile.tenants);
+    // Fetch updated tenant list with new token
+    try {
+      const updatedTenants = await getTenantsApi(res.accessToken);
+      setTenants(updatedTenants);
+    } catch {
+      // Fallback: refresh profile
+      const profile = await getProfileApi(res.accessToken);
+      setTenants(profile.tenants);
+    }
   };
 
   // Create organization action
   const createOrganization = async (data: CreateOrganizationData) => {
     if (!accessToken) return;
-    await createOrganizationApi(data, accessToken);
-    // Refresh profile to get updated tenant list
+    const newOrg = await createOrganizationApi(data, accessToken);
+    // Automatically set and switch to the newly created organization on the UI
+    if (newOrg?.id) {
+      await switchTenant(newOrg.id);
+      return newOrg;
+    }
+    // Fallback: Refresh profile to get updated tenant list
     const profile = await getProfileApi(accessToken);
     setUser({
       id: profile.id,
@@ -203,6 +234,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setActiveTenant(profile.activeTenant);
     }
     setTenants(profile.tenants);
+    return newOrg;
+  };
+
+  // Update organization action
+  const updateOrganization = async (tenantId: string, data: UpdateOrganizationData) => {
+    if (!accessToken) return;
+    const res = await updateOrganizationApi(tenantId, data, accessToken);
+    // Update tenants list
+    setTenants((prev) =>
+      prev.map((t) =>
+        t.id === tenantId
+          ? {
+            ...t,
+            name: res.name || t.name,
+            logoUrl: res.logoUrl !== undefined ? res.logoUrl : t.logoUrl,
+          }
+          : t
+      )
+    );
+    // Update active tenant if matching
+    setActiveTenant((prev) => {
+      if (prev && prev.id === tenantId) {
+        return {
+          ...prev,
+          name: res.name || prev.name,
+          logoUrl: res.logoUrl !== undefined ? res.logoUrl : prev.logoUrl,
+        };
+      }
+      return prev;
+    });
+  };
+
+  // Set default tenant action
+  const setDefaultTenant = async (tenantId: string) => {
+    if (!accessToken) return;
+    await setDefaultTenantApi(tenantId, accessToken);
+    setTenants((prev) =>
+      prev.map((t) => ({
+        ...t,
+        isDefault: t.id === tenantId,
+      }))
+    );
   };
 
   // Update profile action
@@ -212,11 +285,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser((prev) =>
       prev
         ? {
-            ...prev,
-            displayName: res.displayName,
-            phoneNumber: res.phoneNumber ?? prev.phoneNumber,
-            avatarUrl: res.avatarUrl ?? prev.avatarUrl,
-          }
+          ...prev,
+          displayName: res.displayName,
+          phoneNumber: res.phoneNumber ?? prev.phoneNumber,
+          avatarUrl: res.avatarUrl ?? prev.avatarUrl,
+        }
         : null
     );
   };
@@ -237,6 +310,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logout,
         switchTenant,
         createOrganization,
+        updateOrganization,
+        setDefaultTenant,
         updateProfile,
         refreshSession,
       }}

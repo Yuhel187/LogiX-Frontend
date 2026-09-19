@@ -7,7 +7,11 @@ import {
   type ResetPasswordData,
   type SwitchTenantData,
   type CreateOrganizationData,
+  type UpdateOrganizationData,
+  type OrganizationDetail,
+  type TenantListItem,
   type UpdateProfileData,
+  type OrgMember,
 } from "../schemas/auth.schema";
 
 const API_BASE_URL =
@@ -180,6 +184,197 @@ export async function updateProfileApi(
     headers,
     credentials: "include",
     body: JSON.stringify(data),
+  });
+
+  return handleResponse(response);
+}
+
+export async function getTenantsApi(accessToken?: string): Promise<TenantListItem[]> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (accessToken) {
+    headers["Authorization"] = `Bearer ${accessToken}`;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/auth/tenants`, {
+    method: "GET",
+    headers,
+    credentials: "include",
+  });
+
+  return handleResponse(response);
+}
+
+export async function getOrganizationApi(
+  tenantId: string,
+  accessToken?: string
+): Promise<OrganizationDetail> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (accessToken) {
+    headers["Authorization"] = `Bearer ${accessToken}`;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/auth/organizations/${tenantId}`, {
+    method: "GET",
+    headers,
+    credentials: "include",
+  });
+
+  return handleResponse(response);
+}
+
+export async function updateOrganizationApi(
+  tenantId: string,
+  data: UpdateOrganizationData,
+  accessToken?: string
+): Promise<{ id: string; code: string; name: string; logoUrl?: string | null; role: string; isDefault: boolean; message: string }> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (accessToken) {
+    headers["Authorization"] = `Bearer ${accessToken}`;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/auth/organizations/${tenantId}`, {
+    method: "PATCH",
+    headers,
+    credentials: "include",
+    body: JSON.stringify(data),
+  });
+
+  return handleResponse(response);
+}
+
+export async function setDefaultTenantApi(
+  tenantId: string,
+  accessToken?: string
+): Promise<{ tenantId: string; isDefault: boolean; message: string }> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (accessToken) {
+    headers["Authorization"] = `Bearer ${accessToken}`;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/auth/organizations/${tenantId}/set-default`, {
+    method: "POST",
+    headers,
+    credentials: "include",
+  });
+
+  return handleResponse(response);
+}
+
+export async function getOrganizationMembersApi(
+  tenantId: string,
+  accessToken?: string
+): Promise<OrgMember[]> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (accessToken) {
+    headers["Authorization"] = `Bearer ${accessToken}`;
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/auth/organizations/${tenantId}/members`,
+    {
+      method: "GET",
+      headers,
+      credentials: "include",
+    }
+  );
+
+  return handleResponse(response);
+}
+
+export async function updateMemberRoleApi(
+  tenantId: string,
+  memberId: string,
+  role: "OWNER" | "ADMIN" | "MEMBER",
+  accessToken?: string
+): Promise<{ id: string; role: string; message: string }> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (accessToken) {
+    headers["Authorization"] = `Bearer ${accessToken}`;
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/auth/organizations/${tenantId}/members/${memberId}/role`,
+    {
+      method: "PATCH",
+      headers,
+      credentials: "include",
+      body: JSON.stringify({ role }),
+    }
+  );
+
+  return handleResponse(response);
+}
+
+export async function removeMemberApi(
+  tenantId: string,
+  memberId: string,
+  accessToken?: string
+): Promise<{ id: string; message: string }> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (accessToken) {
+    headers["Authorization"] = `Bearer ${accessToken}`;
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/auth/organizations/${tenantId}/members/${memberId}`,
+    {
+      method: "DELETE",
+      headers,
+      credentials: "include",
+    }
+  );
+
+  return handleResponse(response);
+}
+
+export async function deleteOrganizationApi(
+  tenantId: string,
+  accessToken?: string
+): Promise<{ message: string }> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (accessToken) {
+    headers["Authorization"] = `Bearer ${accessToken}`;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/auth/organizations/${tenantId}`, {
+    method: "DELETE",
+    headers,
+    credentials: "include",
+  });
+
+  return handleResponse(response);
+}
+
+export async function deleteAccountApi(
+  accessToken?: string
+): Promise<{ message: string }> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (accessToken) {
+    headers["Authorization"] = `Bearer ${accessToken}`;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/auth/me`, {
+    method: "DELETE",
+    headers,
+    credentials: "include",
   });
 
   return handleResponse(response);
