@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/shared/theme-provider";
 import { LanguageProvider } from "@/lib/i18n";
 import { AuthProvider } from "@/lib/auth";
+import { DynamicTenantHead } from "@/components/shared/dynamic-tenant-head";
 
 const inter = Inter({
   subsets: ["latin", "vietnamese"],
@@ -20,10 +21,6 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: {
-    template: "%s | LogiX TMS",
-    default: "LogiX - Hệ thống Quản lý Vận tải & Chuỗi Cung ứng",
-  },
   description:
     "Giải pháp vận hành tập trung đa dịch vụ. Nền tảng quản lý vận tải, điều phối đơn hàng, kho bãi và giám sát hành trình LogiX.",
   icons: {
@@ -62,6 +59,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         >
           <LanguageProvider>
             <AuthProvider>
+              <DynamicTenantHead />
               <TooltipProvider delayDuration={200}>{children}</TooltipProvider>
             </AuthProvider>
           </LanguageProvider>

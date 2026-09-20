@@ -7,7 +7,6 @@ import { usePathname } from "next/navigation";
 import {
   BarChart3,
   Boxes,
-  ChevronLeft,
   LayoutDashboard,
   Settings,
 } from "lucide-react";
@@ -20,6 +19,7 @@ import {
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useSidebar } from "@/components/shared/sidebar-context";
 import { useTranslation } from "@/lib/i18n";
+import { TenantSwitcher } from "@/components/shared/tenant-switcher";
 
 interface NavItem {
   title: string;
@@ -36,7 +36,7 @@ interface NavGroup {
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const { isCollapsed, toggleCollapse, isMobileOpen, closeMobile, setIsMobileOpen } =
+  const { isCollapsed, isMobileOpen, closeMobile, setIsMobileOpen } =
     useSidebar();
   const { t } = useTranslation();
 
@@ -187,29 +187,26 @@ export function AppSidebar() {
       {/* Desktop Sidebar */}
       <aside
         className={cn(
-          "hidden md:flex md:flex-col shrink-0 border-r border-border/80 bg-sidebar relative z-30 overflow-visible select-none",
+          "hidden md:flex md:flex-col shrink-0 border-r border-border/80 bg-sidebar relative z-30 select-none",
           "transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-[width]",
           isCollapsed ? "w-16" : "w-64"
         )}
       >
-        {/* Floating Border Toggle Button */}
-        <button
-          type="button"
-          onClick={toggleCollapse}
-          className="absolute -right-3 top-5 z-50 flex size-6 items-center justify-center rounded-full border border-border/80 bg-background text-muted-foreground shadow-md hover:text-foreground hover:bg-accent focus-visible:outline-hidden transition-colors cursor-pointer"
-          title={isCollapsed ? t("nav.expand") : t("nav.collapse")}
-          aria-label={isCollapsed ? t("nav.expand") : t("nav.collapse")}
+        {/* Tenant Switcher Header */}
+        <div
+          className={cn(
+            "flex h-18 items-center border-b border-border/70 relative transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden shrink-0",
+            isCollapsed ? "justify-center px-2.5" : "px-3"
+          )}
         >
-          <ChevronLeft
-            className={cn(
-              "size-3.5 transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
-              isCollapsed && "rotate-180"
-            )}
-          />
-        </button>
+          <TenantSwitcher collapsed={isCollapsed} className="w-full" />
+        </div>
 
-        {/* Brand Header */}
-        <div className="flex h-16 items-center border-b border-border/70 px-3 relative overflow-hidden">
+        {/* Navigation links */}
+        {renderNavLinks(isCollapsed)}
+
+        {/* Brand Footer */}
+        <div className="flex h-16 items-center border-t border-border/70 px-3 relative overflow-hidden shrink-0">
           <Link
             href="/"
             className="flex items-center min-w-0 overflow-hidden w-full"
@@ -243,38 +240,49 @@ export function AppSidebar() {
             </div>
           </Link>
         </div>
-
-        {/* Navigation links */}
-        {renderNavLinks(isCollapsed)}
       </aside>
 
       {/* Mobile Drawer (Sheet) */}
       <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
         <SheetContent side="left" className="w-72 p-0 flex flex-col bg-sidebar">
           <SheetTitle className="sr-only">Menu điều hướng LogiX</SheetTitle>
-          <div className="flex h-16 items-center border-b border-border/70 px-4">
-            <div className="size-10 shrink-0 flex items-center justify-center">
-              <div className="flex size-9 items-center justify-center rounded-xl overflow-hidden shadow-xs border border-border/50 bg-background">
-                <Image
-                  src="/fav_logo_logix.png"
-                  alt="LogiX Logo"
-                  width={36}
-                  height={36}
-                  className="size-full object-contain p-0.5"
-                />
-              </div>
-            </div>
-            <div className="flex flex-col min-w-0 ml-2">
-              <span className="text-base font-bold tracking-tight text-sidebar-foreground truncate">
-                Logi<span className="text-primary">X</span>
-              </span>
-              <span className="text-[10px] font-medium text-muted-foreground tracking-widest uppercase truncate">
-                {t("nav.brandSubtitle")}
-              </span>
-            </div>
+          
+          {/* Mobile Tenant Switcher Header */}
+          <div className="flex h-16 items-center border-b border-border/70 px-3.5 shrink-0">
+            <TenantSwitcher collapsed={false} className="w-full" />
           </div>
 
+          {/* Navigation links */}
           {renderNavLinks(false)}
+
+          {/* Mobile Brand Footer */}
+          <div className="flex h-16 items-center border-t border-border/70 px-4 shrink-0">
+            <Link
+              href="/"
+              onClick={closeMobile}
+              className="flex items-center min-w-0 overflow-hidden w-full"
+            >
+              <div className="size-10 shrink-0 flex items-center justify-center">
+                <div className="flex size-9 items-center justify-center rounded-xl overflow-hidden shadow-xs border border-border/50 bg-background">
+                  <Image
+                    src="/fav_logo_logix.png"
+                    alt="LogiX Logo"
+                    width={36}
+                    height={36}
+                    className="size-full object-contain p-0.5"
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col min-w-0 ml-2">
+                <span className="text-base font-bold tracking-tight text-sidebar-foreground truncate">
+                  Logi<span className="text-primary">X</span>
+                </span>
+                <span className="text-[10px] font-medium text-muted-foreground tracking-widest uppercase truncate">
+                  {t("nav.brandSubtitle")}
+                </span>
+              </div>
+            </Link>
+          </div>
         </SheetContent>
       </Sheet>
     </>

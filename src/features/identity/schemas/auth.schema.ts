@@ -67,10 +67,40 @@ export const createOrganizationSchema = z.object({
   setAsDefault: z.boolean().optional(),
 });
 
+export const updateOrganizationSchema = z.object({
+  name: z.string().min(2, "Tên tổ chức phải có ít nhất 2 ký tự").optional(),
+  logoUrl: z.string().optional(),
+});
+
+export const organizationDetailSchema = z.object({
+  id: z.string(),
+  code: z.string(),
+  name: z.string(),
+  logoUrl: z.string().nullable().optional(),
+  status: z.string().optional(),
+  settings: z.record(z.string(), z.any()).optional().default({}),
+  role: z.string(),
+  isDefault: z.boolean(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+});
+
 export const updateProfileSchema = z.object({
   displayName: z.string().min(2, "Tên hiển thị phải có ít nhất 2 ký tự").optional(),
   phoneNumber: z.string().optional(),
   avatarUrl: z.string().optional(),
+});
+
+export const orgMemberSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  email: z.string().email(),
+  displayName: z.string(),
+  avatarUrl: z.string().nullable().optional(),
+  phoneNumber: z.string().nullable().optional(),
+  role: z.enum(["OWNER", "ADMIN", "MEMBER"]),
+  isDefault: z.boolean().optional(),
+  joinedAt: z.string().optional(),
 });
 
 export type AuthUser = z.infer<typeof authUserSchema>;
@@ -84,4 +114,7 @@ export type ForgotPasswordData = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordData = z.infer<typeof resetPasswordSchema>;
 export type SwitchTenantData = z.infer<typeof switchTenantSchema>;
 export type CreateOrganizationData = z.infer<typeof createOrganizationSchema>;
+export type UpdateOrganizationData = z.infer<typeof updateOrganizationSchema>;
+export type OrganizationDetail = z.infer<typeof organizationDetailSchema>;
 export type UpdateProfileData = z.infer<typeof updateProfileSchema>;
+export type OrgMember = z.infer<typeof orgMemberSchema>;
