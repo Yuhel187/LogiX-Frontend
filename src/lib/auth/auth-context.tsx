@@ -6,7 +6,6 @@ import {
   registerApi,
   forgotPasswordApi,
   resetPasswordApi,
-  refreshApi,
   logoutApi,
   getProfileApi,
   getTenantsApi,
@@ -56,15 +55,17 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const ACCESS_TOKEN_KEY = "logix_access_token";
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [activeTenant, setActiveTenant] = useState<ActiveTenant | null>(null);
   const [tenants, setTenants] = useState<TenantListItem[]>([]);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const lastRefreshTimeRef = useRef<number>(Date.now());
+  const lastRefreshTimeRef = useRef<number>(0);
+
+  useEffect(() => {
+    lastRefreshTimeRef.current = Date.now();
+  }, []);
 
   // Helper to apply auth session data
   const applyAuthData = useCallback(
@@ -178,7 +179,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const handleVisibilityOrFocus = async () => {
       if (typeof document !== "undefined" && document.visibilityState === "visible") {
-        const elapsedSinceLastRefresh = Date.now() - lastRefreshTimeRef.current;
+        const elapsedSinceLastRefresh =
+          lastRefreshTimeRef.current > 0 ? Date.now() - lastRefreshTimeRef.current : 0;
         // Nếu đã hơn 9 phút trôi qua kể từ lần refresh trước, tự động làm mới ngầm ngay
         if (elapsedSinceLastRefresh >= 9 * 60 * 1000) {
           try {

@@ -36,7 +36,7 @@ interface NavGroup {
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const { isCollapsed, toggleCollapse, isMobileOpen, closeMobile, setIsMobileOpen } =
+  const { isCollapsed, isMobileOpen, closeMobile, setIsMobileOpen } =
     useSidebar();
   const { t } = useTranslation();
 

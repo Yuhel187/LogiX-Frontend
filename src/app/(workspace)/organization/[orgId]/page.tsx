@@ -80,32 +80,49 @@ function MembersTab({ tenantId }: { tenantId: string }) {
   const [isRemoving, setIsRemoving] = useState(false);
   const [updatingMemberId, setUpdatingMemberId] = useState<string | null>(null);
 
-  const fetchMembers = async (isRefresh = false) => {
-    try {
-      if (isRefresh) {
-        setIsRefreshing(true);
-      } else {
-        setIsLoading(true);
+  useEffect(() => {
+    let isCancelled = false;
+
+    async function loadMembers() {
+      try {
+        const data = await getOrganizationMembersApi(tenantId, accessToken || undefined);
+        if (!isCancelled) {
+          setMembers(data);
+        }
+      } catch (err: unknown) {
+        if (!isCancelled) {
+          const msg = err instanceof Error ? err.message : "Không thể tải danh sách thành viên";
+          toast.error(msg);
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
       }
+    }
+
+    if (tenantId) {
+      void loadMembers();
+    }
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [tenantId, accessToken]);
+
+  const handleRefresh = async () => {
+    try {
+      setIsRefreshing(true);
       const data = await getOrganizationMembersApi(tenantId, accessToken || undefined);
       setMembers(data);
-      if (isRefresh) {
-        toast.success(t("tenant.refresh") + " thành công");
-      }
+      toast.success(t("tenant.refresh") + " thành công");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Không thể tải danh sách thành viên";
       toast.error(msg);
     } finally {
-      setIsLoading(false);
       setIsRefreshing(false);
     }
   };
-
-  useEffect(() => {
-    if (tenantId) {
-      fetchMembers();
-    }
-  }, [tenantId]);
 
   const handleRoleChange = async (member: OrgMember, newRole: "OWNER" | "ADMIN" | "MEMBER") => {
     if (member.role === newRole) return;
@@ -167,7 +184,7 @@ function MembersTab({ tenantId }: { tenantId: string }) {
           <Button
             type="button"
             variant="outline"
-            onClick={() => fetchMembers(true)}
+            onClick={handleRefresh}
             disabled={isRefreshing || isLoading}
             className="h-10 px-4 rounded-xl gap-2 font-semibold text-sm cursor-pointer shadow-2xs hover:bg-muted/60"
           >
@@ -238,6 +255,7 @@ function MembersTab({ tenantId }: { tenantId: string }) {
                   {/* Cột 1: Tên và Email + Badge BẠN */}
                   <div className="col-span-6 flex items-center gap-3.5 min-w-0 pr-2">
                     {member.avatarUrl ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
                       <img
                         src={member.avatarUrl}
                         alt={member.displayName}
