@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import {
   loginApi,
   registerApi,
@@ -15,6 +15,10 @@ import {
   updateOrganizationApi,
   setDefaultTenantApi,
   updateProfileApi,
+  getStoredAccessToken,
+  setStoredAccessToken,
+  registerAuthCallbacks,
+  requestNewAccessToken,
 } from "@/features/identity/api/auth.api";
 import type {
   AuthUser,
@@ -60,6 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [tenants, setTenants] = useState<TenantListItem[]>([]);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const lastRefreshTimeRef = useRef<number>(Date.now());
 
   // Helper to apply auth session data
   const applyAuthData = useCallback(
@@ -75,11 +80,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setActiveTenant(tenantData);
       }
       setTenants(tenantList);
-      try {
-        sessionStorage.setItem(ACCESS_TOKEN_KEY, token);
-      } catch {
-        // Ignore storage errors
-      }
+      setStoredAccessToken(token);
+      lastRefreshTimeRef.current = Date.now();
     },
     []
   );
@@ -90,36 +92,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setActiveTenant(null);
     setTenants([]);
-    try {
-      sessionStorage.removeItem(ACCESS_TOKEN_KEY);
-    } catch {
-      // Ignore storage errors
-    }
+    setStoredAccessToken(null);
   }, []);
 
-  // Refresh session from server (via HttpOnly refresh token cookie)
+  // Register callbacks with the 401 Auto-refresh Fetch Interceptor
+  useEffect(() => {
+    registerAuthCallbacks({
+      onTokenRefreshed: (token, res) => {
+        applyAuthData(token, res.user, res.activeTenant, res.tenants);
+      },
+      onSessionExpired: () => {
+        clearAuthData();
+      },
+    });
+  }, [applyAuthData, clearAuthData]);
+
+  // Refresh session from server (via single-flight mutex / HttpOnly refresh token cookie)
   const refreshSession = useCallback(async () => {
     try {
-      const res = await refreshApi();
-      let activeTenantData = res.activeTenant;
-      let tenantListData = res.tenants;
-
-      // Luôn đảm bảo lấy đầy đủ activeTenant và danh sách tenants
-      if (!activeTenantData || !tenantListData || tenantListData.length === 0) {
-        try {
-          const profile = await getProfileApi(res.accessToken);
-          activeTenantData = profile.activeTenant || activeTenantData;
-          tenantListData = profile.tenants || tenantListData;
-        } catch {
-          // Ignore profile fetch failure
-        }
-      }
-
-      applyAuthData(res.accessToken, res.user, activeTenantData, tenantListData);
+      await requestNewAccessToken();
     } catch {
       // If refresh fails, try restoring with stored token or clear
       try {
-        const storedToken = sessionStorage.getItem(ACCESS_TOKEN_KEY);
+        const storedToken = getStoredAccessToken();
         if (storedToken) {
           const profile = await getProfileApi(storedToken);
           applyAuthData(
@@ -160,6 +155,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [refreshSession]);
 
+  // 1. Silent Background Refresh: Tự động làm mới token ngầm định kỳ mỗi 10 phút (Access Token sống 15m)
+  useEffect(() => {
+    if (!accessToken && !user) return;
+
+    const SILENT_REFRESH_INTERVAL_MS = 10 * 60 * 1000; // 10 phút
+
+    const intervalId = setInterval(async () => {
+      try {
+        await refreshSession();
+      } catch {
+        // Lỗi làm mới ngầm được xử lý bên trong refreshSession
+      }
+    }, SILENT_REFRESH_INTERVAL_MS);
+
+    return () => clearInterval(intervalId);
+  }, [accessToken, user, refreshSession]);
+
+  // 2. Lắng nghe sự kiện người dùng quay lại tab (visibilitychange) hoặc focus cửa sổ sau khi treo máy
+  useEffect(() => {
+    if (!accessToken && !user) return;
+
+    const handleVisibilityOrFocus = async () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        const elapsedSinceLastRefresh = Date.now() - lastRefreshTimeRef.current;
+        // Nếu đã hơn 9 phút trôi qua kể từ lần refresh trước, tự động làm mới ngầm ngay
+        if (elapsedSinceLastRefresh >= 9 * 60 * 1000) {
+          try {
+            await refreshSession();
+          } catch {
+            // Xử lý bên trong refreshSession
+          }
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityOrFocus);
+    window.addEventListener("focus", handleVisibilityOrFocus);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityOrFocus);
+      window.removeEventListener("focus", handleVisibilityOrFocus);
+    };
+  }, [accessToken, user, refreshSession]);
+
   // Login action
   const login = async (credentials: LoginCredentials) => {
     const res = await loginApi(credentials);
@@ -196,11 +235,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const res = await switchTenantApi({ tenantId }, accessToken);
     setAccessToken(res.accessToken);
     setActiveTenant(res.activeTenant);
-    try {
-      sessionStorage.setItem(ACCESS_TOKEN_KEY, res.accessToken);
-    } catch {
-      // Ignore
-    }
+    setStoredAccessToken(res.accessToken);
+    lastRefreshTimeRef.current = Date.now();
     // Fetch updated tenant list with new token
     try {
       const updatedTenants = await getTenantsApi(res.accessToken);
