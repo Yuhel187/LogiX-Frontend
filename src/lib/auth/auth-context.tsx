@@ -14,6 +14,7 @@ import {
   updateOrganizationApi,
   setDefaultTenantApi,
   updateProfileApi,
+  changePasswordApi,
   getStoredAccessToken,
   setStoredAccessToken,
   registerAuthCallbacks,
@@ -30,6 +31,7 @@ import type {
   CreateOrganizationData,
   UpdateOrganizationData,
   UpdateProfileData,
+  ChangePasswordData,
 } from "@/features/identity/schemas/auth.schema";
 
 interface AuthContextType {
@@ -50,6 +52,8 @@ interface AuthContextType {
   updateOrganization: (tenantId: string, data: UpdateOrganizationData) => Promise<void>;
   setDefaultTenant: (tenantId: string) => Promise<void>;
   updateProfile: (data: UpdateProfileData) => Promise<void>;
+  changePassword: (data: ChangePasswordData) => Promise<{ message: string; revokedOthersCount?: number }>;
+  updateCurrentUser: (partial: Partial<AuthUser>) => void;
   refreshSession: () => Promise<void>;
 }
 
@@ -332,6 +336,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  // Change password action
+  const changePassword = async (data: ChangePasswordData) => {
+    if (!accessToken) throw new Error("Chưa đăng nhập");
+    return changePasswordApi(data, accessToken);
+  };
+
+  // Update current user state optimistically
+  const updateCurrentUser = useCallback((partial: Partial<AuthUser>) => {
+    setUser((prev) => (prev ? { ...prev, ...partial } : null));
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -351,6 +366,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         updateOrganization,
         setDefaultTenant,
         updateProfile,
+        changePassword,
+        updateCurrentUser,
         refreshSession,
       }}
     >
