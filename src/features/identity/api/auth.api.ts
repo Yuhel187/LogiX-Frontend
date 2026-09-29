@@ -11,6 +11,8 @@ import {
   type OrganizationDetail,
   type TenantListItem,
   type UpdateProfileData,
+  type ChangePasswordData,
+  type UserSession,
   type OrgMember,
 } from "../schemas/auth.schema";
 
@@ -443,5 +445,55 @@ export async function deleteAccountApi(
   });
 
   setStoredAccessToken(null);
+  return handleResponse(response);
+}
+
+export async function changePasswordApi(
+  data: ChangePasswordData,
+  accessToken?: string
+): Promise<{ message: string; revokedOthersCount?: number }> {
+  const { currentPassword, newPassword, revokeOtherSessions } = data;
+  const response = await authFetch(`${API_BASE_URL}/auth/change-password`, {
+    method: "POST",
+    accessToken,
+    body: JSON.stringify({ currentPassword, newPassword, revokeOtherSessions }),
+  });
+
+  return handleResponse(response);
+}
+
+export async function getActiveSessionsApi(
+  accessToken?: string
+): Promise<UserSession[]> {
+  const response = await authFetch(`${API_BASE_URL}/auth/sessions`, {
+    method: "GET",
+    accessToken,
+  });
+
+  return handleResponse(response);
+}
+
+export async function revokeSessionApi(
+  sessionId: string,
+  accessToken?: string
+): Promise<{ message: string }> {
+  const response = await authFetch(`${API_BASE_URL}/auth/sessions/${sessionId}`, {
+    method: "DELETE",
+    accessToken,
+  });
+
+  return handleResponse(response);
+}
+
+export async function revokeOtherSessionsApi(
+  refreshToken?: string,
+  accessToken?: string
+): Promise<{ message: string; count?: number }> {
+  const response = await authFetch(`${API_BASE_URL}/auth/sessions/revoke-others`, {
+    method: "POST",
+    accessToken,
+    body: JSON.stringify({ refreshToken }),
+  });
+
   return handleResponse(response);
 }

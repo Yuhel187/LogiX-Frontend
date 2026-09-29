@@ -91,6 +91,35 @@ export const updateProfileSchema = z.object({
   avatarUrl: z.string().optional(),
 });
 
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Vui lòng nhập mật khẩu hiện tại"),
+    newPassword: z
+      .string()
+      .min(8, "Mật khẩu mới phải có ít nhất 8 ký tự")
+      .regex(/[A-Z]/, "Mật khẩu phải chứa ít nhất 1 chữ hoa")
+      .regex(/[0-9]/, "Mật khẩu phải chứa ít nhất 1 chữ số"),
+    confirmPassword: z.string().min(1, "Vui lòng xác nhận mật khẩu mới"),
+    revokeOtherSessions: z.boolean().optional().default(true),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Mật khẩu xác nhận không khớp",
+    path: ["confirmPassword"],
+  });
+
+export const userSessionSchema = z.object({
+  id: z.string(),
+  device: z.string(),
+  browser: z.string(),
+  os: z.string(),
+  deviceType: z.enum(["DESKTOP", "MOBILE", "TABLET", "UNKNOWN"]).or(z.string()),
+  ipAddress: z.string(),
+  isCurrent: z.boolean(),
+  issuedAt: z.string(),
+  lastActiveAt: z.string(),
+  expiresAt: z.string(),
+});
+
 export const orgMemberSchema = z.object({
   id: z.string(),
   userId: z.string(),
@@ -117,4 +146,7 @@ export type CreateOrganizationData = z.infer<typeof createOrganizationSchema>;
 export type UpdateOrganizationData = z.infer<typeof updateOrganizationSchema>;
 export type OrganizationDetail = z.infer<typeof organizationDetailSchema>;
 export type UpdateProfileData = z.infer<typeof updateProfileSchema>;
+export type ChangePasswordData = z.infer<typeof changePasswordSchema>;
+export type UserSession = z.infer<typeof userSessionSchema>;
 export type OrgMember = z.infer<typeof orgMemberSchema>;
+

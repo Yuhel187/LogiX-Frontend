@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Bell,
@@ -15,7 +16,6 @@ import {
   Search,
   Settings,
   Truck,
-  User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { LanguageToggle } from "@/components/shared/language-toggle";
 import { useSidebar } from "@/components/shared/sidebar-context";
@@ -49,6 +49,7 @@ export function AppHeader() {
       pathname.startsWith("/settings/organization")
     )
       return t("tenant.pageTitle");
+    if (pathname.startsWith("/settings/account")) return t("account.pageTitle");
     return "";
   };
   const pageTitle = getPageTitle();
@@ -224,7 +225,8 @@ export function AppHeader() {
               variant="ghost"
               className="flex items-center gap-3 h-11 px-3 rounded-xl border border-border/70 bg-background/70 hover:bg-accent/80 transition-all cursor-pointer focus-visible:ring-1"
             >
-              <Avatar className="size-8.5 border border-border/80 rounded-xl">
+              <Avatar className="size-8.5 border border-border/80 rounded-xl overflow-hidden">
+                <AvatarImage src={user?.avatarUrl || ""} alt={user?.displayName || "Avatar"} className="object-cover" />
                 <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs">
                   {user?.displayName ? user.displayName.slice(0, 2).toUpperCase() : "LX"}
                 </AvatarFallback>
@@ -258,13 +260,11 @@ export function AppHeader() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="my-1" />
             <DropdownMenuGroup className="space-y-0.5">
-              <DropdownMenuItem className="cursor-pointer px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-accent transition-colors gap-3">
-                <User className="size-4.5 text-muted-foreground" />
-                <span>{t("userMenu.profile")}</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-accent transition-colors gap-3">
-                <Settings className="size-4.5 text-muted-foreground" />
-                <span>{t("userMenu.settings")}</span>
+              <DropdownMenuItem asChild className="cursor-pointer px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-accent transition-colors gap-3">
+                <Link href="/settings/account" className="flex items-center gap-3 w-full">
+                  <Settings className="size-4.5 text-muted-foreground" />
+                  <span>{t("userMenu.settings")}</span>
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-accent transition-colors gap-3">
                 <HelpCircle className="size-4.5 text-muted-foreground" />
