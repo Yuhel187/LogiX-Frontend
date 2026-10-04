@@ -589,5 +589,86 @@
         "successMessage": "Chào mừng bạn đến với {tenantName}! Đang chuyển hướng..."
       }
     }
+  },
+  "inventory": {
+    "navGroup": "Kho vận & Tồn kho",
+    "navTitle": "Quản lý tồn kho",
+    "title": "Quản lý tồn kho",
+    "description": "Theo dõi số lượng hàng hóa theo từng kho, ghi nhận nhập kho và điều chỉnh tồn.",
+    "refresh": "Làm mới",
+    "history": "Lịch sử biến động",
+    "createReceipt": "+ Nhập kho",
+    "filters": {
+      "warehousePlaceholder": "Lọc theo kho...",
+      "allWarehouses": "Tất cả kho hàng",
+      "productPlaceholder": "Lọc theo sản phẩm...",
+      "allProducts": "Tất cả sản phẩm",
+      "lowStockOnly": "Chỉ hàng sắp hết",
+      "clearFilters": "Xóa bộ lọc"
+    },
+    "table": {
+      "warehouse": "Kho hàng",
+      "product": "Sản phẩm",
+      "onHand": "Tồn thực tế",
+      "reserved": "Đang giữ",
+      "available": "Khả dụng",
+      "threshold": "Ngưỡng tối thiểu",
+      "status": "Trạng thái tồn",
+      "updatedAt": "Cập nhật lúc",
+      "empty": "Không tìm thấy dữ liệu tồn kho phù hợp với điều kiện tìm kiếm.",
+      "pageOf": "Trang {page} / {totalPages} — Tổng cộng {total} dòng tồn kho",
+      "statusLowStock": "Sắp hết hàng",
+      "statusNormal": "Đủ hàng",
+      "actions": {
+        "movements": "Lịch sử biến động",
+        "adjust": "Điều chỉnh tồn kho",
+        "threshold": "Cài đặt cảnh báo"
+      }
+    },
+    "receipt": {
+      "title": "Tạo phiếu nhập kho",
+      "description": "Ghi nhận số lượng thực tế nhập vào kho. Hệ thống sẽ tăng tồn kho và lưu vết kiểm toán.",
+      "warehouse": "Kho nhận hàng",
+      "warehousePlaceholder": "Chọn kho nhận hàng...",
+      "receiptNumber": "Số phiếu nhập (Tùy chọn)",
+      "receiptNumberPlaceholder": "Tự sinh nếu để trống (PN-...)",
+      "linesTitle": "Chi tiết hàng hóa nhập kho",
+      "addLine": "Thêm dòng",
+      "quantityPlaceholder": "Số lượng",
+      "submit": "Xác nhận nhập kho",
+      "success": "Tạo phiếu nhập kho thành công"
+    },
+    "adjust": {
+      "title": "Điều chỉnh tồn kho thủ công",
+      "description": "Thay đổi số lượng tồn thực tế với lý do bắt buộc để phục vụ kiểm toán.",
+      "modeAdd": "+ Tăng tồn kho",
+      "modeSubtract": "− Giảm tồn kho",
+      "quantity": "Số lượng thay đổi",
+      "quantityPlaceholder": "VD: 10 hoặc 2.500",
+      "preview": "Dự kiến sau điều chỉnh:",
+      "reason": "Lý do điều chỉnh",
+      "reasonPlaceholder": "VD: Hàng hỏng rách bao bì, kiểm kê thực tế chênh lệch...",
+      "submit": "Xác nhận điều chỉnh",
+      "success": "Điều chỉnh tồn kho thành công"
+    },
+    "threshold": {
+      "title": "Cài đặt ngưỡng cảnh báo tồn kho",
+      "description": "Khi số lượng khả dụng thấp hơn hoặc bằng mức này, hệ thống sẽ gắn nhãn cảnh báo 'Sắp hết hàng'.",
+      "currentAvailable": "Tồn khả dụng hiện tại:",
+      "label": "Ngưỡng tồn kho tối thiểu (Min stock)",
+      "hint": "Nhập số không âm (tối đa 3 chữ số thập phân). Nhập 0 nếu không cần cảnh báo.",
+      "submit": "Lưu cài đặt",
+      "success": "Cập nhật ngưỡng cảnh báo tồn kho thành công"
+    },
+    "movements": {
+      "title": "Lịch sử biến động tồn kho",
+      "allMovementsDescription": "Toàn bộ lịch sử biến động trong tổ chức (mới nhất xếp trước)",
+      "empty": "Chưa có biến động tồn kho nào được ghi nhận.",
+      "receipt": "Nhập kho",
+      "issue": "Xuất kho",
+      "adjustIn": "Điều chỉnh (+)",
+      "adjustOut": "Điều chỉnh (−)",
+      "reversal": "Hoàn tác"
+    }
   }
 }

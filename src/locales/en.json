@@ -589,5 +589,86 @@
         "successMessage": "Welcome to {tenantName}! Redirecting to workspace..."
       }
     }
+  },
+  "inventory": {
+    "navGroup": "Logistics & Inventory",
+    "navTitle": "Inventory Management",
+    "title": "Inventory Management",
+    "description": "Track stock levels per warehouse, record stock receipts, and make inventory adjustments.",
+    "refresh": "Refresh",
+    "history": "Movement History",
+    "createReceipt": "+ Stock Receipt",
+    "filters": {
+      "warehousePlaceholder": "Filter by warehouse...",
+      "allWarehouses": "All warehouses",
+      "productPlaceholder": "Filter by product...",
+      "allProducts": "All products",
+      "lowStockOnly": "Low stock only",
+      "clearFilters": "Clear filters"
+    },
+    "table": {
+      "warehouse": "Warehouse",
+      "product": "Product",
+      "onHand": "On-hand",
+      "reserved": "Reserved",
+      "available": "Available",
+      "threshold": "Min Threshold",
+      "status": "Stock Status",
+      "updatedAt": "Updated At",
+      "empty": "No inventory balances found matching the search criteria.",
+      "pageOf": "Page {page} / {totalPages} — Total {total} balances",
+      "statusLowStock": "Low stock",
+      "statusNormal": "In stock",
+      "actions": {
+        "movements": "Movement history",
+        "adjust": "Adjust stock",
+        "threshold": "Alert threshold"
+      }
+    },
+    "receipt": {
+      "title": "Create Stock Receipt",
+      "description": "Record physical inbound stock to warehouse. Updates balances and writes audit records.",
+      "warehouse": "Destination Warehouse",
+      "warehousePlaceholder": "Select warehouse...",
+      "receiptNumber": "Receipt Number (Optional)",
+      "receiptNumberPlaceholder": "Auto-generated if empty",
+      "linesTitle": "Inbound Product Items",
+      "addLine": "Add line",
+      "quantityPlaceholder": "Quantity",
+      "submit": "Confirm Receipt",
+      "success": "Stock receipt created successfully"
+    },
+    "adjust": {
+      "title": "Manual Stock Adjustment",
+      "description": "Change on-hand stock with a mandatory reason for audit compliance.",
+      "modeAdd": "+ Increase Stock",
+      "modeSubtract": "− Decrease Stock",
+      "quantity": "Quantity Delta",
+      "quantityPlaceholder": "e.g. 10 or 2.500",
+      "preview": "Projected stock after adjustment:",
+      "reason": "Adjustment Reason",
+      "reasonPlaceholder": "e.g. Damaged goods, inventory count discrepancy...",
+      "submit": "Confirm Adjustment",
+      "success": "Stock adjusted successfully"
+    },
+    "threshold": {
+      "title": "Low Stock Alert Threshold",
+      "description": "When available stock is at or below this number, the system marks the item as 'Low stock'.",
+      "currentAvailable": "Current available stock:",
+      "label": "Min Stock Threshold",
+      "hint": "Non-negative decimal (up to 3 decimal places). Enter 0 to disable alert.",
+      "submit": "Save Settings",
+      "success": "Low stock threshold updated successfully"
+    },
+    "movements": {
+      "title": "Stock Movement History",
+      "allMovementsDescription": "Organization-wide stock movements (newest first)",
+      "empty": "No stock movements recorded yet.",
+      "receipt": "Receipt",
+      "issue": "Issue",
+      "adjustIn": "Adjust (+)",
+      "adjustOut": "Adjust (−)",
+      "reversal": "Reversal"
+    }
   }
 }
