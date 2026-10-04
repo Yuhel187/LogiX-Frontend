@@ -11,7 +11,10 @@
     "validate": "pnpm lint && pnpm typecheck && pnpm build"
   },
   "dependencies": {
+    "@ag-ui/client": "^1.0.1",
     "@base-ui/react": "^1.8.0",
+    "@copilotkit/react-core": "^1.77.0",
+    "@copilotkit/runtime": "^1.77.0",
     "@shadcn/react": "^0.3.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

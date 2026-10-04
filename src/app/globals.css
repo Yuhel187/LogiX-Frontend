@@ -172,3 +172,75 @@
   background-image: linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
 }
+
+/* ── CopilotKit Chat Widget & Typography ───────────────────────── */
+.copilotkit-chat {
+  height: 100% !important;
+}
+
+[data-copilotkit],
+[data-copilot-sidebar] {
+  --cpk-default-font-family: var(--font-sans), sans-serif !important;
+  font-family: var(--font-sans), sans-serif !important;
+}
+
+/* ── CopilotSidebar Full-Page Expansion ─────────────────────────── */
+body.copilot-sidebar-expanded {
+  margin-inline-end: 0px !important;
+  margin-inline-start: 0px !important;
+  overflow: hidden !important;
+}
+
+body.copilot-sidebar-expanded aside[data-copilot-sidebar],
+[data-sidebar-expanded="true"] aside[data-copilot-sidebar] {
+  --sidebar-width: 100vw !important;
+  width: 100vw !important;
+  max-width: 100vw !important;
+  left: 0 !important;
+  right: 0 !important;
+  border-left: none !important;
+  border-right: none !important;
+  z-index: 1300 !important;
+  box-shadow: none !important;
+  transition: none !important;
+}
+
+body.copilot-sidebar-expanded [data-sidebar-chat],
+[data-sidebar-expanded="true"] [data-sidebar-chat] {
+  max-width: 960px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+}
+
+/* ── Compact & Sleek Chat Input Box ("Khung chat") ────────────── */
+[data-copilot-sidebar] [data-testid="copilot-chat-input"] {
+  border-radius: 20px !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+  background-color: var(--card) !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+[data-copilot-sidebar] [data-testid="copilot-chat-input"]:focus-within {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--primary) 20%, transparent) !important;
+}
+
+[data-copilot-sidebar] [data-testid="copilot-chat-input"] > div {
+  padding: 8px 12px !important;
+  row-gap: 6px !important;
+}
+
+[data-copilot-sidebar] [data-testid="copilot-chat-input"] textarea {
+  min-height: 28px !important;
+  max-height: 120px !important;
+  font-size: 13.5px !important;
+  line-height: 1.45 !important;
+  padding: 2px 4px !important;
+  resize: none !important;
+}
+
+[data-copilot-sidebar] .copilotKitInput {
+  border-radius: 20px !important;
+}
+

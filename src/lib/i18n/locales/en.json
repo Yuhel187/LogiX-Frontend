@@ -14,6 +14,15 @@
     "online": "Online",
     "offline": "Offline"
   },
+  "chat": {
+    "appTitle": "LogiX Copilot",
+    "welcomeMessage": "Hello! I am LogiX AI Assistant. How can I assist you with warehouse and logistics operations today?",
+    "inputPlaceholder": "Type your message or question...",
+    "expand": "Expand to full screen",
+    "collapse": "Collapse sidebar",
+    "newChat": "New conversation",
+    "openCopilot": "Open LogiX AI Assistant"
+  },
   "masterData": {
     "navTitle": "Master data",
     "statusActive": "Active",
