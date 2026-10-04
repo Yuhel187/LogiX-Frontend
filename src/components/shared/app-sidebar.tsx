@@ -5,10 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  BarChart3,
-  Boxes,
   LayoutDashboard,
+  Package,
   Settings,
+  Truck,
+  Warehouse,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -57,17 +58,23 @@ export function AppSidebar() {
       ],
     },
     {
-      label: t("nav.feature1"),
+      // Customers joins this group once its screen lands.
+      label: t("masterData.navTitle"),
       items: [
         {
-          title: t("nav.moduleA"),
-          href: "#module-a",
-          icon: Boxes,
+          title: t("masterData.warehouse.title"),
+          href: "/master-data/warehouses",
+          icon: Warehouse,
         },
         {
-          title: t("nav.moduleB"),
-          href: "#module-b",
-          icon: BarChart3,
+          title: t("masterData.product.title"),
+          href: "/master-data/products",
+          icon: Package,
+        },
+        {
+          title: t("masterData.vehicle.title"),
+          href: "/master-data/vehicles",
+          icon: Truck,
         },
       ],
     },
