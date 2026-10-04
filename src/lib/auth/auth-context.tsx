@@ -8,11 +8,13 @@ import {
   resetPasswordApi,
   logoutApi,
   getProfileApi,
+  getEffectivePermissionsApi,
   getTenantsApi,
   switchTenantApi,
   createOrganizationApi,
   updateOrganizationApi,
   setDefaultTenantApi,
+  deleteOrganizationApi,
   updateProfileApi,
   changePasswordApi,
   getStoredAccessToken,
@@ -24,6 +26,7 @@ import type {
   AuthUser,
   ActiveTenant,
   TenantListItem,
+  EffectivePermissions,
   LoginCredentials,
   RegisterData,
   ForgotPasswordData,
@@ -42,6 +45,18 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
 
+  // Dynamic RBAC State
+  permissions: string[];
+  roles: string[];
+  isSuperAdmin: boolean;
+  isOwner: boolean;
+  isAdmin: boolean;
+
+  // RBAC Helpers
+  hasPermission: (permission: string) => boolean;
+  hasAnyPermission: (permissions: string[]) => boolean;
+  hasAllPermissions: (permissions: string[]) => boolean;
+
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (data: RegisterData) => Promise<{ id: string; email: string; displayName: string; message: string }>;
   forgotPassword: (data: ForgotPasswordData) => Promise<{ message: string; devToken?: string }>;
@@ -51,6 +66,7 @@ interface AuthContextType {
   createOrganization: (data: CreateOrganizationData) => Promise<{ id: string; code: string; name: string; role: string; isDefault: boolean; message: string } | undefined>;
   updateOrganization: (tenantId: string, data: UpdateOrganizationData) => Promise<void>;
   setDefaultTenant: (tenantId: string) => Promise<void>;
+  deleteOrganization: (tenantId: string) => Promise<{ message: string }>;
   updateProfile: (data: UpdateProfileData) => Promise<void>;
   changePassword: (data: ChangePasswordData) => Promise<{ message: string; revokedOthersCount?: number }>;
   updateCurrentUser: (partial: Partial<AuthUser>) => void;
@@ -65,11 +81,89 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [tenants, setTenants] = useState<TenantListItem[]>([]);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // Dynamic RBAC States
+  const [permissions, setPermissions] = useState<string[]>([]);
+  const [roles, setRoles] = useState<string[]>([]);
+  const [isSuperAdmin, setIsSuperAdmin] = useState<boolean>(false);
+  const [isOwner, setIsOwner] = useState<boolean>(false);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+
   const lastRefreshTimeRef = useRef<number>(0);
 
   useEffect(() => {
     lastRefreshTimeRef.current = Date.now();
   }, []);
+
+  // RBAC Helpers
+  const hasPermission = useCallback(
+    (permission: string): boolean => {
+      if (isSuperAdmin || isOwner) return true;
+      if (permissions.includes("*")) return true;
+      return permissions.includes(permission);
+    },
+    [isSuperAdmin, isOwner, permissions]
+  );
+
+  const hasAnyPermission = useCallback(
+    (perms: string[]): boolean => {
+      if (isSuperAdmin || isOwner) return true;
+      if (permissions.includes("*")) return true;
+      return perms.some((p) => permissions.includes(p));
+    },
+    [isSuperAdmin, isOwner, permissions]
+  );
+
+  const hasAllPermissions = useCallback(
+    (perms: string[]): boolean => {
+      if (isSuperAdmin || isOwner) return true;
+      if (permissions.includes("*")) return true;
+      return perms.every((p) => permissions.includes(p));
+    },
+    [isSuperAdmin, isOwner, permissions]
+  );
+
+  // Clear auth session data
+  const clearAuthData = useCallback(() => {
+    setAccessToken(null);
+    setUser(null);
+    setActiveTenant(null);
+    setTenants([]);
+    setPermissions([]);
+    setRoles([]);
+    setIsSuperAdmin(false);
+    setIsOwner(false);
+    setIsAdmin(false);
+    setStoredAccessToken(null);
+  }, []);
+
+  // Sync effective permissions from server
+  const syncEffectivePermissions = useCallback(
+    async (token: string): Promise<EffectivePermissions | null> => {
+      try {
+        const eff = await getEffectivePermissionsApi(token);
+        setPermissions(eff.permissions);
+        setRoles(eff.roles);
+        setIsSuperAdmin(eff.isSuperAdmin);
+        setIsOwner(eff.isOwner);
+        setIsAdmin(eff.isAdmin);
+        return eff;
+      } catch (err: any) {
+        console.warn("Could not sync effective permissions:", err);
+        // Nếu token không hợp lệ hoặc đã hết hạn, xóa sạch session để không bị kẹt token cũ
+        const msg = String(err?.message || "");
+        if (
+          msg.includes("Phiên đăng nhập không hợp lệ") ||
+          msg.includes("hết hạn") ||
+          msg.includes("Unauthorized")
+        ) {
+          clearAuthData();
+        }
+        return null;
+      }
+    },
+    [clearAuthData]
+  );
 
   // Helper to apply auth session data
   const applyAuthData = useCallback(
@@ -81,24 +175,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     ) => {
       setAccessToken(token);
       setUser(userData);
+      setIsSuperAdmin(Boolean(userData.isSuperAdmin));
       if (tenantData !== undefined) {
         setActiveTenant(tenantData);
+        setIsOwner(tenantData?.role === "OWNER");
+        setIsAdmin(tenantData?.role === "OWNER" || tenantData?.role === "ADMIN");
+        if (tenantData?.role) {
+          setRoles([tenantData.role]);
+        }
       }
       setTenants(tenantList);
       setStoredAccessToken(token);
       lastRefreshTimeRef.current = Date.now();
-    },
-    []
-  );
 
-  // Clear auth session data
-  const clearAuthData = useCallback(() => {
-    setAccessToken(null);
-    setUser(null);
-    setActiveTenant(null);
-    setTenants([]);
-    setStoredAccessToken(null);
-  }, []);
+      // Trigger sync of permissions
+      void syncEffectivePermissions(token);
+    },
+    [syncEffectivePermissions]
+  );
 
   // Register callbacks with the 401 Auto-refresh Fetch Interceptor
   useEffect(() => {
@@ -130,10 +224,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               displayName: profile.displayName,
               phoneNumber: profile.phoneNumber,
               avatarUrl: profile.avatarUrl,
+              isSuperAdmin: profile.isSuperAdmin ?? false,
             },
             profile.activeTenant,
             profile.tenants
           );
+          await syncEffectivePermissions(storedToken);
           return;
         }
       } catch {
@@ -141,7 +237,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       clearAuthData();
     }
-  }, [applyAuthData, clearAuthData]);
+  }, [applyAuthData, clearAuthData, syncEffectivePermissions]);
 
   // Initial session restoration on mount
   useEffect(() => {
@@ -209,6 +305,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (credentials: LoginCredentials) => {
     const res = await loginApi(credentials);
     applyAuthData(res.accessToken, res.user, res.activeTenant, res.tenants);
+    await syncEffectivePermissions(res.accessToken);
   };
 
   // Register action
@@ -243,14 +340,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setActiveTenant(res.activeTenant);
     setStoredAccessToken(res.accessToken);
     lastRefreshTimeRef.current = Date.now();
-    // Fetch updated tenant list with new token
+
+    // Fetch updated tenant list & effective permissions in parallel
     try {
-      const updatedTenants = await getTenantsApi(res.accessToken);
+      const [updatedTenants, eff] = await Promise.all([
+        getTenantsApi(res.accessToken).catch(async () => {
+          const profile = await getProfileApi(res.accessToken);
+          return profile.tenants;
+        }),
+        getEffectivePermissionsApi(res.accessToken).catch(() => null),
+      ]);
+
       setTenants(updatedTenants);
+      if (eff) {
+        setPermissions(eff.permissions);
+        setRoles(eff.roles);
+        setIsSuperAdmin(eff.isSuperAdmin);
+        setIsOwner(eff.isOwner);
+        setIsAdmin(eff.isAdmin);
+      } else if (res.activeTenant) {
+        setIsOwner(res.activeTenant.role === "OWNER");
+        setIsAdmin(res.activeTenant.role === "OWNER" || res.activeTenant.role === "ADMIN");
+        setRoles([res.activeTenant.role]);
+      }
     } catch {
-      // Fallback: refresh profile
-      const profile = await getProfileApi(res.accessToken);
-      setTenants(profile.tenants);
+      // Fallback
     }
   };
 
@@ -271,6 +385,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       displayName: profile.displayName,
       phoneNumber: profile.phoneNumber,
       avatarUrl: profile.avatarUrl,
+      isSuperAdmin: Boolean(profile.isSuperAdmin),
     });
     if (profile.activeTenant) {
       setActiveTenant(profile.activeTenant);
@@ -320,6 +435,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  // Delete organization action
+  const deleteOrganization = async (tenantId: string) => {
+    if (!accessToken) throw new Error("Chưa đăng nhập");
+    const res = await deleteOrganizationApi(tenantId, accessToken);
+    
+    // Cập nhật danh sách tenants cục bộ
+    const remainingTenants = tenants.filter((t) => t.id !== tenantId);
+    setTenants(remainingTenants);
+
+    // Nếu tenant bị xóa chính là activeTenant đang mở
+    if (activeTenant?.id === tenantId) {
+      if (remainingTenants.length > 0) {
+        const nextTenant = remainingTenants.find((t) => t.isDefault) || remainingTenants[0];
+        try {
+          await switchTenant(nextTenant.id);
+        } catch {
+          setActiveTenant(null);
+        }
+      } else {
+        setActiveTenant(null);
+      }
+    }
+
+    return res;
+  };
+
   // Update profile action
   const updateProfile = async (data: UpdateProfileData) => {
     if (!accessToken) return;
@@ -356,6 +497,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         accessToken,
         isAuthenticated: !!user,
         isLoading,
+        permissions,
+        roles,
+        isSuperAdmin,
+        isOwner,
+        isAdmin,
+        hasPermission,
+        hasAnyPermission,
+        hasAllPermissions,
         login,
         register,
         forgotPassword,
@@ -365,6 +514,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         createOrganization,
         updateOrganization,
         setDefaultTenant,
+        deleteOrganization,
         updateProfile,
         changePassword,
         updateCurrentUser,

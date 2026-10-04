@@ -17,16 +17,13 @@ export function ForgotPasswordForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [devToken, setDevToken] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrorMessage(null);
     try {
-      const res = await forgotPassword({ email });
-      if (res.devToken) {
-        setDevToken(res.devToken);
-      }
+      await forgotPassword({ email });
       setIsSent(true);
     } catch (err: unknown) {
       setErrorMessage(formatAuthError(err, t, "auth.forgotPasswordErrorDefault"));
@@ -50,10 +47,11 @@ export function ForgotPasswordForm() {
           <Image
             src="/logo_logix.png"
             alt="LogiX Logo"
-            width={720}
-            height={216}
+            width={160}
+            height={160}
             priority
-            className="h-32 sm:h-40 max-w-70 w-auto object-contain"
+            style={{ width: "auto" }}
+            className="h-32 sm:h-40 max-w-70 object-contain"
           />
         </div>
 
@@ -138,18 +136,6 @@ export function ForgotPasswordForm() {
             </div>
 
             <div className="pt-2 space-y-4">
-              {devToken && (
-                <div className="p-3 text-xs bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-xl space-y-1">
-                  <p className="font-semibold text-amber-800 dark:text-amber-300">{t("auth.devResetLinkTitle")}</p>
-                  <Link
-                    href={`/reset-password?email=${encodeURIComponent(email)}&token=${encodeURIComponent(devToken)}`}
-                    className="block text-emerald-600 dark:text-emerald-400 font-medium underline break-all"
-                  >
-                    {t("auth.devResetLinkClick")}
-                  </Link>
-                </div>
-              )}
-
               <Link
                 href="/login"
                 className="w-full h-11 bg-[#10b981] hover:bg-[#059669] text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-md text-sm"

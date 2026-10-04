@@ -1,6 +1,8 @@
 import {
   authResponseSchema,
+  effectivePermissionsSchema,
   type AuthResponse,
+  type EffectivePermissions,
   type LoginCredentials,
   type RegisterData,
   type ForgotPasswordData,
@@ -16,7 +18,7 @@ import {
   type OrgMember,
 } from "../schemas/auth.schema";
 
-const API_BASE_URL =
+export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
 
 const ACCESS_TOKEN_KEY = "logix_access_token";
@@ -67,7 +69,7 @@ export function registerAuthCallbacks(callbacks: {
 // =======================================================
 // RESPONSE HANDLER
 // =======================================================
-async function handleResponse<T>(response: Response): Promise<T> {
+export async function handleResponse<T>(response: Response): Promise<T> {
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
@@ -159,7 +161,7 @@ export async function authFetch(
       headers.set("Content-Type", "application/json");
     }
     const resolvedToken = token || explicitToken || getStoredAccessToken();
-    if (resolvedToken && !headers.has("Authorization")) {
+    if (resolvedToken) {
       headers.set("Authorization", `Bearer ${resolvedToken}`);
     }
     return headers;
@@ -275,6 +277,7 @@ export async function getProfileApi(accessToken?: string): Promise<{
   phoneNumber?: string | null;
   avatarUrl?: string | null;
   status: string;
+  isSuperAdmin?: boolean;
   lastLoginAt?: string | null;
   activeTenant?: { id: string; code: string; name: string; logoUrl?: string | null; role: string } | null;
   tenants: Array<{ id: string; code: string; name: string; logoUrl?: string | null; role: string; isDefault: boolean }>;
@@ -285,6 +288,19 @@ export async function getProfileApi(accessToken?: string): Promise<{
   });
 
   return handleResponse(response);
+}
+
+export async function getEffectivePermissionsApi(
+  accessToken?: string
+): Promise<EffectivePermissions> {
+  const response = await authFetch(`${API_BASE_URL}/auth/me/permissions`, {
+    method: "GET",
+    accessToken,
+    skipAuthRefresh: true,
+  });
+
+  const data = await handleResponse<unknown>(response);
+  return effectivePermissionsSchema.parse(data);
 }
 
 export async function switchTenantApi(

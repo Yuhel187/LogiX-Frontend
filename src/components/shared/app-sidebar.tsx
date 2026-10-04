@@ -19,6 +19,7 @@ import {
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useSidebar } from "@/components/shared/sidebar-context";
 import { useTranslation } from "@/lib/i18n";
+import { useAuth } from "@/lib/auth";
 import { TenantSwitcher } from "@/components/shared/tenant-switcher";
 
 interface NavItem {
@@ -27,6 +28,9 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
   badge?: string;
   badgeVariant?: "default" | "warning" | "info";
+  permission?: string;        // Quyền bắt buộc để hiển thị
+  anyPermissions?: string[];  // Một trong các quyền để hiển thị
+  superAdminOnly?: boolean;   // Chỉ hiển thị cho Super Admin
 }
 
 interface NavGroup {
@@ -39,43 +43,72 @@ export function AppSidebar() {
   const { isCollapsed, isMobileOpen, closeMobile, setIsMobileOpen } =
     useSidebar();
   const { t } = useTranslation();
+  const { hasPermission, hasAnyPermission, isSuperAdmin } = useAuth();
 
-  const navGroups: NavGroup[] = [
-    {
-      label: t("nav.systemManagement"),
-      items: [
-        {
-          title: t("nav.overview"),
-          href: "/",
-          icon: LayoutDashboard,
-        },
-        {
-          title: t("nav.generalConfig"),
-          href: "#config",
-          icon: Settings,
-        },
-      ],
-    },
-    {
-      label: t("nav.feature1"),
-      items: [
-        {
-          title: t("nav.moduleA"),
-          href: "#module-a",
-          icon: Boxes,
-        },
-        {
-          title: t("nav.moduleB"),
-          href: "#module-b",
-          icon: BarChart3,
-        },
-      ],
-    },
-  ];
+  const navGroups: NavGroup[] = React.useMemo(
+    () => [
+      {
+        label: t("nav.systemManagement"),
+        items: [
+          {
+            title: t("nav.overview"),
+            href: "/",
+            icon: LayoutDashboard,
+          },
+          {
+            title: t("nav.generalConfig"),
+            href: "#config",
+            icon: Settings,
+            permission: "iam:role:read",
+          },
+        ],
+      },
+      {
+        label: t("nav.feature1"),
+        items: [
+          {
+            title: t("nav.moduleA"),
+            href: "#module-a",
+            icon: Boxes,
+          },
+          {
+            title: t("nav.moduleB"),
+            href: "#module-b",
+            icon: BarChart3,
+          },
+        ],
+      },
+    ],
+    [t]
+  );
+
+  const visibleNavGroups = React.useMemo(() => {
+    return navGroups
+      .map((group) => {
+        const visibleItems = group.items.filter((item) => {
+          if (item.superAdminOnly && !isSuperAdmin) return false;
+          if (item.permission && !hasPermission(item.permission)) return false;
+          if (
+            item.anyPermissions &&
+            item.anyPermissions.length > 0 &&
+            !hasAnyPermission(item.anyPermissions)
+          ) {
+            return false;
+          }
+          return true;
+        });
+
+        return {
+          ...group,
+          items: visibleItems,
+        };
+      })
+      .filter((group) => group.items.length > 0);
+  }, [navGroups, hasPermission, hasAnyPermission, isSuperAdmin]);
 
   const renderNavLinks = (collapsed: boolean) => (
     <div className="flex flex-col flex-1 py-4 overflow-y-auto overflow-x-hidden gap-3 px-3">
-      {navGroups.map((group, groupIdx) => (
+      {visibleNavGroups.map((group, groupIdx) => (
         <div key={group.label || groupIdx} className="w-full space-y-1">
           {/* Subtle divider for collapsed mode when there are multiple groups */}
           {groupIdx > 0 && (
