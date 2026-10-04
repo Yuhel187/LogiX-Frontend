@@ -1,6 +1,8 @@
 import {
   authResponseSchema,
+  effectivePermissionsSchema,
   type AuthResponse,
+  type EffectivePermissions,
   type LoginCredentials,
   type RegisterData,
   type ForgotPasswordData,
@@ -29,9 +31,10 @@ export {
   requestNewAccessToken,
   setStoredAccessToken,
   type AuthFetchOptions,
+  handleResponse,
 } from "@/lib/api";
 
-const API_BASE_URL = apiBaseUrl;
+export const API_BASE_URL = apiBaseUrl;
 
 type OnTokenRefreshedCallback = (token: string, data: AuthResponse) => void;
 type OnSessionExpiredCallback = () => void;
@@ -50,11 +53,6 @@ export function registerAuthCallbacks(callbacks: {
     onSessionExpiredCallback = callbacks.onSessionExpired;
   }
 }
-
-// =======================================================
-// RESPONSE HANDLER
-// =======================================================
-// Transport-level response handling lives in `@/lib/api`.
 
 // =======================================================
 // SESSION REFRESH (domain implementation injected into the transport)
@@ -176,6 +174,7 @@ export async function getProfileApi(accessToken?: string): Promise<{
   phoneNumber?: string | null;
   avatarUrl?: string | null;
   status: string;
+  isSuperAdmin?: boolean;
   lastLoginAt?: string | null;
   activeTenant?: { id: string; code: string; name: string; logoUrl?: string | null; role: string } | null;
   tenants: Array<{ id: string; code: string; name: string; logoUrl?: string | null; role: string; isDefault: boolean }>;
@@ -186,6 +185,19 @@ export async function getProfileApi(accessToken?: string): Promise<{
   });
 
   return handleResponse(response);
+}
+
+export async function getEffectivePermissionsApi(
+  accessToken?: string
+): Promise<EffectivePermissions> {
+  const response = await authFetch(`${API_BASE_URL}/auth/me/permissions`, {
+    method: "GET",
+    accessToken,
+    skipAuthRefresh: true,
+  });
+
+  const data = await handleResponse<unknown>(response);
+  return effectivePermissionsSchema.parse(data);
 }
 
 export async function switchTenantApi(

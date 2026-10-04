@@ -6,7 +6,18 @@ export const authUserSchema = z.object({
   displayName: z.string(),
   phoneNumber: z.string().nullable().optional(),
   avatarUrl: z.string().nullable().optional(),
+  isSuperAdmin: z.boolean().default(false),
 });
+
+export const effectivePermissionsSchema = z.object({
+  isSuperAdmin: z.boolean().default(false),
+  isOwner: z.boolean().default(false),
+  isAdmin: z.boolean().default(false),
+  roles: z.array(z.string()).default([]),
+  permissions: z.array(z.string()).default([]),
+});
+
+export type EffectivePermissions = z.infer<typeof effectivePermissionsSchema>;
 
 export const activeTenantSchema = z.object({
   id: z.string(),

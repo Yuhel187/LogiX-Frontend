@@ -21,6 +21,7 @@ import {
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useSidebar } from "@/components/shared/sidebar-context";
 import { useTranslation } from "@/lib/i18n";
+import { useAuth } from "@/lib/auth";
 import { TenantSwitcher } from "@/components/shared/tenant-switcher";
 
 interface NavItem {
@@ -29,6 +30,9 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
   badge?: string;
   badgeVariant?: "default" | "warning" | "info";
+  permission?: string;        // Quyền bắt buộc để hiển thị
+  anyPermissions?: string[];  // Một trong các quyền để hiển thị
+  superAdminOnly?: boolean;   // Chỉ hiển thị cho Super Admin
 }
 
 interface NavGroup {
@@ -41,59 +45,88 @@ export function AppSidebar() {
   const { isCollapsed, isMobileOpen, closeMobile, setIsMobileOpen } =
     useSidebar();
   const { t } = useTranslation();
+  const { hasPermission, hasAnyPermission, isSuperAdmin } = useAuth();
 
-  const navGroups: NavGroup[] = [
-    {
-      label: t("nav.systemManagement"),
-      items: [
-        {
-          title: t("nav.overview"),
-          href: "/",
-          icon: LayoutDashboard,
-        },
-        {
-          title: t("nav.generalConfig"),
-          href: "#config",
-          icon: Settings,
-        },
-      ],
-    },
-    {
-      // Customers joins this group once its screen lands.
-      label: t("masterData.navTitle"),
-      items: [
-        {
-          title: t("masterData.warehouse.title"),
-          href: "/master-data/warehouses",
-          icon: Warehouse,
-        },
-        {
-          title: t("masterData.product.title"),
-          href: "/master-data/products",
-          icon: Package,
-        },
-        {
-          title: t("masterData.vehicle.title"),
-          href: "/master-data/vehicles",
-          icon: Truck,
-        },
-      ],
-    },
-    {
-      label: t("inventory.navGroup"),
-      items: [
-        {
-          title: t("inventory.navTitle"),
-          href: "/inventory",
-          icon: Boxes,
-        },
-      ],
-    },
-  ];
+  const navGroups: NavGroup[] = React.useMemo(
+    () => [
+      {
+        label: t("nav.systemManagement"),
+        items: [
+          {
+            title: t("nav.overview"),
+            href: "/",
+            icon: LayoutDashboard,
+          },
+          {
+            title: t("nav.generalConfig"),
+            href: "#config",
+            icon: Settings,
+            permission: "iam:role:read",
+          },
+        ],
+      },
+      {
+        // Customers joins this group once its screen lands.
+        label: t("masterData.navTitle"),
+        items: [
+          {
+            title: t("masterData.warehouse.title"),
+            href: "/master-data/warehouses",
+            icon: Warehouse,
+          },
+          {
+            title: t("masterData.product.title"),
+            href: "/master-data/products",
+            icon: Package,
+          },
+          {
+            title: t("masterData.vehicle.title"),
+            href: "/master-data/vehicles",
+            icon: Truck,
+          },
+        ],
+      },
+      {
+        label: t("inventory.navGroup"),
+        items: [
+          {
+            title: t("inventory.navTitle"),
+            href: "/inventory",
+            icon: Boxes,
+          },
+        ],
+      },
+    ],
+    [t]
+  );
+
+  const visibleNavGroups = React.useMemo(() => {
+    return navGroups
+      .map((group) => {
+        const visibleItems = group.items.filter((item) => {
+          if (item.superAdminOnly && !isSuperAdmin) return false;
+          if (item.permission && !hasPermission(item.permission)) return false;
+          if (
+            item.anyPermissions &&
+            item.anyPermissions.length > 0 &&
+            !hasAnyPermission(item.anyPermissions)
+          ) {
+            return false;
+          }
+          return true;
+        });
+
+        return {
+          ...group,
+          items: visibleItems,
+        };
+      })
+      .filter((group) => group.items.length > 0);
+  }, [navGroups, hasPermission, hasAnyPermission, isSuperAdmin]);
 
   const renderNavLinks = (collapsed: boolean) => (
     <div className="flex flex-col flex-1 py-4 overflow-y-auto overflow-x-hidden gap-3 px-3">
-      {navGroups.map((group, groupIdx) => (
+      {visibleNavGroups.map((group, groupIdx) => (
         <div key={group.label || groupIdx} className="w-full space-y-1">
           {/* Subtle divider for collapsed mode when there are multiple groups */}
           {groupIdx > 0 && (
@@ -173,8 +206,8 @@ export function AppSidebar() {
                               isActive
                                 ? "bg-primary-foreground/20 text-primary-foreground"
                                 : item.badgeVariant === "warning"
-                                ? "bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300"
-                                : "bg-muted text-muted-foreground"
+                                  ? "bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300"
+                                  : "bg-muted text-muted-foreground"
                             )}
                           >
                             {item.badge}
@@ -264,7 +297,7 @@ export function AppSidebar() {
       <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
         <SheetContent side="left" className="w-72 p-0 flex flex-col bg-sidebar">
           <SheetTitle className="sr-only">Menu điều hướng LogiX</SheetTitle>
-          
+
           {/* Mobile Tenant Switcher Header */}
           <div className="flex h-16 items-center border-b border-border/70 px-3.5 shrink-0">
             <TenantSwitcher collapsed={false} className="w-full" />
