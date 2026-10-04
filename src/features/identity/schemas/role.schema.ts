@@ -42,3 +42,13 @@ export const updateRoleSchema = z.object({
   description: z.string().max(255).optional(),
 });
 export type UpdateRoleFormValues = z.infer<typeof updateRoleSchema>;
+
+export interface MemberWithRolesItem {
+  id: string;
+  userId?: string;
+  email: string;
+  displayName: string;
+  role?: string;
+  roles?: RoleItem[];
+  joinedAt?: string;
+}

@@ -43,8 +43,10 @@ export function InviteScreenContent() {
   const token = searchParams.get("token") || "";
 
   const [preview, setPreview] = useState<InvitationPreview | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(Boolean(token));
+  const [errorMessage, setErrorMessage] = useState<string | null>(
+    token ? null : t("iam.invitations.publicPage.expiredError")
+  );
 
   // Form states for new accounts
   const [displayName, setDisplayName] = useState("");
@@ -57,22 +59,20 @@ export function InviteScreenContent() {
 
   useEffect(() => {
     if (!token) {
-      setIsLoading(false);
-      setErrorMessage(t("iam.invitations.publicPage.expiredError"));
       return;
     }
 
     let isMounted = true;
     (async () => {
-      setIsLoading(true);
       try {
         const data = await getPublicInvitationPreviewApi(token);
         if (isMounted) {
           setPreview(data);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (isMounted) {
-          setErrorMessage(err.message || t("iam.invitations.publicPage.expiredError"));
+          const msg = err instanceof Error ? err.message : t("iam.invitations.publicPage.expiredError");
+          setErrorMessage(msg);
         }
       } finally {
         if (isMounted) {
@@ -138,10 +138,11 @@ export function InviteScreenContent() {
 
       // Chuyển hướng sang trang chính sau khi lưu token
       setTimeout(() => {
-        window.location.href = "/";
+        router.push("/");
       }, 600);
-    } catch (err: any) {
-      toast.error(err.message || "Chấp nhận lời mời thất bại");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Chấp nhận lời mời thất bại";
+      toast.error(msg);
       setIsSubmitting(false);
     }
   };

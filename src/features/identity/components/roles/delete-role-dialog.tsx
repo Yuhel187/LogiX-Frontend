@@ -49,8 +49,9 @@ export function DeleteRoleDialog({
       toast.success(t("common.save"));
       onSuccess();
       onOpenChange(false);
-    } catch (err: any) {
-      toast.error(err.message || t("iam.roles.deleteFailed"));
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : t("iam.roles.deleteFailed");
+      toast.error(msg);
     } finally {
       setIsDeleting(false);
     }

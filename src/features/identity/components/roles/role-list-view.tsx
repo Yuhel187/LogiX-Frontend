@@ -66,16 +66,38 @@ export function RoleListView({ tenantId }: RoleListViewProps) {
     try {
       const data = await getRolesApi(effectiveTenantId);
       setRoles(data);
-    } catch (err: any) {
-      toast.error(err.message || t("tenant.loadRolesError"));
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : t("tenant.loadRolesError");
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }
   }, [effectiveTenantId, t]);
 
   useEffect(() => {
-    void loadRoles();
-  }, [loadRoles]);
+    let isMounted = true;
+    (async () => {
+      try {
+        const data = await getRolesApi(effectiveTenantId);
+        if (isMounted) {
+          setRoles(data);
+        }
+      } catch (err: unknown) {
+        if (isMounted) {
+          const msg = err instanceof Error ? err.message : t("tenant.loadRolesError");
+          toast.error(msg);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [effectiveTenantId, t]);
 
   const filteredRoles = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();

@@ -23,7 +23,6 @@ import {
   Trash2,
   Clock,
   CheckCircle2,
-  XCircle,
   AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -49,6 +48,7 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
 
   const [invitations, setInvitations] = useState<InvitationItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [now, setNow] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
@@ -65,16 +65,43 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
         effectiveTenantId
       );
       setInvitations(data);
-    } catch (err: any) {
-      toast.error(err.message || "Không thể tải danh sách lời mời");
+      setNow(Date.now());
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Không thể tải danh sách lời mời";
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }
   }, [statusFilter, effectiveTenantId]);
 
   useEffect(() => {
-    void loadInvitations();
-  }, [loadInvitations]);
+    let isMounted = true;
+    (async () => {
+      try {
+        const data = await getInvitationsApi(
+          statusFilter === "ALL" ? undefined : statusFilter,
+          effectiveTenantId
+        );
+        if (isMounted) {
+          setInvitations(data);
+          setNow(Date.now());
+        }
+      } catch (err: unknown) {
+        if (isMounted) {
+          const msg = err instanceof Error ? err.message : "Không thể tải danh sách lời mời";
+          toast.error(msg);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [statusFilter, effectiveTenantId]);
 
   const filteredInvitations = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
@@ -112,8 +139,9 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
         toast.info(t("iam.invitations.copied"));
       }
       void loadInvitations();
-    } catch (err: any) {
-      toast.error(err.message || "Gửi lại lời mời thất bại");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gửi lại lời mời thất bại";
+      toast.error(msg);
     } finally {
       setActionLoadingId(null);
     }
@@ -126,8 +154,9 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
       await revokeInvitationApi(id, effectiveTenantId);
       toast.success(t("iam.invitations.revokeSuccess"));
       void loadInvitations();
-    } catch (err: any) {
-      toast.error(err.message || "Thu hồi lời mời thất bại");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Thu hồi lời mời thất bại";
+      toast.error(msg);
     } finally {
       setActionLoadingId(null);
     }
@@ -140,8 +169,9 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
       await deleteInvitationApi(id, effectiveTenantId);
       toast.success(t("iam.invitations.deleteSuccess"));
       void loadInvitations();
-    } catch (err: any) {
-      toast.error(err.message || "Xóa lời mời thất bại");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Xóa lời mời thất bại";
+      toast.error(msg);
     } finally {
       setActionLoadingId(null);
     }
@@ -149,7 +179,7 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
 
   // Render status badge
   const renderStatusBadge = (status: string, expiresAt: string) => {
-    const isExpired = new Date(expiresAt).getTime() < Date.now();
+    const isExpired = now > 0 && new Date(expiresAt).getTime() < now;
     const effectiveStatus = status === "PENDING" && isExpired ? "EXPIRED" : status;
 
     switch (effectiveStatus) {
@@ -285,7 +315,7 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
             ) : (
               filteredInvitations.map((inv) => {
                 const isPending = inv.status === "PENDING";
-                const isExpired = new Date(inv.expiresAt).getTime() < Date.now();
+                const isExpired = now > 0 && new Date(inv.expiresAt).getTime() < now;
                 const isActionLoading = actionLoadingId === inv.id;
 
                 return (

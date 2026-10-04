@@ -4,6 +4,7 @@ import type {
   RoleItem,
   CreateRoleFormValues,
   UpdateRoleFormValues,
+  MemberWithRolesItem,
 } from "../schemas/role.schema";
 
 /**
@@ -153,7 +154,7 @@ export async function updateRolePermissionsApi(
 export async function getMembersApi(
   tenantId?: string,
   accessToken?: string
-): Promise<any[]> {
+): Promise<MemberWithRolesItem[]> {
   const headers: Record<string, string> = {};
   if (tenantId) {
     headers["x-tenant-id"] = tenantId;
@@ -164,7 +165,7 @@ export async function getMembersApi(
     headers,
     accessToken,
   });
-  return handleResponse<any[]>(response);
+  return handleResponse<MemberWithRolesItem[]>(response);
 }
 
 /**
@@ -175,7 +176,7 @@ export async function assignMemberRolesApi(
   roleIds: string[],
   tenantId?: string,
   accessToken?: string
-): Promise<any> {
+): Promise<{ message?: string; success?: boolean }> {
   const headers: Record<string, string> = {};
   if (tenantId) {
     headers["x-tenant-id"] = tenantId;
@@ -187,5 +188,5 @@ export async function assignMemberRolesApi(
     body: JSON.stringify({ roleIds }),
     accessToken,
   });
-  return handleResponse<any>(response);
+  return handleResponse<{ message?: string; success?: boolean }>(response);
 }

@@ -10,7 +10,6 @@ import {
   Search,
   MoreHorizontal,
   Trash2,
-  Check,
   Mail,
   Copy,
   Send,
@@ -20,7 +19,6 @@ import {
   AlertCircle,
   Loader2,
   Shield,
-  ShieldAlert,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -86,6 +84,7 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
 
   const [members, setMembers] = useState<OrgMember[]>([]);
   const [invitations, setInvitations] = useState<InvitationItem[]>([]);
+  const [now, setNow] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -110,6 +109,7 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
       ]);
       setMembers(membersData);
       setInvitations(invitationsData);
+      setNow(Date.now());
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : t("tenant.loadMembersError");
       toast.error(msg);
@@ -596,7 +596,7 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
             {/* 2. Danh sách Lời mời tham gia */}
             {filteredInvitations.map((inv) => {
               const isPending = inv.status === "PENDING";
-              const isExpired = new Date(inv.expiresAt).getTime() < Date.now();
+              const isExpired = now > 0 && new Date(inv.expiresAt).getTime() < now;
               const isActionLoading = actionLoadingId === inv.id;
 
               return (

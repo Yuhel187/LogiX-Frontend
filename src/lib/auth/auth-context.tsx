@@ -148,10 +148,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsOwner(eff.isOwner);
         setIsAdmin(eff.isAdmin);
         return eff;
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.warn("Could not sync effective permissions:", err);
         // Nếu token không hợp lệ hoặc đã hết hạn, xóa sạch session để không bị kẹt token cũ
-        const msg = String(err?.message || "");
+        const msg = err instanceof Error ? err.message : String(err || "");
         if (
           msg.includes("Phiên đăng nhập không hợp lệ") ||
           msg.includes("hết hạn") ||

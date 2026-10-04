@@ -5,6 +5,7 @@ import type {
   InvitationPreview,
   AcceptInvitationFormValues,
 } from "../schemas/invitation.schema";
+import type { AuthUser, ActiveTenant } from "../schemas/auth.schema";
 
 /**
  * 1. Lấy danh sách lời mời của tổ chức (có thể lọc theo trạng thái)
@@ -134,8 +135,8 @@ export async function acceptPublicInvitationApi(
   dto: AcceptInvitationFormValues
 ): Promise<{
   accessToken: string;
-  user: any;
-  activeTenant: any;
+  user: AuthUser;
+  activeTenant: ActiveTenant | null;
   message: string;
 }> {
   const response = await fetch(`${API_BASE_URL}/auth/invitations/${token}/accept`, {
@@ -146,8 +147,8 @@ export async function acceptPublicInvitationApi(
   });
   return handleResponse<{
     accessToken: string;
-    user: any;
-    activeTenant: any;
+    user: AuthUser;
+    activeTenant: ActiveTenant | null;
     message: string;
   }>(response);
 }

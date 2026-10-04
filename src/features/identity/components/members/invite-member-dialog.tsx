@@ -52,16 +52,20 @@ export function InviteMemberDialog({
 
   const effectiveTenantId = tenantId || activeTenant?.id;
 
-  // Tải danh sách vai trò khả dụng khi mở dialog
-  useEffect(() => {
-    if (!open) {
+  const handleDialogChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
       setEmail("");
       setSelectedRoleIds([]);
       setInviteResult(null);
       setCopied(false);
       setEmailError("");
-      return;
     }
+    onOpenChange(nextOpen);
+  };
+
+  // Tải danh sách vai trò khả dụng khi mở dialog
+  useEffect(() => {
+    if (!open) return;
 
     let isMounted = true;
     (async () => {
@@ -79,8 +83,9 @@ export function InviteMemberDialog({
             setSelectedRoleIds([memberRole.id]);
           }
         }
-      } catch (err: any) {
-        toast.error(err.message || "Không thể tải danh sách vai trò");
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Không thể tải danh sách vai trò";
+        toast.error(msg);
       } finally {
         if (isMounted) {
           setIsLoadingRoles(false);
@@ -126,8 +131,9 @@ export function InviteMemberDialog({
 
       toast.success(t("iam.invitations.sendSuccess", { email: cleanEmail }));
       onSuccess();
-    } catch (err: any) {
-      toast.error(err.message || "Gửi lời mời thất bại");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gửi lời mời thất bại";
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -142,7 +148,7 @@ export function InviteMemberDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleDialogChange}>
       <DialogContent className="sm:max-w-[500px]">
         {inviteResult ? (
           // Màn hình kết quả sau khi tạo lời mời thành công

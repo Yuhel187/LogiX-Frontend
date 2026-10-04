@@ -8,8 +8,6 @@ import {
   ShieldAlert,
   Loader2,
   Check,
-  Info,
-  User,
 } from "lucide-react";
 import {
   Dialog,
@@ -23,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { getRolesApi, assignMemberRolesApi, getMembersApi } from "../../api/roles.api";
-import type { RoleItem } from "../../schemas/role.schema";
+import type { RoleItem, MemberWithRolesItem } from "../../schemas/role.schema";
 import type { OrgMember } from "../../schemas/auth.schema";
 import { useTranslation } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -60,7 +58,7 @@ export function ManageMemberRolesDialog({
       try {
         const [allRoles, membersWithRoles] = await Promise.all([
           getRolesApi(tenantId).catch(() => [] as RoleItem[]),
-          getMembersApi(tenantId).catch(() => [] as any[]),
+          getMembersApi(tenantId).catch(() => [] as MemberWithRolesItem[]),
         ]);
 
         if (!isMounted) return;
@@ -73,12 +71,12 @@ export function ManageMemberRolesDialog({
 
         // Tìm vai trò hiện tại của thành viên
         const currentMemberData = membersWithRoles.find(
-          (m: any) => m.userId === member.userId || m.id === member.id
+          (m: MemberWithRolesItem) => m.userId === member.userId || m.id === member.id
         );
 
         if (currentMemberData && Array.isArray(currentMemberData.roles) && currentMemberData.roles.length > 0) {
           const currentRoleIds = currentMemberData.roles
-            .map((r: any) => r.id)
+            .map((r: RoleItem) => r.id)
             .filter((id: string) => assignableRoles.some((ar) => ar.id === id));
           setSelectedRoleIds(currentRoleIds);
         } else {

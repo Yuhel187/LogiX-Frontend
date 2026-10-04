@@ -60,8 +60,9 @@ export function RolePermissionMatrixDialog({
           const currentIds = new Set<string>(roleDetail.permissionIds || []);
           setSelectedIds(currentIds);
         }
-      } catch (err: any) {
-        toast.error(err.message || t("iam.matrix.loadError"));
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : t("iam.matrix.loadError");
+        toast.error(msg);
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -72,7 +73,7 @@ export function RolePermissionMatrixDialog({
     return () => {
       isMounted = false;
     };
-  }, [open, role, tenantId]);
+  }, [open, role, tenantId, t]);
 
   // Nhóm danh mục quyền theo Module và Resource
   const groupedModules = useMemo(() => {
@@ -162,8 +163,9 @@ export function RolePermissionMatrixDialog({
       toast.success(t("iam.matrix.saveSuccess"));
       onSuccess();
       onOpenChange(false);
-    } catch (err: any) {
-      toast.error(err.message || t("iam.matrix.saveError"));
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : t("iam.matrix.saveError");
+      toast.error(msg);
     } finally {
       setIsSaving(false);
     }
