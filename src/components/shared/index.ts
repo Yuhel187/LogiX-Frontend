@@ -7,3 +7,5 @@ export * from "./page-shell";
 export * from "./sidebar-context";
 export * from "./app-sidebar";
 export * from "./app-header";
+export * from "./permission-guard";
+export * from "./workspace-guard";

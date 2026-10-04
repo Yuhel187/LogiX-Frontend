@@ -23,9 +23,10 @@ export function BrandingPanel() {
               src="/logo_logix.png"
               alt="LogiX Logo"
               width={300}
-              height={100}
+              height={300}
               priority
-              className="h-auto w-auto max-w-[260px] sm:max-w-[300px] object-contain drop-shadow-[0_0_20px_rgba(16,185,129,0.25)]"
+              style={{ width: "auto", height: "auto" }}
+              className="max-w-[260px] sm:max-w-[300px] object-contain drop-shadow-[0_0_20px_rgba(16,185,129,0.25)]"
             />
           </div>
 

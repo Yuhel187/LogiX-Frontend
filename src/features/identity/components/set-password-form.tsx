@@ -81,10 +81,11 @@ export function SetPasswordForm({ onSubmitSuccess }: SetPasswordFormProps) {
           <Image
             src="/logo_logix.png"
             alt="LogiX Logo"
-            width={720}
-            height={216}
+            width={160}
+            height={160}
             priority
-            className="h-32 sm:h-40 max-w-70 w-auto object-contain"
+            style={{ width: "auto" }}
+            className="h-32 sm:h-40 max-w-70 object-contain"
           />
         </div>
 
