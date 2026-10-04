@@ -9,6 +9,15 @@
     "online": "Trực tuyến",
     "offline": "Ngoại tuyến"
   },
+  "chat": {
+    "appTitle": "LogiX Copilot",
+    "welcomeMessage": "Xin chào! Tôi là Trợ lý AI của LogiX. Tôi có thể hỗ trợ gì cho việc quản lý vận hành kho bãi và logistics của bạn hôm nay?",
+    "inputPlaceholder": "Nhập tin nhắn hoặc câu hỏi của bạn...",
+    "expand": "Mở rộng toàn màn hình",
+    "collapse": "Thu nhỏ thanh bên",
+    "newChat": "Cuộc trò chuyện mới",
+    "openCopilot": "Mở Trợ lý AI LogiX"
+  },
   "masterData": {
     "navTitle": "Dữ liệu nền",
     "statusActive": "Đang hoạt động",
