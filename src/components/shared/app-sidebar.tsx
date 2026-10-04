@@ -195,8 +195,8 @@ export function AppSidebar() {
                               isActive
                                 ? "bg-primary-foreground/20 text-primary-foreground"
                                 : item.badgeVariant === "warning"
-                                ? "bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300"
-                                : "bg-muted text-muted-foreground"
+                                  ? "bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300"
+                                  : "bg-muted text-muted-foreground"
                             )}
                           >
                             {item.badge}
@@ -286,7 +286,7 @@ export function AppSidebar() {
       <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
         <SheetContent side="left" className="w-72 p-0 flex flex-col bg-sidebar">
           <SheetTitle className="sr-only">Menu điều hướng LogiX</SheetTitle>
-          
+
           {/* Mobile Tenant Switcher Header */}
           <div className="flex h-16 items-center border-b border-border/70 px-3.5 shrink-0">
             <TenantSwitcher collapsed={false} className="w-full" />
