@@ -55,39 +55,52 @@ export function ResourcePage<T extends { id: string; status: RecordStatus }>({
   const { q, status, page, pageSize, setQ, setStatus, setPage } =
     useResourceQuery();
 
-  const [rows, setRows] = useState<T[]>([]);
-  const [total, setTotal] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [reloadToken, setReloadToken] = useState(0);
+  const requestKey = `${q}|${status}|${page}|${pageSize}|${reloadToken}`;
+
+  // Result is keyed by the request that produced it, so "loading" is derived
+  // rather than set synchronously inside the effect.
+  const [result, setResult] = useState<{
+    key: string;
+    rows: T[];
+    total: number;
+    error: string | null;
+  } | null>(null);
+
+  const isLoading = result?.key !== requestKey;
+  const rows = result?.key === requestKey ? result.rows : [];
+  const total = result?.key === requestKey ? result.total : 0;
+  const error = result?.key === requestKey ? result.error : null;
 
   const reload = useCallback(() => setReloadToken((n) => n + 1), []);
 
   useEffect(() => {
     let cancelled = false;
-    setIsLoading(true);
-    setError(null);
 
     fetchPage({ q: q || undefined, status, page, pageSize })
-      .then((result) => {
+      .then((page_) => {
         if (cancelled) return;
-        setRows(result.items);
-        setTotal(result.total);
+        setResult({
+          key: requestKey,
+          rows: page_.items,
+          total: page_.total,
+          error: null,
+        });
       })
       .catch((cause) => {
         if (cancelled) return;
-        setError(resolveApiErrorMessage(cause));
-        setRows([]);
-        setTotal(0);
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false);
+        setResult({
+          key: requestKey,
+          rows: [],
+          total: 0,
+          error: resolveApiErrorMessage(cause),
+        });
       });
 
     return () => {
       cancelled = true;
     };
-  }, [fetchPage, q, status, page, pageSize, reloadToken]);
+  }, [fetchPage, q, status, page, pageSize, requestKey]);
 
   const lastPage = Math.max(1, Math.ceil(total / pageSize));
 

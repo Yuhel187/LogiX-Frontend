@@ -30,8 +30,14 @@ export function ResourceFilters({
 }: ResourceFiltersProps) {
   const { t } = useTranslation();
   const [draft, setDraft] = useState(q);
+  const [syncedQ, setSyncedQ] = useState(q);
 
-  useEffect(() => setDraft(q), [q]);
+  // Adjusting state during render is React's documented way to follow a prop
+  // without an effect; an effect here would cause a cascading render.
+  if (q !== syncedQ) {
+    setSyncedQ(q);
+    setDraft(q);
+  }
 
   // Debounced so typing does not fire a request per keystroke.
   useEffect(() => {
