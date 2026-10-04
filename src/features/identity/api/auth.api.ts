@@ -17,36 +17,24 @@ import {
   type UserSession,
   type OrgMember,
 } from "../schemas/auth.schema";
+import {
+  authFetch,
+  handleResponse,
+  registerSessionHandlers,
+  setStoredAccessToken,
+} from "@/lib/api";
+import { apiBaseUrl } from "@/lib/config";
 
-export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
+export {
+  authFetch,
+  getStoredAccessToken,
+  requestNewAccessToken,
+  setStoredAccessToken,
+  type AuthFetchOptions,
+  handleResponse,
+} from "@/lib/api";
 
-const ACCESS_TOKEN_KEY = "logix_access_token";
-
-// =======================================================
-// TOKEN STORAGE & CALLBACKS
-// =======================================================
-export function getStoredAccessToken(): string | null {
-  if (typeof window === "undefined") return null;
-  try {
-    return sessionStorage.getItem(ACCESS_TOKEN_KEY);
-  } catch {
-    return null;
-  }
-}
-
-export function setStoredAccessToken(token: string | null): void {
-  if (typeof window === "undefined") return;
-  try {
-    if (token) {
-      sessionStorage.setItem(ACCESS_TOKEN_KEY, token);
-    } else {
-      sessionStorage.removeItem(ACCESS_TOKEN_KEY);
-    }
-  } catch {
-    // Ignore storage errors
-  }
-}
+export const API_BASE_URL = apiBaseUrl;
 
 type OnTokenRefreshedCallback = (token: string, data: AuthResponse) => void;
 type OnSessionExpiredCallback = () => void;
@@ -67,135 +55,44 @@ export function registerAuthCallbacks(callbacks: {
 }
 
 // =======================================================
-// RESPONSE HANDLER
+// SESSION REFRESH (domain implementation injected into the transport)
 // =======================================================
-export async function handleResponse<T>(response: Response): Promise<T> {
-  const data = await response.json().catch(() => ({}));
+registerSessionHandlers({
+  refreshSession: async () => {
+    const res = await refreshApi();
+    const newToken = res.accessToken;
+    setStoredAccessToken(newToken);
 
-  if (!response.ok) {
-    const message =
-      data.message ||
-      (Array.isArray(data.message) ? data.message.join(", ") : null) ||
-      "Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau.";
-    throw new Error(message);
-  }
+    let activeTenantData = res.activeTenant;
+    let tenantListData = res.tenants;
 
-  return data as T;
-}
-
-// =======================================================
-// SINGLE-FLIGHT REFRESH QUEUE & MUTEX
-// =======================================================
-let refreshPromise: Promise<string> | null = null;
-
-export async function requestNewAccessToken(): Promise<string> {
-  if (refreshPromise) {
-    return refreshPromise;
-  }
-
-  refreshPromise = (async () => {
-    try {
-      const res = await refreshApi();
-      const newToken = res.accessToken;
-      setStoredAccessToken(newToken);
-
-      let activeTenantData = res.activeTenant;
-      let tenantListData = res.tenants;
-
-      if (!activeTenantData || !tenantListData || tenantListData.length === 0) {
-        try {
-          const profile = await getProfileApi(newToken);
-          activeTenantData = profile.activeTenant || activeTenantData;
-          tenantListData = profile.tenants || tenantListData;
-        } catch {
-          // Ignore profile fetch failure
-        }
+    if (!activeTenantData || !tenantListData || tenantListData.length === 0) {
+      try {
+        const profile = await getProfileApi(newToken);
+        activeTenantData = profile.activeTenant || activeTenantData;
+        tenantListData = profile.tenants || tenantListData;
+      } catch {
+        // Ignore profile fetch failure
       }
-
-      const fullAuthResponse: AuthResponse = {
-        ...res,
-        activeTenant: activeTenantData,
-        tenants: tenantListData,
-      };
-
-      if (onTokenRefreshedCallback) {
-        onTokenRefreshedCallback(newToken, fullAuthResponse);
-      }
-      return newToken;
-    } catch (err) {
-      setStoredAccessToken(null);
-      if (onSessionExpiredCallback) {
-        onSessionExpiredCallback();
-      }
-      throw err;
-    } finally {
-      refreshPromise = null;
     }
-  })();
 
-  return refreshPromise;
-}
+    const fullAuthResponse: AuthResponse = {
+      ...res,
+      activeTenant: activeTenantData,
+      tenants: tenantListData,
+    };
 
-// =======================================================
-// AUTO-REFRESH FETCH INTERCEPTOR (401 RETRY)
-// =======================================================
-export interface AuthFetchOptions extends RequestInit {
-  accessToken?: string;
-  skipAuthRefresh?: boolean;
-}
-
-export async function authFetch(
-  url: string,
-  options: AuthFetchOptions = {}
-): Promise<Response> {
-  const {
-    accessToken: explicitToken,
-    skipAuthRefresh = false,
-    headers: initialHeaders,
-    ...restOptions
-  } = options;
-
-  const buildHeaders = (token: string | null) => {
-    const headers = new Headers(initialHeaders || {});
-    if (!headers.has("Content-Type") && !(restOptions.body instanceof FormData)) {
-      headers.set("Content-Type", "application/json");
+    if (onTokenRefreshedCallback) {
+      onTokenRefreshedCallback(newToken, fullAuthResponse);
     }
-    const resolvedToken = token || explicitToken || getStoredAccessToken();
-    if (resolvedToken) {
-      headers.set("Authorization", `Bearer ${resolvedToken}`);
+    return newToken;
+  },
+  onSessionExpired: () => {
+    if (onSessionExpiredCallback) {
+      onSessionExpiredCallback();
     }
-    return headers;
-  };
-
-  const initialToken = explicitToken || getStoredAccessToken();
-  const headers = buildHeaders(initialToken);
-
-  let response = await fetch(url, {
-    ...restOptions,
-    headers,
-    credentials: "include",
-  });
-
-  // Tự động bắt mã lỗi 401 để làm mới token và gọi lại request cũ
-  if (response.status === 401 && !skipAuthRefresh) {
-    try {
-      const newToken = await requestNewAccessToken();
-
-      // Gửi lại request cũ với access token mới
-      const retryHeaders = buildHeaders(newToken);
-      response = await fetch(url, {
-        ...restOptions,
-        headers: retryHeaders,
-        credentials: "include",
-      });
-    } catch {
-      // Nếu refresh token đã hết hạn hoàn toàn, trả về response 401 ban đầu
-      return response;
-    }
-  }
-
-  return response;
-}
+  },
+});
 
 // =======================================================
 // AUTH ENDPOINTS
