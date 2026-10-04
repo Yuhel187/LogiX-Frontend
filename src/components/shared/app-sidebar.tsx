@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Boxes,
   LayoutDashboard,
   Package,
   Settings,
@@ -75,6 +76,16 @@ export function AppSidebar() {
           title: t("masterData.vehicle.title"),
           href: "/master-data/vehicles",
           icon: Truck,
+        },
+      ],
+    },
+    {
+      label: t("inventory.navGroup"),
+      items: [
+        {
+          title: t("inventory.navTitle"),
+          href: "/inventory",
+          icon: Boxes,
         },
       ],
     },
