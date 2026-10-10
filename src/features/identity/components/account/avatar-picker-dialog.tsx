@@ -23,6 +23,46 @@ const PRESET_AVATARS = [
   "https://api.dicebear.com/9.x/lorelei/svg?seed=Maya",
 ];
 
+const MAX_SOURCE_FILE_BYTES = 2 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
+// Avatars are stored inline as data URLs, so they are downscaled to stay well under the API body limit.
+const AVATAR_OUTPUT_SIZE_PX = 256;
+const AVATAR_OUTPUT_TYPE = "image/webp";
+const AVATAR_OUTPUT_QUALITY = 0.85;
+
+function loadImage(file: File): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const image = new Image();
+    image.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(image);
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("IMAGE_DECODE_FAILED"));
+    };
+    image.src = objectUrl;
+  });
+}
+
+async function toAvatarDataUrl(file: File): Promise<string> {
+  const image = await loadImage(file);
+  const side = Math.min(image.naturalWidth, image.naturalHeight);
+  const targetSize = Math.min(side, AVATAR_OUTPUT_SIZE_PX);
+  const canvas = document.createElement("canvas");
+  canvas.width = targetSize;
+  canvas.height = targetSize;
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("CANVAS_UNAVAILABLE");
+
+  // Center-crop to a square before scaling.
+  const sourceX = (image.naturalWidth - side) / 2;
+  const sourceY = (image.naturalHeight - side) / 2;
+  context.drawImage(image, sourceX, sourceY, side, side, 0, 0, targetSize, targetSize);
+  return canvas.toDataURL(AVATAR_OUTPUT_TYPE, AVATAR_OUTPUT_QUALITY);
+}
+
 interface AvatarPickerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -49,30 +89,28 @@ export function AvatarPickerDialog({
     onOpenChange(newOpen);
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setUploadError(null);
     const file = e.target.files?.[0];
+    // Reset so selecting the same file again still triggers onChange.
+    e.target.value = "";
     if (!file) return;
 
-    // Validate size < 2MB
-    if (file.size > 2 * 1024 * 1024) {
-      setUploadError(t("account.profile.fileSizeLimit"));
-      return;
-    }
-
-    // Validate type
-    if (!file.type.startsWith("image/")) {
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
       setUploadError(t("account.profile.fileTypeInvalid"));
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        setSelectedUrl(reader.result);
-      }
-    };
-    reader.readAsDataURL(file);
+    if (file.size > MAX_SOURCE_FILE_BYTES) {
+      setUploadError(t("account.profile.fileSizeLimit"));
+      return;
+    }
+
+    try {
+      setSelectedUrl(await toAvatarDataUrl(file));
+    } catch {
+      setUploadError(t("account.profile.fileProcessFailed"));
+    }
   };
 
   const handleConfirm = () => {
@@ -159,7 +197,7 @@ export function AvatarPickerDialog({
               type="file"
               ref={fileInputRef}
               onChange={handleFileUpload}
-              accept="image/png, image/jpeg, image/webp"
+              accept={ALLOWED_IMAGE_TYPES.join(",")}
               className="hidden"
             />
             <Button

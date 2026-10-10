@@ -418,11 +418,13 @@
       "chooseAvatarDialogDesc": "Choose a preset avatar or upload an image from your computer.",
       "fileSizeLimit": "Image size must be smaller than 2MB.",
       "fileTypeInvalid": "Please select a valid image file (PNG, JPG, WebP).",
+      "fileProcessFailed": "Unable to process the selected image. Please try another image.",
       "customDeviceAvatar": "Custom image from device",
       "presetSelected": "Preset avatar selected",
       "noAvatar": "No avatar selected",
       "nameMinLengthError": "Display name must be at least 2 characters.",
-      "updateFailed": "An error occurred while updating profile information."
+      "updateFailed": "An error occurred while updating profile information.",
+      "payloadTooLarge": "The avatar image is too large for the server to accept. Please choose a smaller image or use a preset avatar."
     },
     "security": {
       "title": "Change Password",
