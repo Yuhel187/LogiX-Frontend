@@ -51,7 +51,7 @@ export default function WorkspaceError({
           </Button>
 
           <Button asChild className="flex-1 min-w-32 gap-2">
-            <Link href="/dashboard">
+            <Link href="/">
               <Home className="h-4 w-4" />
               <span>Về Trang chủ</span>
             </Link>

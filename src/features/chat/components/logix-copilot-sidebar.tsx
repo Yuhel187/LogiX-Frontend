@@ -20,7 +20,7 @@ export function LogixCopilotSidebar({
   agentId = "default",
   width = DEFAULT_SIDEBAR_WIDTH,
 }: LogixCopilotSidebarProps) {
-  const { t, locale } = useTranslation();
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = React.useState(false);
   const [threadId, setThreadId] = React.useState("");
 
@@ -115,7 +115,8 @@ export function LogixCopilotSidebar({
     <CopilotSidebar
       agentId={agentId}
       threadId={threadId}
-      key={`${threadId}:${locale}`}
+      // Do not key on locale: remounting re-runs CopilotKit's body-margin effect and corrupts the layout. Labels update reactively.
+      key={threadId}
       defaultOpen={defaultOpen}
       width={isExpanded ? "100vw" : width}
       header={{

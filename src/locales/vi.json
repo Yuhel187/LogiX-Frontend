@@ -12,7 +12,8 @@
     "loading": "Đang tải",
     "noData": "Không có dữ liệu",
     "online": "Trực tuyến",
-    "offline": "Ngoại tuyến"
+    "offline": "Ngoại tuyến",
+    "error": "?? x?y ra l?i. Vui l?ng th? l?i."
   },
   "masterData": {
     "navTitle": "Dữ liệu nền",
@@ -254,6 +255,19 @@
     "isDefaultButton": "Đang là mặc định",
     "dangerZoneWarning": "Xóa tổ chức sẽ xóa vĩnh viễn tất cả dữ liệu, và thành viên liên quan. Hành động này không thể hoàn tác.",
     "leaveOrg": "Rời Tổ chức",
+    "leaveOrgNotice": "Bạn sẽ mất quyền truy cập vào tổ chức này. Dữ liệu nghiệp vụ của tổ chức vẫn được giữ nguyên.",
+    "leaveOrgBlockedOwner": "Chủ sở hữu không thể rời tổ chức. Hãy chuyển quyền sở hữu hoặc xóa tổ chức.",
+    "leaveOrgBlockedDefault": "Không thể rời tổ chức mặc định. Hãy đặt tổ chức khác làm mặc định trước.",
+    "leaveOrgBlockedOnlyOrg": "Đây là tổ chức duy nhất của bạn. Hãy tạo hoặc tham gia tổ chức khác trước.",
+    "leaveOrgDialogTitle": "Xác nhận rời tổ chức",
+    "leaveOrgDialogDesc": "Bạn có chắc chắn muốn rời khỏi tổ chức \"{name}\"?",
+    "leaveOrgConsequenceAccess": "Toàn bộ vai trò, quyền hạn và phiên đăng nhập trong tổ chức này sẽ bị thu hồi ngay.",
+    "leaveOrgConsequenceData": "Dữ liệu bạn đã tạo vẫn thuộc về tổ chức và không bị xóa.",
+    "leaveOrgConsequenceRejoin": "Bạn chỉ có thể quay lại khi được quản trị viên mời lại.",
+    "leaveOrgConfirmButton": "Xác nhận rời",
+    "leavingOrg": "Đang rời...",
+    "leaveOrgSuccess": "Bạn đã rời khỏi tổ chức \"{name}\".",
+    "leaveOrgError": "Không thể rời tổ chức. Vui lòng thử lại.",
     "deleteOrg": "Xóa tổ chức",
     "deleteOrgNotice": "Vô hiệu hóa tổ chức này vĩnh viễn cùng toàn bộ dữ liệu liên quan.",
     "deleteOrgRequirements": "Lưu ý: Cần khai trừ các thành viên khác trước khi xóa.",
@@ -536,6 +550,8 @@
       "sendSuccess": "Đã tạo và gửi lời mời thành công đến {email}",
       "copyLink": "Sao chép liên kết mời",
       "copied": "Đã sao chép liên kết mời vào bộ nhớ tạm!",
+      "invitedBy": "Ng??i m?i",
+      "actions": "Thao t?c l?i m?i",
       "table": {
         "email": "Email người nhận",
         "roles": "Vai trò chỉ định trước",
@@ -543,7 +559,8 @@
         "status": "Trạng thái",
         "expiresAt": "Thời hạn",
         "createdAt": "Ngày gửi",
-        "actions": "Thao tác"
+        "actions": "Thao tác",
+        "revoke": "Thu h?i l?i m?i"
       },
       "status": {
         "pending": "Chờ kích hoạt",

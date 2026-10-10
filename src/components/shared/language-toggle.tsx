@@ -17,7 +17,8 @@ export function LanguageToggle() {
   const { locale, setLocale, locales, t } = useTranslation();
 
   return (
-    <DropdownMenu>
+    // Non-modal: the modal scroll-lock rewrites body margin-right, which conflicts with the Copilot sidebar's body margin.
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"

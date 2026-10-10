@@ -29,15 +29,13 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "@/lib/i18n";
-import {
-  getPublicInvitationPreviewApi,
-  acceptPublicInvitationApi,
-} from "../api/invitations.api";
-import { setStoredAccessToken } from "../api/auth.api";
+import { useAuth } from "@/lib/auth";
+import { getPublicInvitationPreviewApi } from "../api/invitations.api";
 import type { InvitationPreview } from "../schemas/invitation.schema";
 
 export function InviteScreenContent() {
   const { t } = useTranslation();
+  const { acceptInvitation } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") || "";
@@ -124,22 +122,19 @@ export function InviteScreenContent() {
 
     setIsSubmitting(true);
     try {
-      const res = await acceptPublicInvitationApi(token, {
+      const res = await acceptInvitation(token, {
         displayName: displayName.trim() || undefined,
         password: password || undefined,
       });
 
-      setStoredAccessToken(res.accessToken);
       toast.success(
         t("iam.invitations.publicPage.successMessage", {
-          tenantName: preview?.tenant.name || "tổ chức",
+          tenantName: res.activeTenant?.name || preview?.tenant.name || "",
         })
       );
 
-      // Chuyển hướng sang trang chính sau khi lưu token
-      setTimeout(() => {
-        router.push("/");
-      }, 600);
+      // Phiên mới đã gắn với tổ chức vừa tham gia và được nạp vào AuthProvider
+      router.replace("/");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Chấp nhận lời mời thất bại";
       toast.error(msg);

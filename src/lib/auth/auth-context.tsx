@@ -15,6 +15,7 @@ import {
   updateOrganizationApi,
   setDefaultTenantApi,
   deleteOrganizationApi,
+  leaveOrganizationApi,
   updateProfileApi,
   changePasswordApi,
   getStoredAccessToken,
@@ -22,6 +23,8 @@ import {
   registerAuthCallbacks,
   requestNewAccessToken,
 } from "@/features/identity/api/auth.api";
+import { acceptPublicInvitationApi } from "@/features/identity/api/invitations.api";
+import type { AcceptInvitationFormValues } from "@/features/identity/schemas/invitation.schema";
 import type {
   AuthUser,
   ActiveTenant,
@@ -67,6 +70,11 @@ interface AuthContextType {
   updateOrganization: (tenantId: string, data: UpdateOrganizationData) => Promise<void>;
   setDefaultTenant: (tenantId: string) => Promise<void>;
   deleteOrganization: (tenantId: string) => Promise<{ message: string }>;
+  leaveOrganization: (tenantId: string) => Promise<{ tenantId: string; message: string }>;
+  acceptInvitation: (
+    token: string,
+    dto: AcceptInvitationFormValues
+  ) => Promise<{ activeTenant: ActiveTenant | null; message: string }>;
   updateProfile: (data: UpdateProfileData) => Promise<void>;
   changePassword: (data: ChangePasswordData) => Promise<{ message: string; revokedOthersCount?: number }>;
   updateCurrentUser: (partial: Partial<AuthUser>) => void;
@@ -461,6 +469,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return res;
   };
 
+  // Leave organization action (self-service, non-owner, non-default tenant)
+  const leaveOrganization = async (tenantId: string) => {
+    if (!accessToken) throw new Error("Chưa đăng nhập");
+
+    const remainingTenants = tenants.filter((t) => t.id !== tenantId);
+    const leavingActive = activeTenant?.id === tenantId;
+    const nextTenant = remainingTenants.find((t) => t.isDefault) || remainingTenants[0];
+
+    // Switch away first: the leave call revokes sessions bound to this tenant,
+    // so the current refresh token would become unusable afterwards.
+    if (leavingActive && nextTenant) {
+      await switchTenant(nextTenant.id);
+    }
+
+    const tokenForLeave = leavingActive ? getStoredAccessToken() || accessToken : accessToken;
+    const res = await leaveOrganizationApi(tenantId, tokenForLeave);
+    setTenants((prev) => prev.filter((t) => t.id !== tenantId));
+
+    return res;
+  };
+
+  // Accept invitation: the returned session is bound to the joined tenant, so make it active immediately
+  const acceptInvitation = async (token: string, dto: AcceptInvitationFormValues) => {
+    const res = await acceptPublicInvitationApi(token, dto);
+    const tenantList = await getTenantsApi(res.accessToken)
+      .catch(async () => (await getProfileApi(res.accessToken)).tenants)
+      .catch(() => [] as TenantListItem[]);
+
+    applyAuthData(res.accessToken, res.user, res.activeTenant, tenantList);
+    return { activeTenant: res.activeTenant, message: res.message };
+  };
+
   // Update profile action
   const updateProfile = async (data: UpdateProfileData) => {
     if (!accessToken) return;
@@ -515,6 +555,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         updateOrganization,
         setDefaultTenant,
         deleteOrganization,
+        leaveOrganization,
+        acceptInvitation,
         updateProfile,
         changePassword,
         updateCurrentUser,

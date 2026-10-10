@@ -78,9 +78,55 @@ export const createOrganizationSchema = z.object({
   setAsDefault: z.boolean().optional(),
 });
 
+const optionalLegalText = (max: number, message: string) =>
+  z.string().max(max, message).nullable().optional();
+
+/** Blank strings / null clear a field; addressLine and province must be set together. */
+export const legalProfileSchema = z.object({
+  legalName: optionalLegalText(255, "Tên pháp lý tối đa 255 ký tự"),
+  taxCode: optionalLegalText(50, "Mã số thuế tối đa 50 ký tự"),
+  phone: optionalLegalText(30, "Số điện thoại tối đa 30 ký tự"),
+  addressLine: optionalLegalText(500, "Địa chỉ tối đa 500 ký tự"),
+  ward: optionalLegalText(100, "Phường/xã tối đa 100 ký tự"),
+  district: optionalLegalText(100, "Quận/huyện tối đa 100 ký tự"),
+  province: optionalLegalText(100, "Tỉnh/thành phố tối đa 100 ký tự"),
+  postalCode: optionalLegalText(20, "Mã bưu chính tối đa 20 ký tự"),
+});
+
+export const legalProfileFormSchema = legalProfileSchema.superRefine((data, ctx) => {
+  const hasAddress = !!data.addressLine?.trim();
+  const hasProvince = !!data.province?.trim();
+  if (hasAddress && !hasProvince) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["province"],
+      message: "Vui lòng nhập tỉnh/thành phố cho địa chỉ pháp lý",
+    });
+  }
+  if (hasProvince && !hasAddress) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["addressLine"],
+      message: "Vui lòng nhập địa chỉ chi tiết cho địa chỉ pháp lý",
+    });
+  }
+});
+
 export const updateOrganizationSchema = z.object({
   name: z.string().min(2, "Tên tổ chức phải có ít nhất 2 ký tự").optional(),
   logoUrl: z.string().optional(),
+  ...legalProfileSchema.shape,
+});
+
+export const legalProfileViewSchema = z.object({
+  legalName: z.string().nullable(),
+  taxCode: z.string().nullable(),
+  phone: z.string().nullable(),
+  addressLine: z.string().nullable(),
+  ward: z.string().nullable(),
+  district: z.string().nullable(),
+  province: z.string().nullable(),
+  postalCode: z.string().nullable(),
 });
 
 export const organizationDetailSchema = z.object({
@@ -90,6 +136,7 @@ export const organizationDetailSchema = z.object({
   logoUrl: z.string().nullable().optional(),
   status: z.string().optional(),
   settings: z.record(z.string(), z.any()).optional().default({}),
+  legalProfile: legalProfileViewSchema,
   role: z.string(),
   isDefault: z.boolean(),
   createdAt: z.string().optional(),
@@ -156,6 +203,8 @@ export type SwitchTenantData = z.infer<typeof switchTenantSchema>;
 export type CreateOrganizationData = z.infer<typeof createOrganizationSchema>;
 export type UpdateOrganizationData = z.infer<typeof updateOrganizationSchema>;
 export type OrganizationDetail = z.infer<typeof organizationDetailSchema>;
+export type LegalProfile = z.infer<typeof legalProfileViewSchema>;
+export type LegalProfileFormData = z.infer<typeof legalProfileFormSchema>;
 export type UpdateProfileData = z.infer<typeof updateProfileSchema>;
 export type ChangePasswordData = z.infer<typeof changePasswordSchema>;
 export type UserSession = z.infer<typeof userSessionSchema>;

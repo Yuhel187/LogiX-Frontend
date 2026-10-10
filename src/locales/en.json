@@ -12,7 +12,8 @@
     "loading": "Loading",
     "noData": "No data available",
     "online": "Online",
-    "offline": "Offline"
+    "offline": "Offline",
+    "error": "Something went wrong. Please try again."
   },
   "masterData": {
     "navTitle": "Master data",
@@ -254,6 +255,19 @@
     "isDefaultButton": "Currently Default",
     "dangerZoneWarning": "Deleting the organization will permanently delete all data and related members. This action cannot be undone.",
     "leaveOrg": "Leave Organization",
+    "leaveOrgNotice": "You will lose access to this organization. Its business data remains unchanged.",
+    "leaveOrgBlockedOwner": "The owner cannot leave. Transfer ownership or delete the organization instead.",
+    "leaveOrgBlockedDefault": "You cannot leave your default organization. Set another organization as default first.",
+    "leaveOrgBlockedOnlyOrg": "This is your only organization. Create or join another organization first.",
+    "leaveOrgDialogTitle": "Confirm leaving organization",
+    "leaveOrgDialogDesc": "Are you sure you want to leave \"{name}\"?",
+    "leaveOrgConsequenceAccess": "All your roles, permissions and sessions in this organization will be revoked immediately.",
+    "leaveOrgConsequenceData": "Data you created stays with the organization and is not deleted.",
+    "leaveOrgConsequenceRejoin": "You can only return if an administrator invites you again.",
+    "leaveOrgConfirmButton": "Leave",
+    "leavingOrg": "Leaving...",
+    "leaveOrgSuccess": "You have left \"{name}\".",
+    "leaveOrgError": "Unable to leave the organization. Please try again.",
     "deleteOrg": "Delete Organization",
     "deleteOrgNotice": "Permanently deactivate this organization and all related data.",
     "deleteOrgRequirements": "Note: Other members must be removed before deleting.",
@@ -536,6 +550,8 @@
       "sendSuccess": "Invitation successfully created and sent to {email}",
       "copyLink": "Copy Invite Link",
       "copied": "Invite link copied to clipboard!",
+      "invitedBy": "Invited by",
+      "actions": "Invitation actions",
       "table": {
         "email": "Recipient Email",
         "roles": "Pre-assigned Roles",
@@ -543,7 +559,8 @@
         "status": "Status",
         "expiresAt": "Expires",
         "createdAt": "Sent At",
-        "actions": "Actions"
+        "actions": "Actions",
+        "revoke": "Revoke invitation"
       },
       "status": {
         "pending": "Pending",

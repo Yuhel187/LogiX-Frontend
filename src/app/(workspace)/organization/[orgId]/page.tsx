@@ -15,6 +15,7 @@ import {
   Trash2,
   ShieldAlert,
   Lock,
+  LogOut,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ import { useAuth } from "@/lib/auth/auth-context";
 import { useTranslation } from "@/lib/i18n";
 import { OrgLogo } from "@/components/shared/org-fallback-icon";
 import {
+  LegalProfileForm,
   RoleListView,
   UnifiedMembersView,
 } from "@/features/identity";
@@ -54,13 +56,26 @@ function GeneralSettingsForm({
   tenant: ActiveTenantProps;
   isDefaultTenant: boolean;
 }) {
-  const { updateOrganization, setDefaultTenant, deleteOrganization, isSuperAdmin } = useAuth();
+  const { updateOrganization, setDefaultTenant, deleteOrganization, leaveOrganization, tenants, isSuperAdmin } = useAuth();
   const { t } = useTranslation();
   const router = useRouter();
 
   // Kiểm tra quyền hạn: Tuyệt đối chỉ SUPER ADMIN hoặc OWNER mới có quyền xóa
   const isOwner = tenant.role === "OWNER";
   const canDeleteOrg = isSuperAdmin || isOwner;
+
+  // Quy tắc rời tổ chức (đồng bộ với backend): không phải OWNER, còn tổ chức khác, không phải tổ chức mặc định
+  const hasOtherTenant = tenants.some((item) => item.id !== tenant.id);
+  const leaveBlockedReason = isOwner
+    ? t("tenant.leaveOrgBlockedOwner")
+    : !hasOtherTenant
+      ? t("tenant.leaveOrgBlockedOnlyOrg")
+      : isDefaultTenant
+        ? t("tenant.leaveOrgBlockedDefault")
+        : null;
+
+  const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
+  const [isLeaving, setIsLeaving] = useState(false);
 
   const [name, setName] = useState(tenant.name || "");
   const [logoUrl, setLogoUrl] = useState(tenant.logoUrl || "");
@@ -141,12 +156,29 @@ function GeneralSettingsForm({
       const res = await deleteOrganization(tenant.id);
       toast.success(res?.message || t("tenant.deleteSuccess"));
       setIsDeleteDialogOpen(false);
-      router.push("/dashboard");
+      router.push("/");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : t("tenant.deleteError");
       toast.error(msg);
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleLeaveOrganization = async () => {
+    if (leaveBlockedReason) return;
+
+    try {
+      setIsLeaving(true);
+      const res = await leaveOrganization(tenant.id);
+      toast.success(res?.message || t("tenant.leaveOrgSuccess", { name: tenant.name }));
+      setIsLeaveDialogOpen(false);
+      router.push("/");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : t("tenant.leaveOrgError");
+      toast.error(msg);
+    } finally {
+      setIsLeaving(false);
     }
   };
 
@@ -250,6 +282,8 @@ function GeneralSettingsForm({
         </form>
       </div>
 
+      <LegalProfileForm key={tenant.id} tenantId={tenant.id} role={tenant.role} />
+
       {/* Thiết lập tổ chức mặc định */}
       <div className="pt-6 border-t border-border/60 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div className="space-y-1 max-w-xl">
@@ -288,6 +322,40 @@ function GeneralSettingsForm({
                   {t("tenant.setDefault")}
                 </>
               )}
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Rời tổ chức */}
+      <div className="pt-6 border-t border-border/60 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div className="space-y-1 max-w-xl">
+          <div className="flex items-center gap-2.5">
+            <LogOut className="size-5 text-destructive" />
+            <h3 className="text-base sm:text-lg font-bold text-foreground">
+              {t("tenant.leaveOrg")}
+            </h3>
+          </div>
+          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+            {t("tenant.leaveOrgNotice")}
+          </p>
+        </div>
+
+        <div className="flex justify-end shrink-0">
+          {leaveBlockedReason ? (
+            <div className="inline-flex items-center gap-2 min-h-10 py-2 px-4 rounded-xl bg-muted/50 text-muted-foreground border border-border text-xs sm:text-sm font-medium max-w-sm">
+              <Lock className="size-4 shrink-0 text-muted-foreground" />
+              <span>{leaveBlockedReason}</span>
+            </div>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsLeaveDialogOpen(true)}
+              className="h-10 px-5 rounded-xl text-sm font-semibold cursor-pointer shadow-xs min-w-32 border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
+            >
+              <LogOut className="mr-2 size-4" />
+              {t("tenant.leaveOrg")}
             </Button>
           )}
         </div>
@@ -390,6 +458,60 @@ function GeneralSettingsForm({
                 <>
                   <Trash2 className="size-4" />
                   {t("tenant.deleteConfirmButton")}
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* DIALOG XÁC NHẬN RỜI TỔ CHỨC */}
+      <Dialog open={isLeaveDialogOpen} onOpenChange={(open) => !isLeaving && setIsLeaveDialogOpen(open)}>
+        <DialogContent className="sm:max-w-md rounded-2xl">
+          <DialogHeader className="space-y-2">
+            <div className="size-11 rounded-xl bg-destructive/10 text-destructive flex items-center justify-center border border-destructive/20 mb-1">
+              <LogOut className="size-6" />
+            </div>
+            <DialogTitle className="text-lg font-bold text-foreground">
+              {t("tenant.leaveOrgDialogTitle")}
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground leading-relaxed">
+              {t("tenant.leaveOrgDialogDesc", { name: tenant.name })}
+            </DialogDescription>
+          </DialogHeader>
+
+          <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-muted-foreground leading-relaxed">
+            <li>{t("tenant.leaveOrgConsequenceAccess")}</li>
+            <li>{t("tenant.leaveOrgConsequenceData")}</li>
+            <li>{t("tenant.leaveOrgConsequenceRejoin")}</li>
+          </ul>
+
+          <DialogFooter className="flex-col sm:flex-row gap-2 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsLeaveDialogOpen(false)}
+              disabled={isLeaving}
+              className="h-10 rounded-xl cursor-pointer"
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleLeaveOrganization}
+              disabled={isLeaving}
+              className="h-10 rounded-xl font-semibold gap-2 cursor-pointer shadow-sm"
+            >
+              {isLeaving ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  {t("tenant.leavingOrg")}
+                </>
+              ) : (
+                <>
+                  <LogOut className="size-4" />
+                  {t("tenant.leaveOrgConfirmButton")}
                 </>
               )}
             </Button>
