@@ -12,6 +12,7 @@ export { InvitationListView } from "./components/members/invitation-list-view";
 export { UnifiedMembersView } from "./components/members/unified-members-view";
 export { ManageMemberRolesDialog } from "./components/members/manage-member-roles-dialog";
 export { InviteScreen } from "./components/invite-screen";
+export { LegalProfileForm } from "./components/organization/legal-profile-form";
 
 export * from "./schemas/auth.schema";
 export * from "./schemas/invitation.schema";

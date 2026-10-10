@@ -42,9 +42,15 @@ export const updateCustomerSchema = createCustomerSchema
   .omit({ code: true })
   .partial();
 
+export const CUSTOMER_ADDRESS_TYPES = ["SHIPPING", "BILLING"] as const;
+export const customerAddressTypeSchema = z.enum(CUSTOMER_ADDRESS_TYPES);
+export type CustomerAddressType = (typeof CUSTOMER_ADDRESS_TYPES)[number];
+
+/** The default flag is scoped per address type (one default SHIPPING, one default BILLING). */
 export const customerAddressSchema = z.object({
   id: z.string(),
   customerId: z.string(),
+  addressType: customerAddressTypeSchema,
   label: z.string().nullable(),
   recipientName: z.string(),
   phone: z.string().nullable(),
@@ -53,6 +59,7 @@ export const customerAddressSchema = z.object({
   district: z.string().nullable(),
   province: z.string(),
   postalCode: z.string().nullable(),
+  deliveryNote: z.string().nullable(),
   isDefault: z.boolean(),
   ...geoResponseFields,
   ...auditResponseFields,
@@ -60,7 +67,13 @@ export const customerAddressSchema = z.object({
 
 export const customerAddressListSchema = z.array(customerAddressSchema);
 
+const deliveryNoteField = z
+  .string()
+  .max(500, "Ghi chú giao hàng tối đa 500 ký tự")
+  .optional();
+
 export const createCustomerAddressSchema = z.object({
+  addressType: customerAddressTypeSchema.optional(),
   label: z.string().max(100, "Nhãn tối đa 100 ký tự").optional(),
   recipientName: z
     .string()
@@ -70,11 +83,13 @@ export const createCustomerAddressSchema = z.object({
   ...addressFieldsSchema,
   latitude: optionalLatitude,
   longitude: optionalLongitude,
+  deliveryNote: deliveryNoteField,
   isDefault: z.boolean().optional(),
 });
 
+/** addressType is immutable after creation, so it is not part of the update payload. */
 export const updateCustomerAddressSchema = createCustomerAddressSchema
-  .omit({ isDefault: true })
+  .omit({ isDefault: true, addressType: true })
   .partial();
 
 export type Customer = z.infer<typeof customerSchema>;

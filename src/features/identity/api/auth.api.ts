@@ -11,6 +11,7 @@ import {
   type CreateOrganizationData,
   type UpdateOrganizationData,
   type OrganizationDetail,
+  type LegalProfile,
   type TenantListItem,
   type UpdateProfileData,
   type ChangePasswordData,
@@ -266,7 +267,16 @@ export async function updateOrganizationApi(
   tenantId: string,
   data: UpdateOrganizationData,
   accessToken?: string
-): Promise<{ id: string; code: string; name: string; logoUrl?: string | null; role: string; isDefault: boolean; message: string }> {
+): Promise<{
+  id: string;
+  code: string;
+  name: string;
+  logoUrl?: string | null;
+  legalProfile: LegalProfile;
+  role: string;
+  isDefault: boolean;
+  message: string;
+}> {
   const response = await authFetch(`${API_BASE_URL}/auth/organizations/${tenantId}`, {
     method: "PATCH",
     accessToken,
@@ -343,6 +353,18 @@ export async function deleteOrganizationApi(
 ): Promise<{ message: string }> {
   const response = await authFetch(`${API_BASE_URL}/auth/organizations/${tenantId}`, {
     method: "DELETE",
+    accessToken,
+  });
+
+  return handleResponse(response);
+}
+
+export async function leaveOrganizationApi(
+  tenantId: string,
+  accessToken?: string
+): Promise<{ tenantId: string; message: string }> {
+  const response = await authFetch(`${API_BASE_URL}/auth/organizations/${tenantId}/leave`, {
+    method: "POST",
     accessToken,
   });
 
