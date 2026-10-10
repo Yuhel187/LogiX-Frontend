@@ -418,11 +418,13 @@
       "chooseAvatarDialogDesc": "Chọn một avatar mẫu hoặc tải ảnh từ máy tính của bạn.",
       "fileSizeLimit": "Dung lượng ảnh phải nhỏ hơn 2MB.",
       "fileTypeInvalid": "Vui lòng chọn file hình ảnh hợp lệ (PNG, JPG, WebP).",
+      "fileProcessFailed": "Không thể xử lý ảnh đã chọn. Vui lòng thử ảnh khác.",
       "customDeviceAvatar": "Ảnh tùy chỉnh từ thiết bị",
       "presetSelected": "Ảnh mẫu được chọn",
       "noAvatar": "Chưa có ảnh đại diện",
       "nameMinLengthError": "Tên hiển thị phải có ít nhất 2 ký tự.",
-      "updateFailed": "Đã xảy ra lỗi khi cập nhật thông tin cá nhân."
+      "updateFailed": "Đã xảy ra lỗi khi cập nhật thông tin cá nhân.",
+      "payloadTooLarge": "Ảnh đại diện quá lớn, máy chủ không thể tiếp nhận. Vui lòng chọn ảnh có dung lượng nhỏ hơn hoặc dùng ảnh có sẵn."
     },
     "security": {
       "title": "Đổi mật khẩu",

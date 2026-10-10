@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useAuth } from "@/lib/auth";
 import { useTranslation } from "@/lib/i18n";
+import { isApiError } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,8 +59,11 @@ function ProfileFormInner({ user, activeTenant }: ProfileFormInnerProps) {
 
       setSuccessMessage(t("account.profile.success"));
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : t("account.profile.updateFailed");
-      setErrorMessage(msg);
+      if (isApiError(err) && err.status === 413) {
+        setErrorMessage(t("account.profile.payloadTooLarge"));
+      } else {
+        setErrorMessage(err instanceof Error ? err.message : t("account.profile.updateFailed"));
+      }
     } finally {
       setIsLoading(false);
     }
