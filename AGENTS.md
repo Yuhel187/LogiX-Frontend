@@ -88,6 +88,61 @@ the architecture entrypoint is at
 - Planner UI may submit natural-language requests and display preview/results;
   it must never call an LLM directly to mutate business state.
 
+### Production Code Standards
+
+LogiX is a public repository for a B2B production platform. Every change must
+be safe to deploy as-is.
+
+**No hardcoding**
+
+- Never commit secrets, tokens, API keys, internal hosts/ports, tenant/user
+  IDs, or environment-specific URLs. `.env*.local` stays local; document
+  required variables with placeholders only. `NEXT_PUBLIC_*` values are
+  browser-visible: never put a secret in them.
+- Read environment variables only through a typed config module in
+  `src/lib/config`; components and features must not read `process.env`
+  directly.
+- User-visible copy comes from `src/locales/{vi,en}.json` (both updated in the
+  same change); colors/spacing come from theme tokens; statuses, permission
+  codes, and error codes come from typed constants traceable to the backend
+  contract, not repeated string literals.
+
+**No dangerous fallbacks (fail fast, fail closed)**
+
+- A required configuration value that is missing or invalid must fail the
+  build/startup with a clear error. Never fall back to `http://localhost:...`,
+  a default API host, or a guessed endpoint.
+- Do not mask backend failures: never replace an error with fake/empty data,
+  optimistic success, or a silent `catch {}`. Show the localized error state
+  (mapped from the backend error code) and keep retry explicit.
+- The UI is not a security boundary, but it must not widen access: hide or
+  disable actions when permission/tenant context is unknown, and never infer
+  permissions, tenant, or state transitions client-side when the backend has
+  not provided them.
+- Acceptable `??` defaults are limited to neutral display values (e.g., `—`
+  for an absent optional field, an empty list for an absent optional array).
+
+**Clean code**
+
+- Follow `docs/ARCHITECTURE.md` placement rules; keep pages thin, feature
+  logic in `src/features/<domain>`, raw HTTP in `src/lib/api`.
+- No dead code, unused exports, commented-out blocks, `console.log`, `any`, or
+  non-null assertions without a justified comment. Reuse existing shadcn
+  components, buttons, and patterns before adding new ones.
+
+**Testing**
+
+- Every change must pass `pnpm lint`, `pnpm typecheck`, and `pnpm build`
+  without new warnings, plus a manual check of the affected flow (light/dark,
+  VI/EN, mobile/desktop) when behavior or UI changes. When a project test
+  runner exists, add tests for non-trivial logic (mappers, permission/state
+  helpers, form validation).
+- Verify against the real backend through the API Gateway, including error
+  paths (401/403/validation/network failure), not only the happy path.
+- Temporary test pages, scripts, mock data, and QA accounts must be removed
+  after verification; never commit them. Never weaken or skip existing checks
+  to make a change pass.
+
 ### Validation
 
 For a frontend change, run the narrowest relevant proof and normally finish
