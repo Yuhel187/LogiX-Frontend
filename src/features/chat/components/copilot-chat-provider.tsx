@@ -3,6 +3,7 @@
 import * as React from "react";
 import { CopilotKit } from "@copilotkit/react-core/v2";
 import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/lib/auth";
 
 export interface CopilotChatProviderProps {
   children: React.ReactNode;
@@ -10,7 +11,7 @@ export interface CopilotChatProviderProps {
 
 const isClientSnapshot = () => true;
 const isServerSnapshot = () => false;
-const noopSubscribe = () => () => {};
+const noopSubscribe = () => () => { };
 
 export function CopilotChatProvider({ children }: CopilotChatProviderProps) {
   const { accessToken } = useAuth();
@@ -38,7 +39,12 @@ export function CopilotChatProvider({ children }: CopilotChatProviderProps) {
       headers={headers}
       useSingleEndpoint={false}
     >
-      {children}
-    </CopilotKit>
-  );
+      <CopilotKit
+        runtimeUrl={runtimeUrl}
+        headers={headers}
+        useSingleEndpoint={false}
+      >
+        {children}
+      </CopilotKit>
+      );
 }
