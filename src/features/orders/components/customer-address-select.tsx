@@ -1,13 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ChevronsUpDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import {
   listCustomerAddressesApi,
   type CustomerAddress,
@@ -56,6 +64,7 @@ export function CustomerAddressSelect({
   invalid = false,
 }: CustomerAddressSelectProps) {
   const { t } = useTranslation();
+  const [openCustomerId, setOpenCustomerId] = useState<string | null>(null);
   const [result, setResult] = useState<{
     customerId: string;
     addresses: CustomerAddress[];
@@ -67,6 +76,8 @@ export function CustomerAddressSelect({
     result?.customerId === customerId ? result.addresses : [];
   const loadFailure =
     result?.customerId === customerId ? result.failure : null;
+  const isOpen =
+    openCustomerId === customerId && Boolean(customerId) && !disabled && !isLoading;
   const showCurrent =
     Boolean(value && currentAddressLabel) &&
     !addresses.some((address) => address.id === value);
@@ -96,6 +107,18 @@ export function CustomerAddressSelect({
     };
   }, [customerId]);
 
+  const addressTitle = (address: CustomerAddress) =>
+    `${address.label || address.recipientName}${
+      address.isDefault ? ` · ${t("orders.form.addressDefault")}` : ""
+    }`;
+  const selectedAddress = addresses.find((address) => address.id === value);
+  // The trigger is one line tall; the full address is only shown in the list.
+  const selectedLabel = selectedAddress
+    ? addressTitle(selectedAddress)
+    : showCurrent
+      ? currentAddressLabel
+      : undefined;
+
   const placeholder = !customerId
     ? t("orders.form.addressNeedsCustomer")
     : isLoading
@@ -105,42 +128,76 @@ export function CustomerAddressSelect({
         : t("orders.form.addressPlaceholder");
 
   return (
-    <div className="space-y-1">
-      <Select
-        value={value}
-        onValueChange={onChange}
-        disabled={disabled || !customerId || isLoading}
+    <div className="min-w-0 space-y-1">
+      <Popover
+        modal={false}
+        open={isOpen}
+        onOpenChange={(open) => setOpenCustomerId(open ? customerId : null)}
       >
-        <SelectTrigger
-          id={id}
-          aria-invalid={invalid || undefined}
-          className={cn("w-full", invalid && "border-destructive")}
+        <PopoverTrigger asChild>
+          <Button
+            id={id}
+            type="button"
+            variant="outline"
+            role="combobox"
+            aria-label={t("orders.form.deliveryAddress")}
+            aria-expanded={isOpen}
+            aria-invalid={invalid || undefined}
+            disabled={disabled || !customerId || isLoading}
+            className={cn(
+              "h-8 w-full min-w-0 justify-between gap-2 font-normal",
+              !selectedLabel && "text-muted-foreground",
+              invalid && "border-destructive"
+            )}
+          >
+            <span className="min-w-0 truncate">{selectedLabel || placeholder}</span>
+            <ChevronsUpDown className="size-3.5 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          align="start"
+          sideOffset={4}
+          collisionPadding={16}
+          className="w-(--radix-popover-trigger-width) max-w-[calc(100vw-2rem)] gap-0 overflow-hidden p-0"
         >
-          <SelectValue placeholder={placeholder} />
-        </SelectTrigger>
-        <SelectContent>
-          {showCurrent ? (
-            <SelectItem value={value} disabled>
-              {currentAddressLabel}
-            </SelectItem>
-          ) : null}
-          {addresses.map((address) => (
-            <SelectItem key={address.id} value={address.id}>
-              <span className="flex flex-col text-left">
-                <span className="font-medium">
-                  {address.label || address.recipientName}
-                  {address.isDefault
-                    ? ` · ${t("orders.form.addressDefault")}`
-                    : ""}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {formatAddressLine(address)}
-                </span>
-              </span>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+          <Command>
+            <CommandInput
+              aria-label={t("orders.form.addressSearch")}
+              placeholder={t("orders.form.addressSearch")}
+            />
+            <CommandList className="max-h-[min(18rem,calc(var(--radix-popover-content-available-height)-3.5rem))] overscroll-contain">
+              <CommandEmpty>{t(addresses.length === 0 ? "orders.form.addressEmpty" : "orders.form.addressNoResults")}</CommandEmpty>
+              <CommandGroup>
+                {showCurrent ? (
+                  <CommandItem value={value} disabled>
+                    <span className="min-w-0 whitespace-normal [overflow-wrap:anywhere]">{currentAddressLabel}</span>
+                  </CommandItem>
+                ) : null}
+                {addresses.map((address) => (
+                  <CommandItem
+                    key={address.id}
+                    value={address.id}
+                    keywords={[addressTitle(address), formatAddressLine(address)]}
+                    data-checked={address.id === value}
+                    onSelect={() => {
+                      onChange(address.id);
+                      setOpenCustomerId(null);
+                    }}
+                    className="items-start py-2 [&>svg]:mt-0.5 [&>svg]:shrink-0"
+                  >
+                    <span className="flex min-w-0 flex-1 flex-col gap-0.5 whitespace-normal text-left [overflow-wrap:anywhere]">
+                      <span className="font-medium">{addressTitle(address)}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {formatAddressLine(address)}
+                      </span>
+                    </span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
       {loadFailure ? (
         <p className="text-xs text-destructive">
           {resolveOrderError(loadFailure.cause, t).message}

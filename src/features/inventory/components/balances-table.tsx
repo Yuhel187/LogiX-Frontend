@@ -36,8 +36,10 @@ import {
 } from "@/components/ui/pagination";
 import type { InventoryBalance } from "../schemas/inventory.schema";
 import { formatQuantity } from "../utils/quantity";
-import { getWarehouseApi } from "@/features/master-data/api/warehouses.api";
-import { getProductApi } from "@/features/master-data/api/products.api";
+import { getWarehouseApi, getProductApi } from "@/features/master-data";
+import { useAuth } from "@/lib/auth";
+import { useTranslation } from "@/lib/i18n";
+import { EntityLabel } from "@/components/shared/entity-label";
 
 export interface BalancesTableProps {
   balances: InventoryBalance[];
@@ -85,56 +87,84 @@ export function BalancesTable({
   onSelectThreshold,
   onSelectMovements,
 }: BalancesTableProps) {
-  // Local metadata caches for warehouses and products
-  const [warehouses, setWarehouses] = React.useState<Record<string, WarehouseMeta>>({});
-  const [products, setProducts] = React.useState<Record<string, ProductMeta>>({});
+  const { activeTenant, accessToken } = useAuth();
+  const tenantId = activeTenant?.id;
+  const { t } = useTranslation();
+  const [retry, setRetry] = React.useState(0);
+  const [metadata, setMetadata] = React.useState<{
+    key: string;
+    warehouses: Record<string, WarehouseMeta>;
+    products: Record<string, ProductMeta>;
+    failed: boolean;
+  } | null>(null);
+  const warehouseIds = JSON.stringify(
+    [...new Set(balances.map((item) => item.warehouseId))].sort()
+  );
+  const productIds = JSON.stringify(
+    [...new Set(balances.map((item) => item.productId))].sort()
+  );
+  const metadataKey = JSON.stringify([
+    tenantId,
+    accessToken,
+    warehouseIds,
+    productIds,
+    retry,
+  ]);
+  const current = metadata?.key === metadataKey ? metadata : null;
+  const warehouses = current?.warehouses ?? {};
+  const products = current?.products ?? {};
 
-  // Batch-fetch any unknown warehouse or product IDs
   React.useEffect(() => {
-    if (!balances || balances.length === 0) return;
-
-    const missingWarehouseIds = Array.from(
-      new Set(balances.map((b) => b.warehouseId).filter((id) => !warehouses[id]))
-    );
-    const missingProductIds = Array.from(
-      new Set(balances.map((b) => b.productId).filter((id) => !products[id]))
-    );
-
-    if (missingWarehouseIds.length > 0) {
-      missingWarehouseIds.forEach((id) => {
-        getWarehouseApi(id)
-          .then((w) => {
-            setWarehouses((prev) => ({
-              ...prev,
-              [id]: { code: w.code, name: w.name },
-            }));
-          })
-          .catch(() => {
-            // Ignore error
-          });
+    if (!tenantId || !accessToken) return;
+    let active = true;
+    const warehouseKeys: string[] = JSON.parse(warehouseIds);
+    const productKeys: string[] = JSON.parse(productIds);
+    Promise.all([
+      Promise.allSettled(warehouseKeys.map((id) => getWarehouseApi(id))),
+      Promise.allSettled(productKeys.map((id) => getProductApi(id))),
+    ]).then(([warehouseResults, productResults]) => {
+      if (!active) return;
+      const warehouses: Record<string, WarehouseMeta> = {};
+      const products: Record<string, ProductMeta> = {};
+      for (const result of warehouseResults)
+        if (result.status === "fulfilled")
+          warehouses[result.value.id] = result.value;
+      for (const result of productResults)
+        if (result.status === "fulfilled")
+          products[result.value.id] = result.value;
+      setMetadata({
+        key: metadataKey,
+        warehouses,
+        products,
+        failed: [...warehouseResults, ...productResults].some(
+          (result) => result.status === "rejected"
+        ),
       });
-    }
-
-    if (missingProductIds.length > 0) {
-      missingProductIds.forEach((id) => {
-        getProductApi(id)
-          .then((p) => {
-            setProducts((prev) => ({
-              ...prev,
-              [id]: { sku: p.sku, name: p.name, baseUnit: p.baseUnit },
-            }));
-          })
-          .catch(() => {
-            // Ignore error
-          });
-      });
-    }
-  }, [balances, warehouses, products]);
+    });
+    return () => {
+      active = false;
+    };
+  }, [metadataKey, warehouseIds, productIds, tenantId, accessToken]);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
     <div className="space-y-4">
+      {current?.failed ? (
+        <div
+          role="alert"
+          className="flex flex-wrap items-center gap-2 text-xs text-destructive"
+        >
+          {t("displayLabels.metadataLoadError")}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setRetry((value) => value + 1)}
+          >
+            {t("displayLabels.retry")}
+          </Button>
+        </div>
+      ) : null}
       <div className="rounded-lg border">
         <Table>
           <TableHeader>
@@ -143,10 +173,14 @@ export function BalancesTable({
               <TableHead className="min-w-[200px]">Sản phẩm</TableHead>
               <TableHead className="text-right">Tồn thực tế</TableHead>
               <TableHead className="text-right">Đang giữ</TableHead>
-              <TableHead className="text-right font-semibold text-foreground">Khả dụng</TableHead>
+              <TableHead className="text-right font-semibold text-foreground">
+                Khả dụng
+              </TableHead>
               <TableHead className="text-right">Ngưỡng tối thiểu</TableHead>
               <TableHead className="text-center w-32">Trạng thái tồn</TableHead>
-              <TableHead className="text-right min-w-[130px]">Cập nhật lúc</TableHead>
+              <TableHead className="text-right min-w-[130px]">
+                Cập nhật lúc
+              </TableHead>
               <TableHead className="w-12 text-center" />
             </TableRow>
           </TableHeader>
@@ -154,15 +188,33 @@ export function BalancesTable({
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-44" /></TableCell>
-                  <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
-                  <TableCell className="text-right"><Skeleton className="h-4 w-12 ml-auto" /></TableCell>
-                  <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
-                  <TableCell className="text-right"><Skeleton className="h-4 w-12 ml-auto" /></TableCell>
-                  <TableCell className="text-center"><Skeleton className="h-5 w-20 mx-auto" /></TableCell>
-                  <TableCell className="text-right"><Skeleton className="h-4 w-28 ml-auto" /></TableCell>
-                  <TableCell><Skeleton className="size-6 mx-auto rounded-md" /></TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-32" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-44" />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Skeleton className="h-4 w-16 ml-auto" />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Skeleton className="h-4 w-12 ml-auto" />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Skeleton className="h-4 w-16 ml-auto" />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Skeleton className="h-4 w-12 ml-auto" />
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Skeleton className="h-5 w-20 mx-auto" />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Skeleton className="h-4 w-28 ml-auto" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="size-6 mx-auto rounded-md" />
+                  </TableCell>
                 </TableRow>
               ))
             ) : balances.length === 0 ? (
@@ -181,50 +233,44 @@ export function BalancesTable({
 
                 const warehouseLabel = wh
                   ? `[${wh.code}] ${wh.name}`
-                  : `Kho: ${b.warehouseId.slice(0, 8)}…`;
+                  : t("displayLabels.unavailable");
                 const productLabel = prod
                   ? `[${prod.sku}] ${prod.name}`
-                  : `SP: ${b.productId.slice(0, 8)}…`;
+                  : t("displayLabels.unavailable");
 
                 return (
                   <TableRow key={b.id}>
                     {/* Warehouse */}
                     <TableCell>
-                      {wh ? (
-                        <div className="flex flex-col gap-0.5">
-                          <span className="font-medium text-xs text-foreground">
-                            {wh.name}
-                          </span>
-                          <span className="font-mono text-[10px] text-muted-foreground">
-                            {wh.code}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="font-mono text-xs text-muted-foreground">
-                          {b.warehouseId.slice(0, 8)}…
-                        </span>
-                      )}
+                      <EntityLabel
+                        id={b.warehouseId}
+                        name={wh?.name}
+                        code={wh?.code}
+                        fallback={t(
+                          current
+                            ? "displayLabels.unavailable"
+                            : "displayLabels.loading"
+                        )}
+                      />
                     </TableCell>
 
                     {/* Product */}
                     <TableCell>
+                      <EntityLabel
+                        id={b.productId}
+                        name={prod?.name}
+                        code={prod?.sku}
+                        fallback={t(
+                          current
+                            ? "displayLabels.unavailable"
+                            : "displayLabels.loading"
+                        )}
+                      />
                       {prod ? (
-                        <div className="flex flex-col gap-0.5">
-                          <span className="font-medium text-xs text-foreground">
-                            {prod.name}
-                          </span>
-                          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                            <span className="font-mono bg-muted px-1 rounded">
-                              {prod.sku}
-                            </span>
-                            <span>• ĐVT: {prod.baseUnit}</span>
-                          </div>
-                        </div>
-                      ) : (
-                        <span className="font-mono text-xs text-muted-foreground">
-                          {b.productId.slice(0, 8)}…
+                        <span className="text-xs text-muted-foreground">
+                          {prod.baseUnit}
                         </span>
-                      )}
+                      ) : null}
                     </TableCell>
 
                     {/* On-hand */}
@@ -278,9 +324,10 @@ export function BalancesTable({
 
                     {/* Actions */}
                     <TableCell className="text-center">
-                      <DropdownMenu>
+                      <DropdownMenu modal={false}>
                         <DropdownMenuTrigger asChild>
                           <Button
+                            type="button"
                             variant="ghost"
                             size="icon"
                             className="size-7 text-muted-foreground hover:text-foreground"
@@ -289,9 +336,13 @@ export function BalancesTable({
                             <span className="sr-only">Thao tác</span>
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48 text-xs">
+                        <DropdownMenuContent
+                          align="end"
+                          collisionPadding={16}
+                          className="w-48 max-w-[calc(100vw-2rem)] text-xs"
+                        >
                           <DropdownMenuItem
-                            onClick={() =>
+                            onSelect={() =>
                               onSelectMovements(b, warehouseLabel, productLabel)
                             }
                             className="cursor-pointer gap-2"
@@ -301,7 +352,7 @@ export function BalancesTable({
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
-                            onClick={() =>
+                            onSelect={() =>
                               onSelectAdjust(b, warehouseLabel, productLabel)
                             }
                             className="cursor-pointer gap-2"
@@ -310,7 +361,7 @@ export function BalancesTable({
                             <span>Điều chỉnh tồn kho</span>
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() =>
+                            onSelect={() =>
                               onSelectThreshold(b, warehouseLabel, productLabel)
                             }
                             className="cursor-pointer gap-2"
@@ -340,13 +391,21 @@ export function BalancesTable({
               <PaginationItem>
                 <PaginationPrevious
                   onClick={() => onPageChange(Math.max(1, page - 1))}
-                  className={page <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  className={
+                    page <= 1
+                      ? "pointer-events-none opacity-50"
+                      : "cursor-pointer"
+                  }
                 />
               </PaginationItem>
               <PaginationItem>
                 <PaginationNext
                   onClick={() => onPageChange(Math.min(totalPages, page + 1))}
-                  className={page >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  className={
+                    page >= totalPages
+                      ? "pointer-events-none opacity-50"
+                      : "cursor-pointer"
+                  }
                 />
               </PaginationItem>
             </PaginationContent>

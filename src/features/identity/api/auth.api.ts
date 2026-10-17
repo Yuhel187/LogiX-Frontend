@@ -1,5 +1,6 @@
 import {
   authResponseSchema,
+  orgMemberSchema,
   effectivePermissionsSchema,
   type AuthResponse,
   type EffectivePermissions,
@@ -300,17 +301,19 @@ export async function setDefaultTenantApi(
 
 export async function getOrganizationMembersApi(
   tenantId: string,
-  accessToken?: string
+  accessToken?: string,
+  signal?: AbortSignal
 ): Promise<OrgMember[]> {
   const response = await authFetch(
     `${API_BASE_URL}/auth/organizations/${tenantId}/members`,
     {
       method: "GET",
       accessToken,
+      signal,
     }
   );
 
-  return handleResponse(response);
+  return orgMemberSchema.array().parse(await handleResponse<unknown>(response));
 }
 
 export async function updateMemberRoleApi(

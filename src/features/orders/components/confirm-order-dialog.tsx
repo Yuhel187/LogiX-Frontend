@@ -11,6 +11,7 @@ import { formatDateTime, formatDecimal } from "@/lib/format";
 import { confirmOrderApi, getConfirmationPreviewApi } from "../api/orders.api";
 import type { ConfirmationPreview, OrderDetail } from "../schemas/order.schema";
 import { resolveOrderError } from "../utils/order-errors";
+import { OrderProductLabel } from "./order-product-label";
 
 interface Props {
   order: OrderDetail;
@@ -84,7 +85,7 @@ export function ConfirmOrderDialog({ order, onClose, onConfirmed, onConflict }: 
                 </TableRow></TableHeader>
                 <TableBody>{preview.lines.map((line) => (
                   <TableRow key={line.productId}>
-                    <TableCell>{order.lines.find((item) => item.productId === line.productId)?.skuSnapshot ?? line.productId}</TableCell>
+                    <TableCell><OrderProductLabel order={order} productId={line.productId} /></TableCell>
                     <TableCell className="text-right">{formatDecimal(line.required, locale)}</TableCell>
                     <TableCell className="text-right">{formatDecimal(line.available, locale)}</TableCell>
                     <TableCell className={line.sufficient ? "text-green-600" : "text-destructive"}>{t(line.sufficient ? "orders.confirm.sufficient" : "orders.confirm.insufficient")}</TableCell>

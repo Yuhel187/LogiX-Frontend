@@ -15,6 +15,9 @@ import { listMovementsApi } from "../api/inventory.api";
 import type { StockMovement } from "../schemas/inventory.schema";
 import { formatQuantity, formatSignedQuantity } from "../utils/quantity";
 import { resolveErrorMessage } from "../utils/error";
+import { useTranslation } from "@/lib/i18n";
+import { ActorDirectory, ActorLabel } from "@/features/identity/client";
+import { MovementReference, useMovementReferences } from "./movement-reference";
 
 export interface MovementHistorySheetProps {
   open: boolean;
@@ -41,6 +44,8 @@ function MovementHistoryContent({
   const [movements, setMovements] = React.useState<StockMovement[]>([]);
   const [page, setPage] = React.useState(1);
   const [total, setTotal] = React.useState(0);
+  const { t } = useTranslation();
+  const references = useMovementReferences(movements);
   const pageSize = 15;
 
   React.useEffect(() => {
@@ -79,15 +84,35 @@ function MovementHistoryContent({
   const renderMovementBadge = (type: StockMovement["movementType"]) => {
     switch (type) {
       case "RECEIPT":
-        return <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">Nhập kho</Badge>;
+        return (
+          <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
+            Nhập kho
+          </Badge>
+        );
       case "ISSUE":
-        return <Badge className="bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/20">Xuất kho</Badge>;
+        return (
+          <Badge className="bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/20">
+            Xuất kho
+          </Badge>
+        );
       case "ADJUSTMENT_IN":
-        return <Badge className="bg-teal-500/15 text-teal-600 dark:text-teal-400 border-teal-500/20">Điều chỉnh (+)</Badge>;
+        return (
+          <Badge className="bg-teal-500/15 text-teal-600 dark:text-teal-400 border-teal-500/20">
+            Điều chỉnh (+)
+          </Badge>
+        );
       case "ADJUSTMENT_OUT":
-        return <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20">Điều chỉnh (−)</Badge>;
+        return (
+          <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20">
+            Điều chỉnh (−)
+          </Badge>
+        );
       case "REVERSAL":
-        return <Badge className="bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/20">Hoàn tác</Badge>;
+        return (
+          <Badge className="bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/20">
+            Hoàn tác
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{type}</Badge>;
     }
@@ -100,16 +125,18 @@ function MovementHistoryContent({
       <SheetHeader className="p-4 border-b">
         <div className="flex items-center gap-2">
           <History className="size-4 text-muted-foreground" />
-          <SheetTitle className="text-sm font-semibold">Lịch sử biến động tồn kho</SheetTitle>
+          <SheetTitle className="text-sm font-semibold">
+            Lịch sử biến động tồn kho
+          </SheetTitle>
         </div>
         <SheetDescription className="text-xs text-muted-foreground">
           {warehouseLabel && productLabel
             ? `${warehouseLabel} • ${productLabel}`
             : warehouseLabel
-            ? `Kho: ${warehouseLabel}`
-            : productLabel
-            ? `Sản phẩm: ${productLabel}`
-            : "Toàn bộ lịch sử biến động trong tổ chức (mới nhất xếp trước)"}
+              ? `Kho: ${warehouseLabel}`
+              : productLabel
+                ? `Sản phẩm: ${productLabel}`
+                : "Toàn bộ lịch sử biến động trong tổ chức (mới nhất xếp trước)"}
         </SheetDescription>
       </SheetHeader>
 
@@ -134,57 +161,72 @@ function MovementHistoryContent({
         )}
 
         {!loading && !error && movements.length > 0 && (
-          <div className="space-y-2.5">
-            {movements.map((m) => {
-              const isPositive = !m.quantityDelta.startsWith("-");
-              return (
-                <div
-                  key={m.id}
-                  className="border rounded-lg p-3 bg-card hover:bg-accent/40 transition-colors text-xs flex flex-col gap-2"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {renderMovementBadge(m.movementType)}
-                      <span className="font-mono text-[11px] text-muted-foreground">
-                        {new Date(m.occurredAt).toLocaleString("vi-VN", {
-                          dateStyle: "short",
-                          timeStyle: "short",
-                        })}
-                      </span>
-                    </div>
-                    <span
-                      className={`font-semibold font-mono text-sm ${
-                        isPositive
-                          ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-amber-600 dark:text-amber-400"
-                      }`}
+          <ActorDirectory
+            actorIds={movements.map((movement) => movement.actorId)}
+          >
+            {(resolve) => (
+              <div className="space-y-2.5">
+                {movements.map((m) => {
+                  const isPositive = !m.quantityDelta.startsWith("-");
+                  return (
+                    <div
+                      key={m.id}
+                      className="border rounded-lg p-3 bg-card hover:bg-accent/40 transition-colors text-xs flex flex-col gap-2"
                     >
-                      {formatSignedQuantity(m.quantityDelta)}
-                    </span>
-                  </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          {renderMovementBadge(m.movementType)}
+                          <span className="font-mono text-[11px] text-muted-foreground">
+                            {new Date(m.occurredAt).toLocaleString("vi-VN", {
+                              dateStyle: "short",
+                              timeStyle: "short",
+                            })}
+                          </span>
+                        </div>
+                        <span
+                          className={`font-semibold font-mono text-sm ${
+                            isPositive
+                              ? "text-emerald-600 dark:text-emerald-400"
+                              : "text-amber-600 dark:text-amber-400"
+                          }`}
+                        >
+                          {formatSignedQuantity(m.quantityDelta)}
+                        </span>
+                      </div>
 
-                  <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/50">
-                    <div className="flex items-center gap-1.5 font-mono">
-                      <span>Tồn: {formatQuantity(m.beforeOnHand)}</span>
-                      <ArrowRight className="size-3 text-muted-foreground" />
-                      <span className="font-semibold text-foreground">
-                        {formatQuantity(m.afterOnHand)}
-                      </span>
-                    </div>
-                    <div className="truncate max-w-[200px]">
-                      Ref: {m.referenceType} ({m.referenceId.slice(0, 8)}…)
-                    </div>
-                  </div>
+                      <div className="min-w-0 space-y-2 text-[11px] text-muted-foreground pt-1 border-t border-border/50">
+                        <div className="flex items-center gap-1.5 font-mono">
+                          <span>Tồn: {formatQuantity(m.beforeOnHand)}</span>
+                          <ArrowRight className="size-3 text-muted-foreground" />
+                          <span className="font-semibold text-foreground">
+                            {formatQuantity(m.afterOnHand)}
+                          </span>
+                        </div>
+                        <MovementReference
+                          movement={m}
+                          reference={references.resolve(m.referenceId)}
+                          retry={references.retry}
+                        />
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {t("displayLabels.actor")}:{" "}
+                        <ActorLabel
+                          actorId={m.actorId}
+                          actor={resolve(m.actorId)}
+                        />
+                      </div>
 
-                  {m.reason && (
-                    <div className="text-[11px] text-muted-foreground bg-muted/50 rounded px-2 py-1 italic">
-                      Lý do: {m.reason}
+                      {m.reason && (
+                        <div className="text-[11px] text-muted-foreground bg-muted/50 rounded px-2 py-1 italic">
+                          Lý do: {m.reason}
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                  );
+                })}
+              </div>
+            )}
+          </ActorDirectory>
         )}
       </div>
 

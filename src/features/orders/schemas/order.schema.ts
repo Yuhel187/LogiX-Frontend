@@ -35,6 +35,8 @@ export const orderSummarySchema = z.object({
   updatedAt: z.string(),
   pendingSince: z.string().nullable(),
   cancellationRequestedAt: z.string().nullable(),
+  dispatchGrantedAt: z.string().nullable(),
+  dispatchShipmentId: z.string().nullable(),
   version: z.number().int(),
 });
 export type OrderSummary = z.infer<typeof orderSummarySchema>;

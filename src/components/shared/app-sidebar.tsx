@@ -25,6 +25,7 @@ import { useTranslation } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
 import { TenantSwitcher } from "@/components/shared/tenant-switcher";
 import { ORDER_PERMISSIONS } from "@/features/orders";
+import { SHIPMENT_PERMISSIONS } from "@/features/shipments";
 
 interface NavItem {
   title: string;
@@ -96,6 +97,12 @@ export function AppSidebar() {
             href: "/orders",
             icon: ClipboardList,
             permission: ORDER_PERMISSIONS.read,
+          },
+          {
+            title: t("shipments.navTitle"),
+            href: "/shipments",
+            icon: Package,
+            permission: SHIPMENT_PERMISSIONS.read,
           },
         ],
       },

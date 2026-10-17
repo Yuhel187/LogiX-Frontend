@@ -1,4 +1,5 @@
 import { isApiError } from "@/lib/api";
+import { orderStatusSchema } from "../schemas/order.schema";
 
 type Translate = (path: string, params?: Record<string, string>) => string;
 
@@ -18,6 +19,9 @@ export const ORDER_ERROR_REASONS = [
   "IDEMPOTENCY_KEY_REUSED",
   "UPSTREAM_UNAVAILABLE",
   "UPSTREAM_REJECTED",
+  "ORDER_DISPATCH_COMMITTED",
+  "ORDER_DISPATCH_REQUEST_CONFLICT",
+  "ORDER_RESERVATION_MISMATCH",
 ] as const;
 
 export type OrderErrorReason = (typeof ORDER_ERROR_REASONS)[number];
@@ -61,8 +65,8 @@ function stringParams(
 
 /**
  * Turns a failed order request into a localized message plus the input it
- * belongs to. Reasons come from `details.reason`; anything unknown keeps the
- * server message so no information is hidden from the user.
+ * belongs to. Reasons and HTTP statuses select local copy; backend-language
+ * messages are not rendered in a different UI locale.
  */
 export function resolveOrderError(
   error: unknown,
@@ -79,9 +83,28 @@ export function resolveOrderError(
 
   const details = error.details ?? {};
   const reason = isOrderErrorReason(details.reason) ? details.reason : null;
-  const message = reason
-    ? t(`orders.errors.${reason}`, stringParams(details))
-    : error.message;
+  const params = stringParams(details);
+  if (reason === "ORDER_INVALID_TRANSITION") {
+    const status = orderStatusSchema.safeParse(details.currentStatus);
+    params.currentStatus = status.success
+      ? t(`orders.status.${status.data}`)
+      : t("orders.errors.currentState");
+  }
+  const statusKey: Record<number, string> = {
+    400: "invalidRequest",
+    401: "unauthorized",
+    403: "forbidden",
+    404: "ORDER_NOT_FOUND",
+    409: "ORDER_VERSION_CONFLICT",
+    422: "invalidRequest",
+    502: "UPSTREAM_UNAVAILABLE",
+    503: "UPSTREAM_UNAVAILABLE",
+    504: "UPSTREAM_UNAVAILABLE",
+  };
+  const message = t(
+    `orders.errors.${reason ?? statusKey[error.status] ?? "generic"}`,
+    params
+  );
 
   const rawField = typeof details.field === "string" ? details.field : "";
   const lineMatch = LINE_FIELD_PATTERN.exec(rawField);

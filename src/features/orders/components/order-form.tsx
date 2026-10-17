@@ -150,7 +150,7 @@ function OrderForm({
           <CardTitle className="text-sm">{t("orders.form.headerSection")}</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-3">
-          <div className="space-y-1.5">
+          <div className="min-w-0 space-y-1.5">
             <Label htmlFor={FIELD_IDS.customerId}>{t("orders.form.customer")}</Label>
             <CustomerPicker
               id={FIELD_IDS.customerId}
@@ -163,7 +163,7 @@ function OrderForm({
             />
             <FieldError message={errors.fields.customerId} />
           </div>
-          <div className="space-y-1.5">
+          <div className="min-w-0 space-y-1.5">
             <Label htmlFor={FIELD_IDS.deliveryAddressId}>
               {t("orders.form.deliveryAddress")}
             </Label>
@@ -181,7 +181,7 @@ function OrderForm({
             />
             <FieldError message={errors.fields.deliveryAddressId} />
           </div>
-          <div className="space-y-1.5">
+          <div className="min-w-0 space-y-1.5">
             <Label>{t("orders.form.warehouse")}</Label>
             <WarehousePicker
               value={values.warehouseId}
@@ -392,7 +392,7 @@ export function OrderEditScreen({ orderId }: { orderId: string }) {
   }
 
   const order = current.order;
-  if (!canEditOrder(order.status, hasPermission, order.cancellationRequestedAt)) {
+  if (!canEditOrder(order.status, hasPermission, order.cancellationRequestedAt, order.dispatchGrantedAt)) {
     return (
       <BlockedNotice
         title={t("orders.form.notEditableTitle")}

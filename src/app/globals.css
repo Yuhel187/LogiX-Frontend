@@ -199,6 +199,17 @@
   font-family: var(--font-sans), sans-serif !important;
 }
 
+/* Workspace scrolls in main; modal compensation must not duplicate Copilot's body margin. */
+body:has(#main-content)[data-scroll-locked] {
+  padding-right: 0 !important;
+}
+
+/* CopilotKit ships at z-index 1100/1200; app modal portals use z-50. */
+aside[data-copilot-sidebar],
+[data-copilotkit][data-slot="chat-toggle-button"] {
+  z-index: 40 !important;
+}
+
 /* ── CopilotSidebar Full-Page Expansion ─────────────────────────── */
 body.copilot-sidebar-expanded {
   margin-inline-end: 0px !important;
@@ -215,7 +226,7 @@ body.copilot-sidebar-expanded aside[data-copilot-sidebar],
   right: 0 !important;
   border-left: none !important;
   border-right: none !important;
-  z-index: 1300 !important;
+  z-index: 40 !important;
   box-shadow: none !important;
   transition: none !important;
 }
