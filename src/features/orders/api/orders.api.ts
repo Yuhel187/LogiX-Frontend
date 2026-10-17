@@ -22,7 +22,8 @@ const BASE_URL = `${apiBaseUrl}/orders`;
 const orderHistorySchema = orderHistoryEntrySchema.array();
 
 export async function listOrdersApi(
-  params: ListOrdersParams = {}
+  params: ListOrdersParams = {},
+  signal?: AbortSignal
 ): Promise<OrderPage> {
   const query = toQueryString({
     q: params.q,
@@ -35,7 +36,7 @@ export async function listOrdersApi(
     page: params.page,
     pageSize: params.pageSize,
   });
-  const response = await authFetch(`${BASE_URL}${query}`, { method: "GET" });
+  const response = await authFetch(`${BASE_URL}${query}`, { method: "GET", signal });
   return orderPageSchema.parse(await handleResponse<unknown>(response));
 }
 

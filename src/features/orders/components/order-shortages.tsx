@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useTranslation } from "@/lib/i18n";
 import { formatDateTime, formatDecimal } from "@/lib/format";
 import type { OrderDetail, OrderShortage } from "../schemas/order.schema";
+import { OrderProductLabel } from "./order-product-label";
 
 export function OrderShortages({ order, shortages }: { order: OrderDetail; shortages: OrderShortage[] }) {
   const { t, locale } = useTranslation();
@@ -25,7 +26,7 @@ export function OrderShortages({ order, shortages }: { order: OrderDetail; short
             </TableRow></TableHeader>
             <TableBody>{shortages.map((item) => (
               <TableRow key={item.id}>
-                <TableCell>{order.lines.find((line) => line.productId === item.productId)?.skuSnapshot ?? item.productId}</TableCell>
+                <TableCell><OrderProductLabel order={order} productId={item.productId} /></TableCell>
                 <TableCell className="text-right">{formatDecimal(item.required, locale)}</TableCell>
                 <TableCell className="text-right">{formatDecimal(item.available, locale)}</TableCell>
                 <TableCell>{formatDateTime(item.detectedAt, locale)}</TableCell>

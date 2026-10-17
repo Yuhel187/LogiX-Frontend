@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, ClipboardList, Plus, RefreshCw } from "lucide-react";
@@ -25,6 +25,7 @@ import {
 import { useAuth } from "@/lib/auth";
 import { useTranslation } from "@/lib/i18n";
 import { formatDateTime, formatDecimal } from "@/lib/format";
+import { useBoundedRefresh } from "@/lib/api/use-bounded-refresh";
 import { listOrdersApi } from "../api/orders.api";
 import type { OrderPage } from "../schemas/order.schema";
 import {
@@ -47,36 +48,63 @@ export function OrdersScreen() {
   const { filters, setFilters, setPage, resetFilters, hasActiveFilters } =
     useOrderListQuery();
 
-  const [reloadToken, setReloadToken] = useState(0);
-  const requestKey = `${JSON.stringify(filters)}|${reloadToken}`;
+  const requestKey = JSON.stringify(filters);
   const [result, setResult] = useState<{
     key: string;
     page: OrderPage | null;
     failure: { cause: unknown } | null;
   } | null>(null);
+  const [loadingKey, setLoadingKey] = useState<string | null>(requestKey);
+  const activeRequest = useRef<{
+    key: string;
+    controller: AbortController;
+  } | null>(null);
 
   const isLoading = result?.key !== requestKey;
+  const isRefreshing = isLoading || loadingKey === requestKey;
   const current = result?.key === requestKey ? result : null;
   const items = current?.page?.items ?? [];
   const total = current?.page?.total ?? 0;
   const pageSize = current?.page?.pageSize ?? ORDER_LIST_PAGE_SIZE;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
-  useEffect(() => {
-    let active = true;
-    listOrdersApi(toListOrdersParams(filters))
+  const reload = useCallback(() => {
+    if (activeRequest.current?.key === requestKey) return;
+    activeRequest.current?.controller.abort();
+    const controller = new AbortController();
+    activeRequest.current = { key: requestKey, controller };
+    setLoadingKey(requestKey);
+    listOrdersApi(toListOrdersParams(filters), controller.signal)
       .then((page) => {
-        if (active) setResult({ key: requestKey, page, failure: null });
+        if (!controller.signal.aborted)
+          setResult({ key: requestKey, page, failure: null });
       })
       .catch((cause) => {
-        if (active) setResult({ key: requestKey, page: null, failure: { cause } });
+        if (!controller.signal.aborted)
+          setResult((previous) => ({
+            key: requestKey,
+            page: previous?.key === requestKey ? previous.page : null,
+            failure: { cause },
+          }));
+      })
+      .finally(() => {
+        if (activeRequest.current?.controller === controller) {
+          activeRequest.current = null;
+          setLoadingKey(null);
+        }
       });
-    return () => {
-      active = false;
-    };
   }, [filters, requestKey]);
 
-  const reload = () => setReloadToken((value) => value + 1);
+  useEffect(() => {
+    const timer = window.setTimeout(reload, 0);
+    return () => {
+      window.clearTimeout(timer);
+      activeRequest.current?.controller.abort();
+      activeRequest.current = null;
+    };
+  }, [reload]);
+
+  useBoundedRefresh(requestKey, reload, !current?.failure);
 
   return (
     <div className="space-y-5">
@@ -88,8 +116,8 @@ export function OrdersScreen() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={reload} disabled={isLoading}>
-            <RefreshCw className={isLoading ? "size-4 animate-spin" : "size-4"} />
+          <Button variant="outline" onClick={reload} disabled={isRefreshing}>
+            <RefreshCw className={isRefreshing ? "size-4 animate-spin" : "size-4"} />
             <span className="hidden sm:inline">{t("orders.actions.refresh")}</span>
           </Button>
           {canCreateOrder(hasPermission) ? (
@@ -114,14 +142,14 @@ export function OrdersScreen() {
         <Alert variant="destructive">
           <AlertDescription className="flex items-center justify-between gap-3">
             <span>{resolveOrderError(current.failure.cause, t).message}</span>
-            <Button variant="outline" size="sm" onClick={reload}>
+            <Button variant="outline" size="sm" onClick={reload} disabled={isRefreshing}>
               {t("orders.actions.retry")}
             </Button>
           </AlertDescription>
         </Alert>
       ) : null}
 
-      <div className="rounded-lg border">
+      <div className="rounded-lg border" aria-busy={isRefreshing}>
         <Table>
           <TableHeader>
             <TableRow>

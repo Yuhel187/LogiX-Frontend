@@ -1,4 +1,94 @@
 {
+  "displayLabels": {
+    "actor": "Performed by",
+    "system": "System",
+    "loading": "Loading information…",
+    "unavailable": "Entity information is no longer available",
+    "actorUnavailable": "User information is no longer available",
+    "actorLoadError": "Unable to load the performer's information.",
+    "actorDenied": "Your session is invalid or you do not have permission to view the performer's information.",
+    "metadataLoadError": "Some warehouse or product names could not be loaded. Please retry.",
+    "referenceLoadError": "Unable to load the reference document.",
+    "referenceDenied": "You do not have permission to view the reference document",
+    "manualAdjustment": "Manual stock adjustment",
+    "technicalDetails": "Technical details (ID)",
+    "retry": "Retry",
+    "referenceTypes": {
+      "STOCK_RECEIPT": "Stock receipt",
+      "MANUAL_ADJUSTMENT": "Manual adjustment",
+      "SHIPMENT": "Shipment"
+    }
+  },
+  "pickers": {
+    "loading": "Loading…", "retry": "Retry", "clear": "Clear selection",
+    "warehouse": {
+      "placeholder": "Select a warehouse…", "search": "Search by warehouse code or name…",
+      "empty": "No matching warehouses found.",
+      "loadError": "Unable to load warehouse information. Please retry."
+    },
+    "product": {
+      "placeholder": "Select a product…", "search": "Search by SKU or product name…",
+      "empty": "No matching products found.",
+      "loadError": "Unable to load product information. Please retry.",
+      "summary": "Unit: {unit} · Weight: {weight} kg · Volume: {volume} m³"
+    }
+  },
+  "shipments": {
+    "navTitle": "Shipment pool",
+    "title": "Shipment pool",
+    "description": "Prepare confirmed orders and track dispatch and delivery outcomes.",
+    "allStatuses": "All statuses", "allWarehouses": "All warehouses",
+    "createdFrom": "Created from", "createdTo": "Created to",
+    "loading": "Loading backend preview…", "empty": "No shipments match these filters.",
+    "pagination": "Page {page} / {pages} · {total} shipments",
+    "items": "Shipment items", "history": "Status history", "destination": "Delivery address",
+    "actor": "Actor", "system": "System", "failureReason": "Failure reason (required, max. 1,000 characters)",
+    "failureReasonPlaceholder": "Enter the reason delivery failed…",
+    "saved": "Backend accepted the change. Related services may still be synchronizing.",
+    "refreshHint": "Refreshes every 5 seconds for up to 12 attempts, and when this tab regains focus. Use Refresh after that.",
+    "orderPanel": "Shipment", "orderEmpty": "No shipment exists yet. Confirmed orders may still be processing.",
+    "columns": {
+      "shipment": "Shipment", "order": "Order", "customer": "Customer", "warehouse": "Warehouse",
+      "status": "Status", "weight": "Weight (kg)", "volume": "Volume (m³)", "createdAt": "Created",
+      "sku": "SKU", "product": "Product", "quantity": "Quantity", "unit": "Unit"
+    },
+    "status": {
+      "PENDING_PICK": "Pending pick", "PICKING": "Picking", "READY_TO_SHIP": "Ready to ship",
+      "DISPATCHED": "Dispatched", "DELIVERED": "Delivered", "FAILED": "Delivery failed", "CANCELED": "Canceled"
+    },
+    "actions": {
+      "refresh": "Refresh", "retry": "Retry", "reload": "Reload latest data", "resetFilters": "Reset filters",
+      "previous": "Previous", "next": "Next", "back": "Back to shipment pool", "dismiss": "Close",
+      "retryPreview": "Retry preview", "confirmDescription": "Confirm this change for the shipment shown below.",
+      "start-picking": "Start picking", "mark-ready": "Mark ready", "dispatch": "Confirm dispatch",
+      "mark-delivered": "Confirm delivered", "mark-failed": "Confirm delivery failed"
+    },
+    "confirmations": {
+      "start-picking": "Confirm that preparation is starting for this shipment.",
+      "mark-ready": "Confirm that all items have been prepared and this shipment is ready to dispatch.",
+      "mark-delivered": "Confirm that the customer received the shipment. The related order will be marked completed.",
+      "mark-failed": "Confirm that delivery failed and provide a reason. This does not cancel the order or automatically return stock."
+    },
+    "dispatch": {
+      "warning": "Dispatch is irreversible: cancellation will be blocked and inventory will be issued asynchronously. Check the shipment before confirming.",
+      "versions": "Shipment version {shipment} · Order version {order}",
+      "unknownOutcome": "If the connection fails, the backend may already have accepted dispatch. Retry in this dialog to reuse the same request, or close and refresh to inspect recovery. Do not create a replacement request while processing.",
+      "processing": "Dispatch processing",
+      "processingDescription": "The backend is resolving this dispatch request. Actions are locked until its result is known. Refresh to check progress; this is not confirmation that stock has been issued.",
+      "rejected": "Dispatch was rejected by the backend. Reload latest data before starting another request."
+    },
+    "errors": {
+      "generic": "Unable to complete the request. Check your connection and retry; the previous request may already have been accepted.",
+      "invalidRequest": "Invalid request or date range. Check the selected values before retrying.",
+      "unauthorized": "Your session has expired. Sign in again.", "forbidden": "You do not have permission to view or change shipments.",
+      "SHIPMENT_NOT_FOUND": "Shipment not found in this workspace.",
+      "SHIPMENT_VERSION_CONFLICT": "Shipment or order state changed. Reload latest data before continuing.",
+      "SHIPMENT_INVALID_TRANSITION": "This action is not valid for the current shipment status.",
+      "SHIPMENT_DISPATCH_PENDING": "Dispatch is processing. Wait and refresh; do not submit a new request.",
+      "ORDER_UNAVAILABLE": "Order service is unavailable. Dispatch may still be processing; refresh before retrying.",
+      "ORDER_REJECTED": "The order no longer permits dispatch. Reload latest data."
+    }
+  },
   "common": {
     "all": "All",
     "close": "Close",
@@ -719,6 +809,9 @@
     }
   },
   "orders": {
+    "lifecycle": {
+      "dispatchGranted": "Dispatch has been authorized. Cancellation is no longer allowed, even while the order projection is synchronizing."
+    },
     "navGroup": "Sales",
     "navTitle": "Orders",
     "status": {
@@ -784,8 +877,11 @@
       "customerPlaceholder": "Select a customer...",
       "customerSearch": "Search customers...",
       "customerEmpty": "No active customers found.",
+      "customerLoadError": "Unable to load customer information. Please retry.",
       "deliveryAddress": "Delivery address",
       "addressPlaceholder": "Select a delivery address...",
+      "addressSearch": "Search delivery addresses...",
+      "addressNoResults": "No matching delivery address",
       "addressNeedsCustomer": "Select a customer first",
       "addressEmpty": "This customer has no active shipping address",
       "addressDefault": "Default",
@@ -894,6 +990,13 @@
     },
     "errors": {
       "generic": "Something went wrong, please try again.",
+      "invalidRequest": "Invalid request. Check the entered values and retry.",
+      "unauthorized": "Your session has expired. Sign in again.",
+      "forbidden": "You do not have permission to perform this order action.",
+      "currentState": "current",
+      "ORDER_DISPATCH_COMMITTED": "Dispatch has been authorized and this order can no longer be canceled. Reload latest data to track the shipment.",
+      "ORDER_DISPATCH_REQUEST_CONFLICT": "The dispatch request does not match the recorded decision. Reload latest data.",
+      "ORDER_RESERVATION_MISMATCH": "The reservation does not match this order. Reload latest data before continuing.",
       "ORDER_NOT_FOUND": "The order was not found or you cannot access it.",
       "ORDER_INVALID_TRANSITION": "This action is not allowed while the order is {currentStatus}.",
       "ORDER_VERSION_CONFLICT": "The order was changed by someone else, please reload.",

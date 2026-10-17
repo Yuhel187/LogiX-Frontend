@@ -32,6 +32,8 @@ import {
 import { useAuth } from "@/lib/auth";
 import { useTranslation } from "@/lib/i18n";
 import { formatDateTime, formatDecimal } from "@/lib/format";
+import { useBoundedRefresh } from "@/lib/api/use-bounded-refresh";
+import { OrderShipmentPanel } from "@/features/shipments";
 import { getOrderApi, getOrderHistoryApi, getOrderShortagesApi } from "../api/orders.api";
 import type { OrderDetail, OrderHistoryEntry, OrderShortage } from "../schemas/order.schema";
 import { canCancelOrder, canEditOrder, canConfirmOrder } from "../utils/order-actions";
@@ -52,9 +54,9 @@ interface LoadedOrder {
 
 function InfoRow({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="grid grid-cols-[120px_1fr] gap-2 text-sm">
+    <div className="grid grid-cols-[minmax(0,7rem)_minmax(0,1fr)] gap-2 text-sm">
       <dt className="text-muted-foreground">{label}</dt>
-      <dd className="break-words">{children}</dd>
+      <dd className="min-w-0 [overflow-wrap:anywhere]">{children}</dd>
     </div>
   );
 }
@@ -79,7 +81,7 @@ export function OrderDetailScreen({ orderId }: { orderId: string }) {
 
   const isLoading = result?.key !== requestKey;
   // Keep showing the previous data while a reload is in flight.
-  const data = result?.data ?? null;
+  const data = result?.data?.order.id === orderId ? result.data : null;
   const failure = result?.key === requestKey ? result.failure : null;
 
   useEffect(() => {
@@ -98,7 +100,8 @@ export function OrderDetailScreen({ orderId }: { orderId: string }) {
     };
   }, [orderId, requestKey]);
 
-  const reload = () => setReloadToken((value) => value + 1);
+  const reload = useCallback(() => setReloadToken((value) => value + 1), []);
+  useBoundedRefresh(orderId, reload, !cancelOpen && !confirmOpen && !conflictOpen && !failure);
 
   if (failure) {
     const resolved = resolveOrderError(failure.cause, t);
@@ -128,9 +131,10 @@ export function OrderDetailScreen({ orderId }: { orderId: string }) {
 
   if (!data) {
     return (
-      <div className="space-y-4">
+      <div className="@container/order-detail min-w-0 space-y-4">
         <Skeleton className="h-8 w-64" />
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="grid gap-4 @min-[40rem]/order-detail:grid-cols-2">
+          <Skeleton className="h-40" />
           <Skeleton className="h-40" />
           <Skeleton className="h-40" />
           <Skeleton className="h-40" />
@@ -144,12 +148,12 @@ export function OrderDetailScreen({ orderId }: { orderId: string }) {
   const address = order.deliveryAddressSnapshot;
   const warehouse = order.warehouseSnapshot;
   const customer = order.customerSnapshot;
-  const editable = canEditOrder(order.status, hasPermission, order.cancellationRequestedAt);
-  const cancelable = canCancelOrder(order.status, hasPermission, order.cancellationRequestedAt);
-  const confirmable = canConfirmOrder(order.status, hasPermission, order.cancellationRequestedAt);
+  const editable = canEditOrder(order.status, hasPermission, order.cancellationRequestedAt, order.dispatchGrantedAt);
+  const cancelable = canCancelOrder(order.status, hasPermission, order.cancellationRequestedAt, order.dispatchGrantedAt);
+  const confirmable = canConfirmOrder(order.status, hasPermission, order.cancellationRequestedAt, order.dispatchGrantedAt);
 
   return (
-    <div className="space-y-5">
+    <div className="@container/order-detail min-w-0 space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <Link
@@ -213,7 +217,9 @@ export function OrderDetailScreen({ orderId }: { orderId: string }) {
         </Alert>
       ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      {order.dispatchGrantedAt ? <Alert><AlertDescription>{t("orders.lifecycle.dispatchGranted")}</AlertDescription></Alert> : null}
+      <div className="grid gap-4 @min-[40rem]/order-detail:grid-cols-2 [&>*]:min-w-0">
+        <OrderShipmentPanel orderId={order.id} />
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">{t("orders.detail.customer")}</CardTitle>
