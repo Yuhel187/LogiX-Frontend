@@ -13,7 +13,7 @@
     "noData": "Không có dữ liệu",
     "online": "Trực tuyến",
     "offline": "Ngoại tuyến",
-    "error": "?? x?y ra l?i. Vui l?ng th? l?i."
+    "error": "Đã xảy ra lỗi. Vui lòng thử lại."
   },
   "chat": {
     "appTitle": "LogiX Copilot",
@@ -580,8 +580,8 @@
       "sendSuccess": "Đã tạo và gửi lời mời thành công đến {email}",
       "copyLink": "Sao chép liên kết mời",
       "copied": "Đã sao chép liên kết mời vào bộ nhớ tạm!",
-      "invitedBy": "Ng??i m?i",
-      "actions": "Thao t?c l?i m?i",
+      "invitedBy": "Người mời",
+      "actions": "Thao tác lời mời",
       "table": {
         "email": "Email người nhận",
         "roles": "Vai trò chỉ định trước",
@@ -590,7 +590,7 @@
         "expiresAt": "Thời hạn",
         "createdAt": "Ngày gửi",
         "actions": "Thao tác",
-        "revoke": "Thu h?i l?i m?i"
+        "revoke": "Thu hồi lời mời"
       },
       "status": {
         "pending": "Chờ kích hoạt",
@@ -716,6 +716,199 @@
       "adjustIn": "Điều chỉnh (+)",
       "adjustOut": "Điều chỉnh (−)",
       "reversal": "Hoàn tác"
+    }
+  },
+  "orders": {
+    "navGroup": "Bán hàng",
+    "navTitle": "Đơn hàng",
+    "status": {
+      "DRAFT": "Nháp",
+      "PENDING_STOCK": "Chờ hàng",
+      "CONFIRMED": "Đã xác nhận",
+      "PICKING": "Đang soạn hàng",
+      "READY_TO_SHIP": "Sẵn sàng giao",
+      "IN_DELIVERY": "Đang giao",
+      "DELIVERY_FAILED": "Giao thất bại",
+      "COMPLETED": "Hoàn tất",
+      "CANCELED": "Đã hủy"
+    },
+    "actions": {
+      "back": "Quay lại",
+      "backToList": "Về danh sách đơn hàng",
+      "cancel": "Hủy đơn",
+      "clear": "Bỏ chọn",
+      "create": "Tạo đơn hàng",
+      "discard": "Hủy bỏ",
+      "edit": "Sửa",
+      "refresh": "Làm mới",
+      "retry": "Thử lại",
+      "saveChanges": "Lưu thay đổi",
+      "saveDraft": "Lưu đơn nháp"
+    },
+    "list": {
+      "title": "Đơn hàng",
+      "description": "Theo dõi và quản lý đơn bán hàng của doanh nghiệp.",
+      "searchPlaceholder": "Tìm theo mã đơn...",
+      "allStatuses": "Tất cả trạng thái",
+      "statusCount": "{count} trạng thái",
+      "allCustomers": "Tất cả khách hàng",
+      "allWarehouses": "Tất cả kho",
+      "createdFrom": "Tạo từ ngày",
+      "createdTo": "Tạo đến ngày",
+      "resetFilters": "Xóa bộ lọc",
+      "columns": {
+        "orderNumber": "Mã đơn",
+        "customer": "Khách hàng",
+        "warehouse": "Kho xuất",
+        "status": "Trạng thái",
+        "totalWeight": "Tổng khối lượng (kg)",
+        "totalVolume": "Tổng thể tích (m³)",
+        "createdAt": "Ngày tạo"
+      },
+      "emptyTitle": "Chưa có đơn hàng",
+      "emptyDescription": "Tạo đơn hàng đầu tiên để bắt đầu.",
+      "emptyFilteredTitle": "Không có đơn hàng phù hợp",
+      "emptyFilteredDescription": "Thử thay đổi hoặc xóa bộ lọc.",
+      "pageInfo": "Trang {page}/{totalPages} · {total} đơn",
+      "previous": "Trước",
+      "next": "Sau"
+    },
+    "form": {
+      "createTitle": "Tạo đơn hàng",
+      "createDescription": "Đơn mới được lưu ở trạng thái Nháp và chưa giữ tồn kho.",
+      "editTitle": "Sửa đơn {orderNumber}",
+      "editDescription": "Chỉ đơn ở trạng thái Nháp mới được chỉnh sửa.",
+      "headerSection": "Thông tin đơn hàng",
+      "linesSection": "Dòng hàng",
+      "customer": "Khách hàng",
+      "customerPlaceholder": "Chọn khách hàng...",
+      "customerSearch": "Tìm khách hàng...",
+      "customerEmpty": "Không tìm thấy khách hàng đang hoạt động.",
+      "deliveryAddress": "Địa chỉ giao hàng",
+      "addressPlaceholder": "Chọn địa chỉ giao hàng...",
+      "addressNeedsCustomer": "Chọn khách hàng trước",
+      "addressEmpty": "Khách hàng chưa có địa chỉ giao hàng đang hoạt động",
+      "addressDefault": "Mặc định",
+      "warehouse": "Kho xuất hàng",
+      "warehousePlaceholder": "Chọn kho xuất...",
+      "lineProduct": "Sản phẩm",
+      "lineQuantity": "Số lượng",
+      "lineUnit": "Đơn vị",
+      "lineUnitWeight": "KL đơn vị (kg)",
+      "lineUnitVolume": "TT đơn vị (m³)",
+      "productPlaceholder": "Chọn sản phẩm...",
+      "removeLine": "Xóa dòng",
+      "addLine": "Thêm dòng",
+      "loadPreview": "Tải trọng dự kiến",
+      "loadPreviewHint": "Giá trị tham khảo; hệ thống tính lại chính xác khi lưu.",
+      "noChanges": "Không có thay đổi nào để lưu.",
+      "forbiddenTitle": "Không có quyền",
+      "forbiddenCreate": "Bạn không có quyền tạo đơn hàng.",
+      "notEditableTitle": "Không thể sửa đơn",
+      "notEditable": "Đơn {orderNumber} không còn ở trạng thái Nháp hoặc bạn không có quyền sửa."
+    },
+    "validation": {
+      "customerRequired": "Vui lòng chọn khách hàng",
+      "addressRequired": "Vui lòng chọn địa chỉ giao hàng",
+      "warehouseRequired": "Vui lòng chọn kho xuất",
+      "linesRequired": "Đơn hàng cần ít nhất một dòng hàng",
+      "productRequired": "Vui lòng chọn sản phẩm",
+      "productDuplicate": "Sản phẩm đã có ở dòng khác",
+      "quantityRequired": "Vui lòng nhập số lượng",
+      "quantityInvalid": "Số lượng phải lớn hơn 0, tối đa 3 chữ số thập phân",
+      "cancelReasonRequired": "Vui lòng nhập lý do hủy"
+    },
+    "detail": {
+      "createdAt": "Tạo lúc {date}",
+      "updatedAt": "Cập nhật lúc {date}",
+      "canceledReason": "Đơn đã hủy. Lý do: {reason}",
+      "customer": "Khách hàng",
+      "deliveryAddress": "Địa chỉ giao hàng",
+      "warehouse": "Kho xuất hàng",
+      "name": "Tên",
+      "code": "Mã",
+      "taxCode": "Mã số thuế",
+      "phone": "Điện thoại",
+      "email": "Email",
+      "recipient": "Người nhận",
+      "address": "Địa chỉ",
+      "deliveryNote": "Ghi chú giao",
+      "lines": "Dòng hàng",
+      "sku": "SKU",
+      "totalQuantity": "Tổng số lượng",
+      "totalWeight": "Tổng khối lượng (kg)",
+      "totalVolume": "Tổng thể tích (m³)",
+      "notFoundTitle": "Không tìm thấy đơn hàng",
+      "loadFailedTitle": "Không tải được đơn hàng"
+    },
+    "timeline": {
+      "title": "Lịch sử trạng thái",
+      "empty": "Chưa có lịch sử.",
+      "created": "Khởi tạo",
+      "reason": "Lý do",
+      "version": "Phiên bản {version}"
+    },
+    "cancel": {
+      "title": "Hủy đơn {orderNumber}",
+      "processing": "Đang xử lý hủy đơn. Các thao tác sửa và xác nhận đã được khóa; hệ thống sẽ tự thử lại đến khi giải phóng hàng và hoàn tất hủy.",
+      "description": "Đơn sẽ chuyển sang trạng thái Đã hủy và không thể khôi phục.",
+      "reason": "Lý do hủy",
+      "reasonPlaceholder": "Nhập lý do hủy đơn...",
+      "dismiss": "Đóng",
+      "confirm": "Xác nhận hủy"
+    },
+    "conflict": {
+      "title": "Đơn hàng đã thay đổi",
+      "description": "Đơn hàng vừa được người khác cập nhật. Tải lại để xem dữ liệu mới nhất; thay đổi chưa lưu của bạn sẽ bị bỏ.",
+      "keepEditing": "Ở lại",
+      "reload": "Tải lại"
+    },
+    "confirm": {
+      "title": "Xác nhận đơn {orderNumber}",
+      "description": "Hệ thống chỉ giữ hàng khi đủ toàn bộ các dòng. Nếu thiếu, đơn sẽ chuyển sang chờ hàng.",
+      "action": "Xác nhận đơn",
+      "retry": "Thử giữ hàng lại",
+      "reference": "Số liệu tham khảo tại thời điểm {date}; kho sẽ kiểm tra lại khi xác nhận.",
+      "result": "Kết quả",
+      "sufficient": "Đủ hàng",
+      "insufficient": "Thiếu hàng",
+      "pendingWarning": "Nếu xác nhận lúc này và kho vẫn thiếu hàng, đơn sẽ chờ hàng; không giữ riêng những dòng đang đủ.",
+      "success": "Đơn đã được xác nhận và giữ đủ hàng.",
+      "pending": "Đơn đang chờ hàng. Chưa giữ hàng ở bất kỳ dòng nào.",
+      "unavailable": "Kho tạm thời không phản hồi, đơn chưa được xác nhận. Vui lòng tải lại và thử lại."
+    },
+    "shortage": {
+      "title": "Các mặt hàng đang thiếu",
+      "sku": "SKU",
+      "required": "Cần",
+      "available": "Có sẵn",
+      "detectedAt": "Thời điểm kiểm tra",
+      "pendingSince": "Đang chờ hàng từ {date}",
+      "column": "Chờ hàng từ",
+      "awaitingCheck": "Chưa có kết quả thiếu hàng hiện tại. Tải lại hoặc thử giữ hàng lại."
+    },
+    "toast": {
+      "created": "Đã tạo đơn {orderNumber}",
+      "updated": "Đã cập nhật đơn {orderNumber}",
+      "canceled": "Đã hủy đơn {orderNumber}"
+    },
+    "errors": {
+      "generic": "Đã xảy ra lỗi, vui lòng thử lại.",
+      "ORDER_NOT_FOUND": "Không tìm thấy đơn hàng hoặc bạn không có quyền xem.",
+      "ORDER_INVALID_TRANSITION": "Không thể thực hiện thao tác khi đơn đang ở trạng thái {currentStatus}.",
+      "ORDER_VERSION_CONFLICT": "Đơn hàng đã được người khác thay đổi, vui lòng tải lại.",
+      "ORDER_NO_CHANGES": "Không có thay đổi nào để lưu.",
+      "ORDER_INVALID_DATE_RANGE": "Ngày bắt đầu phải trước hoặc bằng ngày kết thúc.",
+      "ORDER_ADDRESS_NOT_OF_CUSTOMER": "Địa chỉ giao hàng không thuộc khách hàng đã chọn.",
+      "ORDER_ADDRESS_NOT_SHIPPING": "Địa chỉ được chọn không phải địa chỉ giao hàng.",
+      "ORDER_MASTER_DATA_NOT_FOUND": "Không tìm thấy dữ liệu danh mục đã chọn.",
+      "ORDER_MASTER_DATA_INACTIVE": "Dữ liệu danh mục đã chọn đang ngừng hoạt động.",
+      "ORDER_DUPLICATE_PRODUCT": "Một sản phẩm chỉ được xuất hiện một lần trong đơn.",
+      "ORDER_TOO_MANY_LINES": "Đơn hàng chỉ được có tối đa {maxLines} dòng (hiện có {actualLines}).",
+      "IDEMPOTENCY_KEY_REQUIRED": "Yêu cầu tạo đơn không hợp lệ, vui lòng tải lại trang.",
+      "IDEMPOTENCY_KEY_REUSED": "Phiên tạo đơn này đã được dùng. Đơn có thể đã được tạo; hãy kiểm tra danh sách trước khi tạo lại.",
+      "UPSTREAM_UNAVAILABLE": "Dịch vụ liên quan tạm thời không phản hồi, vui lòng thử lại sau.",
+      "UPSTREAM_REJECTED": "Dịch vụ liên quan từ chối yêu cầu, vui lòng thử lại."
     }
   }
 }

@@ -2,6 +2,7 @@ export {
   ApiError,
   isApiError,
   GENERIC_API_ERROR_MESSAGE,
+  type ApiErrorDetails,
 } from "./errors";
 
 export {

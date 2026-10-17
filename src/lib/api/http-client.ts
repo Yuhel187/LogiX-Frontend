@@ -1,4 +1,8 @@
-import { ApiError, GENERIC_API_ERROR_MESSAGE } from "./errors";
+import {
+  ApiError,
+  GENERIC_API_ERROR_MESSAGE,
+  type ApiErrorDetails,
+} from "./errors";
 
 const ACCESS_TOKEN_KEY = "logix_access_token";
 
@@ -60,11 +64,21 @@ export async function handleResponse<T>(response: Response): Promise<T> {
     throw new ApiError(
       response.status,
       extractErrorMessage(data),
-      extractErrorCode(data)
+      extractErrorCode(data),
+      extractErrorDetails(data)
     );
   }
 
   return data as T;
+}
+
+function extractErrorDetails(data: unknown): ApiErrorDetails | undefined {
+  if (!data || typeof data !== "object") return undefined;
+  const details = (data as { details?: unknown }).details;
+  if (!details || typeof details !== "object" || Array.isArray(details)) {
+    return undefined;
+  }
+  return details as ApiErrorDetails;
 }
 
 function extractErrorMessage(data: unknown): string {

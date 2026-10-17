@@ -79,6 +79,15 @@ The frontend may attach the accepted session, tenant context, correlation ID,
 locale, and idempotency key through shared transport. It does not establish
 tenant isolation or authorization; the backend must enforce both.
 
+When the user selects a different organization in the workspace switcher,
+wait for the tenant-switch operation to complete and store the new session
+before navigating. Then perform a full browser navigation to `/`, including
+when already on the home page, to discard the previous organization's
+in-memory data and App Router cache. Do not retain the previous resource URL.
+Selecting the already-active organization does not reload. A failed switch
+shows the localized error and does not navigate; concurrent selections are
+blocked until completion.
+
 The choice between same-origin HttpOnly cookies, bearer tokens, and a
 server-mediated BFF is intentionally unresolved. Record that decision before
 implementing browser transport or storing any credential.

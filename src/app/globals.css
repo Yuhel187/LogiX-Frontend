@@ -144,6 +144,21 @@
   }
 }
 
+/* Keep the workspace header usable when the Copilot sidebar narrows its content area. */
+.app-header {
+  container-type: inline-size;
+}
+
+@container (max-width: 900px) {
+  .app-header-search {
+    display: none;
+  }
+
+  .app-header-actions {
+    gap: 0.25rem;
+  }
+}
+
 @keyframes float {
 
   0%,
