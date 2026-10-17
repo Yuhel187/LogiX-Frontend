@@ -137,7 +137,6 @@ function LogixCopilotSidebarContent({
               <div
                 onClick={() => {
                   if (isExpanded) setIsExpanded(false);
-                  document.body.style.marginInlineEnd = "";
                 }}
                 className="inline-flex items-center justify-center shrink-0 [&_button]:!h-9 [&_button]:!w-9 [&_button]:!inline-flex [&_button]:!items-center [&_button]:!justify-center [&_button]:!p-0 [&_button]:!m-0 [&_button]:!rounded-lg [&_button]:!text-muted-foreground [&_button]:hover:!text-foreground [&_button]:hover:!bg-muted [&_button]:!transition-colors [&_button]:!cursor-pointer [&_button]:!shrink-0 [&_button]:!border-0 [&_button]:!bg-transparent [&_button]:!static [&_button]:!transform-none [&_svg]:!h-[18px] [&_svg]:!w-[18px] [&_svg]:!stroke-[2.25]"
               >
@@ -187,37 +186,12 @@ export function LogixCopilotSidebar({
   }, []);
 
   React.useEffect(() => {
-    if (isExpanded) {
-      document.body.classList.add("copilot-sidebar-expanded");
-    } else {
-      document.body.classList.remove("copilot-sidebar-expanded");
-
-      const syncBodyMargin = () => {
-        if (typeof window === "undefined") return;
-        const isDesktop = window.matchMedia("(min-width: 768px)").matches;
-        const aside = document.querySelector(
-          "aside[data-copilot-sidebar]"
-        ) as HTMLElement | null;
-        const isSidebarOpen =
-          aside && aside.getAttribute("aria-hidden") !== "true";
-        if (isDesktop && isSidebarOpen) {
-          document.body.style.marginInlineEnd = `${width}px`;
-        } else {
-          document.body.style.marginInlineEnd = "";
-        }
-      };
-
-      syncBodyMargin();
-      window.addEventListener("resize", syncBodyMargin);
-      return () => {
-        window.removeEventListener("resize", syncBodyMargin);
-      };
-    }
+    document.body.classList.toggle("copilot-sidebar-expanded", isExpanded);
 
     return () => {
       document.body.classList.remove("copilot-sidebar-expanded");
     };
-  }, [isExpanded, width]);
+  }, [isExpanded]);
 
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -266,4 +240,3 @@ export function LogixCopilotSidebar({
     />
   );
 }
-

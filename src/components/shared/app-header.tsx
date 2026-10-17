@@ -83,9 +83,9 @@ export function AppHeader() {
   ];
 
   return (
-    <header className="sticky top-0 z-20 flex h-18 shrink-0 items-center justify-between border-b border-border/70 bg-background/80 px-4 backdrop-blur-md sm:px-6">
+    <header className="app-header sticky top-0 z-20 flex h-18 shrink-0 items-center justify-between border-b border-border/70 bg-background/80 px-4 backdrop-blur-md sm:px-6">
       {/* Left: Sidebar toggle + Current Section Title */}
-      <div className="flex items-center gap-3 sm:gap-3.5">
+      <div className="flex shrink-0 items-center gap-3 sm:gap-3.5">
         {/* Mobile menu toggle */}
         <Button
           variant="ghost"
@@ -111,14 +111,14 @@ export function AppHeader() {
 
         {/* Page Title next to toggle button */}
         {pageTitle && (
-          <span className="text-lg font-bold text-foreground tracking-tight select-none">
+          <span className="whitespace-nowrap text-lg font-bold text-foreground tracking-tight select-none">
             {pageTitle}
           </span>
         )}
       </div>
 
       {/* Center/Search palette */}
-      <div className="flex-1 min-w-0 max-w-xs xl:max-w-sm 2xl:max-w-md mx-2 sm:mx-4 hidden md:block">
+      <div className="app-header-search mx-2 hidden min-w-0 max-w-xs flex-1 sm:mx-4 md:block xl:max-w-sm 2xl:max-w-md">
         <button
           type="button"
           onClick={() => {}}
@@ -137,12 +137,12 @@ export function AppHeader() {
       </div>
 
       {/* Right Actions: Language, Notifications, ThemeToggle, User Avatar */}
-      <div className="flex items-center gap-2 sm:gap-2.5">
+      <div className="app-header-actions flex shrink-0 items-center gap-2 sm:gap-2.5">
         {/* Language Switcher */}
         <LanguageToggle />
 
         {/* Notifications Dropdown */}
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
@@ -238,7 +238,7 @@ export function AppHeader() {
         <div className="h-5 w-px bg-border/60 mx-1 hidden sm:block" />
 
         {/* User Profile Menu */}
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
