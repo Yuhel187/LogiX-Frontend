@@ -17,7 +17,7 @@ export const MOVEMENT_TYPES = [
   "REVERSAL",
 ] as const;
 
-export const REFERENCE_TYPES = ["STOCK_RECEIPT", "MANUAL_ADJUSTMENT"] as const;
+export const REFERENCE_TYPES = ["STOCK_RECEIPT", "MANUAL_ADJUSTMENT", "SHIPMENT"] as const;
 
 export const movementTypeSchema = z.enum(MOVEMENT_TYPES);
 export const referenceTypeSchema = z.enum(REFERENCE_TYPES);
@@ -47,6 +47,7 @@ export const stockMovementSchema = z.object({
   afterOnHand: z.string(),
   referenceType: referenceTypeSchema,
   referenceId: z.string(),
+  referenceNumber: z.string().nullable().optional(),
   reason: z.string().nullable(),
   actorId: z.string().nullable(),
   occurredAt: z.string(),

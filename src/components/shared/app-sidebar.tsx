@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Boxes,
+  ClipboardList,
   LayoutDashboard,
   Package,
   Settings,
@@ -23,6 +24,8 @@ import { useSidebar } from "@/components/shared/sidebar-context";
 import { useTranslation } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
 import { TenantSwitcher } from "@/components/shared/tenant-switcher";
+import { ORDER_PERMISSIONS } from "@/features/orders";
+import { SHIPMENT_PERMISSIONS } from "@/features/shipments";
 
 interface NavItem {
   title: string;
@@ -83,6 +86,23 @@ export function AppSidebar() {
             title: t("masterData.vehicle.title"),
             href: "/master-data/vehicles",
             icon: Truck,
+          },
+        ],
+      },
+      {
+        label: t("orders.navGroup"),
+        items: [
+          {
+            title: t("orders.navTitle"),
+            href: "/orders",
+            icon: ClipboardList,
+            permission: ORDER_PERMISSIONS.read,
+          },
+          {
+            title: t("shipments.navTitle"),
+            href: "/shipments",
+            icon: Package,
+            permission: SHIPMENT_PERMISSIONS.read,
           },
         ],
       },

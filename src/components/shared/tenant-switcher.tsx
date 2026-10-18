@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   ChevronDown,
@@ -39,34 +39,35 @@ export function TenantSwitcher({
   className,
 }: TenantSwitcherProps) {
   const router = useRouter();
-  const pathname = usePathname();
   const { activeTenant, tenants, switchTenant } = useAuth();
   const { t } = useTranslation();
 
   const [open, setOpen] = useState(false);
   const [switchingId, setSwitchingId] = useState<string | null>(null);
+  const switchingRef = useRef(false);
   const [createOpen, setCreateOpen] = useState(false);
 
   const isAdmin =
     activeTenant?.role === "OWNER" || activeTenant?.role === "ADMIN";
 
   const handleSelectTenant = async (tenantId: string, tenantName: string) => {
+    if (switchingRef.current) return;
     if (tenantId === activeTenant?.id) {
       setOpen(false);
       return;
     }
 
     try {
+      switchingRef.current = true;
       setSwitchingId(tenantId);
       await switchTenant(tenantId);
       toast.success(t("tenant.switchSuccess", { name: tenantName }));
       setOpen(false);
-      if (pathname.startsWith("/organization")) {
-        router.push(`/organization/${tenantId}`);
-      }
+      // A full navigation discards tenant-scoped state and the App Router cache.
+      window.location.replace("/");
     } catch {
       toast.error(t("tenant.switchError"));
-    } finally {
+      switchingRef.current = false;
       setSwitchingId(null);
     }
   };
@@ -151,7 +152,7 @@ export function TenantSwitcher({
                 <button
                   key={tItem.id}
                   type="button"
-                  disabled={isSwitching}
+                  disabled={switchingId !== null}
                   onClick={() => handleSelectTenant(tItem.id, tItem.name)}
                   className={cn(
                     "flex items-center gap-2.5 w-full px-2.5 py-1.5 rounded-lg text-left transition-all cursor-pointer text-xs group",

@@ -6,6 +6,7 @@ import { ShieldAlert, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useTranslation } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
+import { SHIPMENT_PERMISSIONS } from "@/features/shipments";
 
 interface RoutePermissionRule {
   pattern: RegExp;
@@ -15,6 +16,7 @@ interface RoutePermissionRule {
 }
 
 const ROUTE_PERMISSIONS: RoutePermissionRule[] = [
+  { pattern: /^\/shipments(?:\/|$)/, permission: SHIPMENT_PERMISSIONS.read },
   { pattern: /\/organization\/[^/]+\/roles/, anyPermissions: ["iam:role:read", "iam:role:manage"] },
   { pattern: /\/organization\/[^/]+\/members/, anyPermissions: ["iam:member:read", "iam:member:invite"] },
   { pattern: /\/settings\/roles/, anyPermissions: ["iam:role:read", "iam:role:manage"] },
@@ -98,4 +100,3 @@ export function WorkspaceGuard({ children }: { children: React.ReactNode }) {
 
   return <>{children}</>;
 }
-
