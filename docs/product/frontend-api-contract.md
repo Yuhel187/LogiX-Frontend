@@ -73,6 +73,16 @@ backend error bodies.
 Never expose tokens, raw credentials, internal stack traces, or sensitive
 backend payloads in user messages or client logs.
 
+User-facing instructions describe the business outcome and the next available
+action in both Vietnamese and English, not implementation details such as
+backend services, asynchronous processing, projections, or request reuse.
+Keep pending, failed, and unknown outcomes distinct: a lost connection does not
+prove that a mutation failed. Preserve warnings about irreversible actions,
+duplicate submissions, and checking the latest status. Reference identifiers
+remain available under clearly labeled reference details, rather than developer
+terminology. Keep the source dictionaries and the dictionaries currently
+imported by the language provider aligned for every changed key.
+
 ## Authentication And Request Context
 
 The frontend may attach the accepted session, tenant context, correlation ID,
