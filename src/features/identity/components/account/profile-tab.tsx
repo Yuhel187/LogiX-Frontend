@@ -62,7 +62,7 @@ function ProfileFormInner({ user, activeTenant }: ProfileFormInnerProps) {
       if (isApiError(err) && err.status === 413) {
         setErrorMessage(t("account.profile.payloadTooLarge"));
       } else {
-        setErrorMessage(err instanceof Error ? err.message : t("account.profile.updateFailed"));
+        setErrorMessage(t("account.profile.updateFailed"));
       }
     } finally {
       setIsLoading(false);
@@ -251,4 +251,3 @@ export function ProfileTab() {
     />
   );
 }
-
