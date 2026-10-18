@@ -22,17 +22,35 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 
+export interface ConfirmationOrderLine {
+  productName?: string;
+  skuSnapshot?: string;
+  quantity?: string | number;
+  sufficient?: boolean;
+}
+
+export interface ConfirmationPreviewData {
+  orderNumber?: string;
+  shipmentNumber?: string;
+  customerName?: string;
+  warehouseName?: string;
+  totalQuantity?: string | number;
+  carrierName?: string;
+  lines?: ConfirmationOrderLine[];
+  [key: string]: unknown;
+}
+
 export interface PendingApprovalData {
   approval_id?: string;
   action?: string;
   target_type?: string;
   target_id?: string;
   target_version?: number;
-  preview?: Record<string, any>;
+  preview?: ConfirmationPreviewData;
   expires_at?: string;
   tool_call?: {
     name?: string;
-    args?: Record<string, any>;
+    args?: Record<string, unknown>;
   };
 }
 
@@ -77,6 +95,7 @@ export function ConfirmationInterruptCard({
       decision: "REJECT",
       approval_id: data.approval_id,
     });
+    onCancel?.();
   };
 
   return (
@@ -133,7 +152,7 @@ export function ConfirmationInterruptCard({
             <div className="flex justify-between items-center text-[11px]">
               <span className="text-muted-foreground">Số lượng</span>
               <span className="font-medium text-foreground">
-                {preview.totalQuantity} sản phẩm
+                {String(preview.totalQuantity)} sản phẩm
               </span>
             </div>
           )}
@@ -154,7 +173,7 @@ export function ConfirmationInterruptCard({
                 Kiểm tra khả dụng ({preview.lines.length} mặt hàng):
               </div>
               <div className="max-h-24 overflow-y-auto space-y-1 pr-0.5">
-                {preview.lines.map((line: any, idx: number) => {
+                {preview.lines.map((line: ConfirmationOrderLine, idx: number) => {
                   const isSufficient = line.sufficient !== false;
                   return (
                     <div

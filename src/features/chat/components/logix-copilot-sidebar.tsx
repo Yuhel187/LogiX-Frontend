@@ -52,7 +52,8 @@ function LogixCopilotSidebarContent({
 
   useInterrupt<PendingApprovalData>({
     render: ({ event, interrupt, resolve, cancel }) => {
-      const data = (event?.value ?? (interrupt as any)?.value ?? {}) as PendingApprovalData;
+      const interruptVal = (interrupt as { value?: unknown } | null | undefined)?.value;
+      const data = (event?.value ?? interruptVal ?? {}) as PendingApprovalData;
       return (
         <ConfirmationInterruptCard
           data={data}
