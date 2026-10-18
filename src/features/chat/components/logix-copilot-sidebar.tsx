@@ -3,7 +3,8 @@
 import * as React from "react";
 import Image from "next/image";
 import { Maximize2, Minimize2, Plus, Sparkles } from "lucide-react";
-import { CopilotSidebar, useDefaultRenderTool } from "@copilotkit/react-core/v2";
+import { CopilotSidebar, useDefaultRenderTool, useInterrupt } from "@copilotkit/react-core/v2";
+import { ConfirmationInterruptCard, type PendingApprovalData } from "./confirmation-interrupt-card";
 import { createNewThreadId, getInitialThreadId } from "@/features/chat/lib/session";
 import { useTranslation } from "@/lib/i18n";
 
@@ -48,6 +49,19 @@ function LogixCopilotSidebarContent({
           render: () => <></>,
         }
   );
+
+  useInterrupt<PendingApprovalData>({
+    render: ({ event, interrupt, resolve, cancel }) => {
+      const data = (event?.value ?? (interrupt as any)?.value ?? {}) as PendingApprovalData;
+      return (
+        <ConfirmationInterruptCard
+          data={data}
+          onResolve={(decision) => resolve(decision, interrupt?.id)}
+          onCancel={() => cancel(interrupt?.id)}
+        />
+      );
+    },
+  });
 
   return (
     <CopilotSidebar
