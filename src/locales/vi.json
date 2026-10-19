@@ -37,6 +37,11 @@
       "summary": "ĐVT: {unit} · Khối lượng: {weight} kg · Thể tích: {volume} m³"
     }
   },
+  "routes": {
+    "navTitle": "Lộ trình & Chuyến xe",
+    "title": "Điều Phối & Tối Ưu Tuyến Đường",
+    "description": "Lập lộ trình giao hàng đa điểm tại TP.HCM, tự động kiểm tra tải trọng và so sánh đối chứng khoa học với Baselines."
+  },
   "shipments": {
     "navTitle": "Lô giao hàng", "title": "Danh sách lô giao hàng",
     "description": "Chuẩn bị đơn đã xác nhận, theo dõi xuất kho và kết quả giao hàng.",

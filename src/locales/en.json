@@ -33,6 +33,11 @@
       "summary": "Unit: {unit} · Weight: {weight} kg · Volume: {volume} m³"
     }
   },
+  "routes": {
+    "navTitle": "Routes & Trips",
+    "title": "Dispatch & Route Optimization",
+    "description": "Multi-stop delivery routing on OSRM road network with Google OR-Tools CVRP."
+  },
   "shipments": {
     "navTitle": "Shipment pool",
     "title": "Shipment pool",
