@@ -10,14 +10,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
-  MOCK_ROUTE_PLAN,
+  SAMPLE_ROUTE_PLAN,
   RouteMapWrapper,
   RouteSummaryPanel,
   type RoutePlan,
 } from "@/features/routes";
 
 export default function RoutesPage() {
-  const [routePlan, setRoutePlan] = React.useState<RoutePlan>(MOCK_ROUTE_PLAN);
+  const [routePlan, setRoutePlan] = React.useState<RoutePlan>(SAMPLE_ROUTE_PLAN);
   const [showBaseline, setShowBaseline] = React.useState<boolean>(true);
   const [selectedStopId, setSelectedStopId] = React.useState<string | null>(null);
   const [isReoptimizing, setIsReoptimizing] = React.useState<boolean>(false);

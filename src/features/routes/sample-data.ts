@@ -1,6 +1,6 @@
 import type { RoutePlan } from "./types";
 
-export const MOCK_ROUTE_PLAN: RoutePlan = {
+export const SAMPLE_ROUTE_PLAN: RoutePlan = {
   id: "rp-hcm-20261019-01",
   tripId: "trip-hcm-20261019-01",
   tripCode: "TRIP-HCM-01",
