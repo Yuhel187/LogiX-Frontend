@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { isApiError } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 import { useTranslation } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -18,6 +19,7 @@ import {
 import {
   commandShipmentApi,
   getDispatchPreviewApi,
+  getShipmentApi,
 } from "../api/shipments.api";
 import type {
   DispatchAttempt,
@@ -28,7 +30,11 @@ import {
   SHIPMENT_FAILURE_MAX_LENGTH,
   type ShipmentAction,
 } from "../constants/shipment.constants";
-import { shipmentError } from "../utils/shipment-errors";
+import {
+  shipmentError,
+  shipmentOutcomeUnknown,
+} from "../utils/shipment-errors";
+import { shipmentActions } from "../utils/shipment-actions";
 
 interface Props {
   shipment: ShipmentDetail;
@@ -38,6 +44,7 @@ interface Props {
   onClose: () => void;
   onReload: () => void;
   onCompleted: (updated: ShipmentDetail) => void;
+  onMutationStarted: () => void;
 }
 export function ShipmentActionDialog({
   shipment,
@@ -47,8 +54,10 @@ export function ShipmentActionDialog({
   onClose,
   onReload,
   onCompleted,
+  onMutationStarted,
 }: Props) {
   const { t } = useTranslation();
+  const { hasPermission } = useAuth();
   const [requestId] = useState(
     () => previousAttempt?.requestId ?? crypto.randomUUID()
   );
@@ -63,11 +72,17 @@ export function ShipmentActionDialog({
   const [reason, setReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [conflict, setConflict] = useState(false);
+  const [unknownOutcome, setUnknownOutcome] = useState(false);
+  const allowed = shipmentActions(shipment, hasPermission).includes(action);
   const submittingRef = useRef(false);
+  const detailRead = useRef<AbortController | null>(null);
   const mounted = useRef(false);
   useEffect(() => {
     mounted.current = true;
-    return () => { mounted.current = false; };
+    return () => {
+      mounted.current = false;
+      detailRead.current?.abort();
+    };
   }, []);
   useEffect(() => {
     if (action !== "dispatch" || previousAttempt) return;
@@ -88,6 +103,7 @@ export function ShipmentActionDialog({
       .catch((error: unknown) => {
         if (!controller.signal.aborted) {
           setFailure(error);
+          if (isApiError(error) && error.status === 409) setConflict(true);
           setLoading(false);
         }
       });
@@ -104,6 +120,7 @@ export function ShipmentActionDialog({
   const submit = async () => {
     if (
       submittingRef.current ||
+      !allowed ||
       loading ||
       conflict ||
       (action === "dispatch" && !preview) ||
@@ -113,6 +130,8 @@ export function ShipmentActionDialog({
     submittingRef.current = true;
     setSubmitting(true);
     setFailure(null);
+    onMutationStarted();
+    let committed = false;
     try {
       if (action === "dispatch" && preview)
         onDispatchAttempt({ preview, requestId });
@@ -131,12 +150,19 @@ export function ShipmentActionDialog({
               }),
               ...(action === "mark-failed" && { reason: reason.trim() }),
             };
-      const updated = await commandShipmentApi(shipment.id, action, input);
+      await commandShipmentApi(shipment.id, action, input);
+      committed = true;
+      const controller = new AbortController();
+      detailRead.current = controller;
+      if (!mounted.current) controller.abort();
+      const updated = await getShipmentApi(shipment.id, controller.signal);
       if (mounted.current) onCompleted(updated);
     } catch (error) {
       if (mounted.current) {
         setFailure(error);
-        if (isApiError(error) && error.status === 409) setConflict(true);
+        const unknown = committed || shipmentOutcomeUnknown(error);
+        setUnknownOutcome(unknown && (action !== "dispatch" || committed));
+        if (action !== "dispatch" || committed || !unknown) setConflict(true);
       }
     } finally {
       submittingRef.current = false;
@@ -173,7 +199,9 @@ export function ShipmentActionDialog({
           <dt className="text-muted-foreground">
             {t("shipments.columns.warehouse")}
           </dt>
-          <dd className="min-w-0 break-words">{shipment.warehouseSnapshot.name}</dd>
+          <dd className="min-w-0 break-words">
+            {shipment.warehouseSnapshot.name}
+          </dd>
         </dl>
         {loading ? (
           <p role="status" className="flex items-center gap-2 text-sm">
@@ -212,7 +240,21 @@ export function ShipmentActionDialog({
             </AlertDescription>
           </Alert>
         ) : null}
-        {conflict ? (
+        {!allowed ? (
+          <Alert variant="destructive">
+            <AlertDescription>
+              {t("shipments.errors.forbidden")}
+            </AlertDescription>
+          </Alert>
+        ) : null}
+        {unknownOutcome ? (
+          <Alert variant="destructive">
+            <AlertDescription>
+              {t("shipments.pickList.unknownOutcome")}
+            </AlertDescription>
+          </Alert>
+        ) : null}
+        {conflict && !failure ? (
           <Alert variant="destructive">
             <AlertDescription>
               {t("shipments.errors.SHIPMENT_VERSION_CONFLICT")}
@@ -245,7 +287,9 @@ export function ShipmentActionDialog({
                 </Button>
               ) : null}
               <Button
+                aria-busy={submitting}
                 disabled={
+                  !allowed ||
                   submitting ||
                   loading ||
                   (action === "dispatch" && !preview) ||
@@ -256,7 +300,11 @@ export function ShipmentActionDialog({
                 {submitting ? (
                   <Loader2 className="size-4 animate-spin" />
                 ) : null}
-                {t(`shipments.actions.${action}`)}
+                {t(
+                  submitting
+                    ? "shipments.pickList.submitting"
+                    : `shipments.actions.${action}`
+                )}
               </Button>
             </>
           )}

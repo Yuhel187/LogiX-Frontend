@@ -8,6 +8,13 @@ export const SHIPMENT_PERMISSIONS = {
   complete: "fulfillment:shipment:complete",
 } as const;
 export const SHIPMENT_PAGE_SIZE = 20;
+export const SHIPMENT_COMMAND_TIMEOUT_MS = 30_000;
+export const SHIPMENT_RESOURCE_CHANGED = "logix:shipment-changed";
+export const SHIPMENT_LIST_VIEWS = ["preparation", "ready", "all"] as const;
+export const SHIPMENT_PREPARATION_STATUSES = [
+  "PENDING_PICK",
+  "PICKING",
+] as const satisfies readonly ShipmentStatus[];
 export const SHIPMENT_FAILURE_MAX_LENGTH = 1_000;
 export const SHIPMENT_ACTIONS = [
   "start-picking",

@@ -139,6 +139,30 @@
     "title": "Shipment pool",
     "description": "Prepare confirmed orders and track dispatch and delivery outcomes.",
     "allStatuses": "All statuses",
+    "allInGroup": "All in this group",
+    "orderFilter": "Filtered by order ID",
+    "listLoading": "Loading shipments…",
+    "invalidQuery": "This link contains invalid filters. Choose valid values or reset filters to view the current group.",
+    "tabs": {
+      "label": "Shipment groups",
+      "preparation": "Preparation",
+      "ready": "Ready to ship",
+      "all": "All"
+    },
+    "views": {
+      "preparation": {
+        "description": "Shipments awaiting picking or being picked at the warehouse. Finish packing to move them to Ready to ship.",
+        "empty": "No shipments to prepare match these filters."
+      },
+      "ready": {
+        "description": "Fully packed shipments ready for delivery. Open a shipment to check dispatch progress.",
+        "empty": "No shipments ready for dispatch match these filters."
+      },
+      "all": {
+        "description": "Find shipments in any status, including dispatched, delivered and canceled.",
+        "empty": "No shipments match these filters."
+      }
+    },
     "allWarehouses": "All warehouses",
     "createdFrom": "Created from",
     "createdTo": "Created to",
@@ -146,6 +170,18 @@
     "empty": "No shipments match these filters.",
     "pagination": "Page {page} / {pages} · {total} shipments",
     "items": "Shipment items",
+    "pickList": {
+      "title": "Pick list",
+      "warehouse": "Picking warehouse",
+      "requiredQuantity": "Required quantity",
+      "description": "Check every line and quantity before confirming packing for the entire shipment. This list does not save picking progress per line.",
+      "startSuccess": "Picking has started for this shipment.",
+      "readySuccess": "Packing confirmed. The shipment is ready for dispatch.",
+      "openReady": "View ready shipments",
+      "unknownOutcome": "The outcome is not yet known. Reload the latest status before taking another action. Do not submit the confirmation again.",
+      "stale": "Actions are unavailable for the displayed data. Successfully reload the latest data before continuing.",
+      "submitting": "Confirming and checking the latest status…"
+    },
     "history": "Status history",
     "destination": "Delivery address",
     "actor": "Performed by",
@@ -191,14 +227,14 @@
       "retryPreview": "Reload confirmation details",
       "confirmDescription": "Confirm this change for the shipment shown below.",
       "start-picking": "Start picking",
-      "mark-ready": "Mark ready",
+      "mark-ready": "Confirm packing",
       "dispatch": "Confirm dispatch",
       "mark-delivered": "Confirm delivered",
       "mark-failed": "Confirm delivery failed"
     },
     "confirmations": {
-      "start-picking": "Confirm that preparation is starting for this shipment.",
-      "mark-ready": "Confirm that all items have been prepared and this shipment is ready to dispatch.",
+      "start-picking": "Confirm that picking is starting from this shipment's pick list.",
+      "mark-ready": "Confirm that all items in this shipment have been picked in full and packed. This applies to the entire shipment, does not save progress per line and does not issue stock.",
       "mark-delivered": "Confirm that the customer received the shipment. The related order will be marked completed.",
       "mark-failed": "Confirm that delivery failed and provide a reason. This does not cancel the order or automatically return stock."
     },
@@ -211,6 +247,9 @@
       "rejected": "This shipment could not be dispatched. Reload the latest data and check its status before trying again."
     },
     "errors": {
+      "conflict": "This action cannot be completed in the current state. Reload the latest data before continuing.",
+      "connection": "The connection was interrupted or timed out. Check your connection and reload the latest data.",
+      "unavailable": "The request cannot be processed right now. Reload the latest data before continuing.",
       "generic": "The result of your action is not yet known. Check your connection and refresh to see the status before trying again.",
       "invalidRequest": "Invalid request or date range. Check the selected values before retrying.",
       "unauthorized": "Your session has expired. Sign in again.",
