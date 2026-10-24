@@ -130,6 +130,30 @@
     "title": "Danh sách lô giao hàng",
     "description": "Chuẩn bị đơn đã xác nhận, theo dõi xuất kho và kết quả giao hàng.",
     "allStatuses": "Tất cả trạng thái",
+    "allInGroup": "Tất cả trong nhóm",
+    "orderFilter": "Đang lọc theo mã định danh đơn hàng",
+    "listLoading": "Đang tải danh sách lô giao…",
+    "invalidQuery": "Liên kết có bộ lọc không hợp lệ. Chọn lại giá trị hoặc xóa bộ lọc để xem danh sách trong nhóm hiện tại.",
+    "tabs": {
+      "label": "Nhóm lô giao hàng",
+      "preparation": "Chuẩn bị hàng",
+      "ready": "Chờ giao",
+      "all": "Tất cả"
+    },
+    "views": {
+      "preparation": {
+        "description": "Các lô chờ nhặt hoặc đang nhặt hàng tại kho. Hoàn tất đóng gói để chuyển sang Chờ giao.",
+        "empty": "Không có lô giao cần chuẩn bị phù hợp với bộ lọc."
+      },
+      "ready": {
+        "description": "Các lô đã hoàn tất đóng gói và sẵn sàng giao. Mở lô giao để kiểm tra tiến trình xuất kho.",
+        "empty": "Không có lô giao chờ giao phù hợp với bộ lọc."
+      },
+      "all": {
+        "description": "Tra cứu lô giao ở tất cả trạng thái, bao gồm đã xuất kho, đã giao và đã hủy.",
+        "empty": "Không có lô giao phù hợp với bộ lọc."
+      }
+    },
     "allWarehouses": "Tất cả kho",
     "createdFrom": "Tạo từ ngày",
     "createdTo": "Tạo đến ngày",
@@ -137,6 +161,18 @@
     "empty": "Không có lô giao phù hợp với bộ lọc.",
     "pagination": "Trang {page} / {pages} · {total} lô giao",
     "items": "Hàng hóa trong lô",
+    "pickList": {
+      "title": "Danh sách nhặt hàng",
+      "warehouse": "Kho lấy hàng",
+      "requiredQuantity": "Số lượng cần lấy",
+      "description": "Đối chiếu từng dòng hàng và số lượng trước khi xác nhận đóng gói toàn lô. Danh sách không lưu tiến độ nhặt từng dòng.",
+      "startSuccess": "Đã bắt đầu nhặt hàng cho lô giao.",
+      "readySuccess": "Đã xác nhận đóng gói. Lô giao đã sẵn sàng giao.",
+      "openReady": "Xem nhóm chờ giao",
+      "unknownOutcome": "Chưa xác định được kết quả. Hãy tải lại trạng thái mới nhất trước khi thao tác tiếp, không gửi lại xác nhận.",
+      "stale": "Chưa thể thao tác với dữ liệu đang hiển thị. Hãy tải dữ liệu mới nhất thành công trước khi tiếp tục.",
+      "submitting": "Đang xác nhận và kiểm tra trạng thái…"
+    },
     "history": "Lịch sử trạng thái",
     "destination": "Địa chỉ giao hàng",
     "actor": "Người thực hiện",
@@ -162,8 +198,8 @@
       "unit": "Đơn vị"
     },
     "status": {
-      "PENDING_PICK": "Chờ chuẩn bị",
-      "PICKING": "Đang chuẩn bị",
+      "PENDING_PICK": "Chờ nhặt hàng",
+      "PICKING": "Đang nhặt hàng",
       "READY_TO_SHIP": "Sẵn sàng xuất kho",
       "DISPATCHED": "Đã xuất kho",
       "DELIVERED": "Đã giao",
@@ -181,15 +217,15 @@
       "dismiss": "Đóng",
       "retryPreview": "Tải lại thông tin xác nhận",
       "confirmDescription": "Xác nhận thay đổi cho lô giao dưới đây.",
-      "start-picking": "Bắt đầu chuẩn bị",
-      "mark-ready": "Đánh dấu sẵn sàng",
+      "start-picking": "Bắt đầu nhặt hàng",
+      "mark-ready": "Xác nhận đóng gói",
       "dispatch": "Xác nhận xuất kho",
       "mark-delivered": "Xác nhận đã giao",
       "mark-failed": "Xác nhận giao thất bại"
     },
     "confirmations": {
-      "start-picking": "Xác nhận bắt đầu chuẩn bị hàng cho lô giao này.",
-      "mark-ready": "Xác nhận đã chuẩn bị đủ hàng và lô giao đã sẵn sàng xuất kho.",
+      "start-picking": "Xác nhận bắt đầu nhặt hàng theo danh sách của lô giao này.",
+      "mark-ready": "Xác nhận đã nhặt đủ và đóng gói toàn bộ hàng của lô giao này. Thao tác áp dụng cho toàn lô, không lưu tiến độ từng dòng và chưa xuất kho.",
       "mark-delivered": "Xác nhận khách hàng đã nhận hàng. Đơn hàng liên quan sẽ được cập nhật hoàn tất.",
       "mark-failed": "Xác nhận giao hàng thất bại và nhập lý do. Thao tác này không hủy đơn hay tự hoàn trả tồn kho."
     },
@@ -202,6 +238,9 @@
       "rejected": "Không thể xuất kho lô giao này. Hãy tải dữ liệu mới nhất và kiểm tra trạng thái trước khi thử lại."
     },
     "errors": {
+      "conflict": "Không thể thực hiện thao tác với trạng thái hiện tại. Tải dữ liệu mới nhất trước khi tiếp tục.",
+      "connection": "Kết nối bị gián đoạn hoặc quá thời gian chờ. Hãy kiểm tra kết nối và tải dữ liệu mới nhất.",
+      "unavailable": "Tạm thời chưa thể xử lý yêu cầu. Hãy tải dữ liệu mới nhất trước khi tiếp tục.",
       "generic": "Chưa xác định được kết quả thao tác. Hãy kiểm tra kết nối và làm mới để xem trạng thái trước khi thực hiện lại.",
       "invalidRequest": "Yêu cầu hoặc khoảng ngày không hợp lệ. Kiểm tra lại giá trị đã chọn trước khi thử lại.",
       "unauthorized": "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.",

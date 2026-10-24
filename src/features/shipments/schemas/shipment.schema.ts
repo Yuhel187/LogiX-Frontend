@@ -116,12 +116,17 @@ export interface DispatchInput {
   requestId: string;
   confirmed: true;
 }
-export interface ShipmentListParams {
+export type ShipmentListParams = {
   warehouseId?: string;
   orderId?: string;
-  status?: ShipmentStatus;
   page?: number;
   pageSize?: number;
   createdFrom?: string;
   createdTo?: string;
-}
+} & (
+  | { status?: ShipmentStatus; statuses?: never }
+  | {
+      status?: never;
+      statuses: readonly [ShipmentStatus, ...ShipmentStatus[]];
+    }
+);
