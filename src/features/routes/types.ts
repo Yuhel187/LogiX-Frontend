@@ -140,7 +140,11 @@ export function mapProposedRouteToRoutePlan(dto: ProposedRouteBackendDTO): Route
     solverMethod: dto.solver_method,
     distanceProvider: dto.distance_provider,
     stops,
-    osrmPolyline: dto.polyline || [],
+    // OSRM returns GeoJSON coordinates in [lng, lat] format.
+    // Leaflet requires [lat, lng]. We convert them here.
+    osrmPolyline: (dto.polyline || []).map(([c1, c2]): [number, number] =>
+      c1 > c2 ? [c2, c1] : [c1, c2]
+    ),
     baselinePolyline,
     recommendedAction: dto.recommended_action,
   };

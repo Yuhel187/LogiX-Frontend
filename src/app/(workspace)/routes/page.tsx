@@ -6,7 +6,6 @@ import {
   Loader2,
   RefreshCw,
   Route as RouteIcon,
-  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,7 +42,10 @@ export default function RoutesPage() {
   }, []);
 
   React.useEffect(() => {
-    loadRoute();
+    const timer = setTimeout(() => {
+      void loadRoute();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadRoute]);
 
   const handleReoptimize = async () => {
@@ -95,19 +97,6 @@ export default function RoutesPage() {
           >
             <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${isReoptimizing ? "animate-spin" : ""}`} />
             {isReoptimizing ? "Đang tính toán…" : "Chạy lại tối ưu"}
-          </Button>
-
-          <Button
-            size="sm"
-            className="text-xs h-9 bg-primary text-primary-foreground shadow-xs"
-            onClick={() => {
-              toast.info("Gợi ý từ Copilot", {
-                description: "Bạn có thể mở Copilot ở góc phải màn hình và hỏi: 'Tối ưu tuyến hôm nay giúp tôi'.",
-              });
-            }}
-          >
-            <Sparkles className="w-3.5 h-3.5 mr-1.5 text-amber-300" />
-            Hỏi Copilot AI
           </Button>
         </div>
       </div>

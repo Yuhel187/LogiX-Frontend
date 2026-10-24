@@ -15,6 +15,7 @@ import {
   Warehouse,
   Building2,
   Users,
+  Contact,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -89,9 +90,13 @@ export function AppSidebar() {
         ],
       },
       {
-        // Customers joins this group once its screen lands.
         label: t("masterData.navTitle"),
         items: [
+          {
+            title: t("masterData.customer.title"),
+            href: "/master-data/customers",
+            icon: Contact,
+          },
           {
             title: t("masterData.warehouse.title"),
             href: "/master-data/warehouses",
