@@ -1,5 +1,7 @@
 "use client";
 
+import { formatIdentityError } from "../utils/error-formatter";
+
 import * as React from "react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -29,6 +31,7 @@ interface TenantData {
   code: string;
   name: string;
   logoUrl?: string | null;
+  role: string;
 }
 
 function OrgSettingsForm({
@@ -42,8 +45,13 @@ function OrgSettingsForm({
   isDefaultTenant: boolean;
   onClose: () => void;
 }) {
-  const { updateOrganization, setDefaultTenant } = useAuth();
+  const { updateOrganization, setDefaultTenant, isSuperAdmin } = useAuth();
   const { t } = useTranslation();
+  const canEdit =
+    isSuperAdmin ||
+    targetTenant.role === "OWNER" ||
+    targetTenant.role === "ADMIN";
+  const hasMembership = targetTenant.role !== "SUPER_ADMIN";
 
   const [name, setName] = useState(targetTenant.name || "");
   const [logoUrl, setLogoUrl] = useState(targetTenant.logoUrl || "");
@@ -55,7 +63,7 @@ function OrgSettingsForm({
     e.preventDefault();
     const trimmedName = name.trim();
     if (!trimmedName || trimmedName.length < 2) {
-      setError(t("tenant.orgNameLabel"));
+      setError("phase5.orgNameInvalid");
       return;
     }
 
@@ -71,9 +79,8 @@ function OrgSettingsForm({
       toast.success(t("tenant.saveSuccess"));
       onClose();
     } catch (err: unknown) {
-      const msg =
-        err instanceof Error ? err.message : t("tenant.saveError");
-      setError(msg);
+      const msg = formatIdentityError(err, t, "tenant.saveError");
+      setError("tenant.saveError");
       toast.error(msg);
     } finally {
       setIsSaving(false);
@@ -88,8 +95,7 @@ function OrgSettingsForm({
       await setDefaultTenant(targetTenantId);
       toast.success(t("tenant.setDefaultSuccess"));
     } catch (err: unknown) {
-      const msg =
-        err instanceof Error ? err.message : t("tenant.setDefaultError");
+      const msg = formatIdentityError(err, t, "tenant.setDefaultError");
       toast.error(msg);
     } finally {
       setIsSettingDefault(false);
@@ -114,7 +120,7 @@ function OrgSettingsForm({
         <form onSubmit={handleSaveGeneral} className="space-y-3.5">
           {error && (
             <div className="rounded-md bg-destructive/10 p-2.5 text-xs text-destructive font-medium">
-              {error}
+              {t(error)}
             </div>
           )}
 
@@ -130,7 +136,7 @@ function OrgSettingsForm({
               id="settings-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              disabled={isSaving}
+              disabled={isSaving || !canEdit}
               required
               minLength={2}
             />
@@ -163,7 +169,7 @@ function OrgSettingsForm({
               placeholder={t("tenant.orgLogoPlaceholder")}
               value={logoUrl}
               onChange={(e) => setLogoUrl(e.target.value)}
-              disabled={isSaving}
+              disabled={isSaving || !canEdit}
             />
           </div>
 
@@ -172,11 +178,14 @@ function OrgSettingsForm({
               type="button"
               variant="outline"
               onClick={onClose}
-              disabled={isSaving}
+              disabled={isSaving || !canEdit}
             >
               {t("common.cancel")}
             </Button>
-            <Button type="submit" disabled={isSaving || !name.trim()}>
+            <Button
+              type="submit"
+              disabled={isSaving || !name.trim() || !canEdit}
+            >
               {isSaving ? (
                 <>
                   <Loader2 className="mr-2 size-3.5 animate-spin" />
@@ -213,6 +222,11 @@ function OrgSettingsForm({
               ? t("tenant.isCurrentlyDefault")
               : t("tenant.notDefaultHint")}
           </p>
+          {!hasMembership && (
+            <p className="text-xs text-muted-foreground">
+              {t("phase5.membershipRequired")}
+            </p>
+          )}
         </div>
 
         <div className="flex justify-end pt-2">
@@ -220,7 +234,7 @@ function OrgSettingsForm({
             type="button"
             variant={isDefaultTenant ? "outline" : "default"}
             onClick={handleSetDefault}
-            disabled={isSettingDefault || isDefaultTenant}
+            disabled={isSettingDefault || isDefaultTenant || !hasMembership}
           >
             {isSettingDefault ? (
               <>
@@ -256,7 +270,7 @@ export function OrgSettingsDialog({
     (activeTenant?.id === targetTenantId ? activeTenant : null);
 
   const isDefaultTenant = tenants.some(
-    (t) => t.id === targetTenantId && t.isDefault
+    (t) => t.id === targetTenantId && t.isDefault,
   );
 
   if (!targetTenantId || !targetTenant) {

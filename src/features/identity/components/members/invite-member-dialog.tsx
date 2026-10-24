@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { formatIdentityError } from "../../utils/error-formatter";
+
+import React, { useState, useEffect, useEffectEvent } from "react";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +23,7 @@ import { useAuth } from "@/lib/auth";
 import { getRolesApi } from "../../api/roles.api";
 import { createInvitationApi } from "../../api/invitations.api";
 import type { RoleItem } from "../../schemas/role.schema";
+import { formatDateTime } from "@/lib/format";
 
 interface InviteMemberDialogProps {
   open: boolean;
@@ -35,13 +38,14 @@ export function InviteMemberDialog({
   tenantId,
   onSuccess,
 }: InviteMemberDialogProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { activeTenant, isSuperAdmin, isOwner } = useAuth();
 
   const [email, setEmail] = useState("");
   const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
   const [roles, setRoles] = useState<RoleItem[]>([]);
   const [isLoadingRoles, setIsLoadingRoles] = useState(false);
+  const [rolesLoaded, setRolesLoaded] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [inviteResult, setInviteResult] = useState<{
     inviteLink: string;
@@ -51,8 +55,12 @@ export function InviteMemberDialog({
   const [emailError, setEmailError] = useState("");
 
   const effectiveTenantId = tenantId || activeTenant?.id;
+  const notifyLoadError = useEffectEvent((err: unknown) => {
+    toast.error(formatIdentityError(err, t, "tenant.loadRolesError"));
+  });
 
   const handleDialogChange = (nextOpen: boolean) => {
+    if (isSubmitting) return;
     if (!nextOpen) {
       setEmail("");
       setSelectedRoleIds([]);
@@ -70,12 +78,16 @@ export function InviteMemberDialog({
     let isMounted = true;
     (async () => {
       setIsLoadingRoles(true);
+      setRolesLoaded(false);
+      setSelectedRoleIds([]);
+      setRoles([]);
       try {
         const data = await getRolesApi(effectiveTenantId);
         if (isMounted) {
           // Bỏ qua vai trò SUPER_ADMIN
           const availableRoles = data.filter((r) => r.code !== "SUPER_ADMIN");
           setRoles(availableRoles);
+          setRolesLoaded(true);
 
           // Mặc định chọn vai trò MEMBER nếu có
           const memberRole = availableRoles.find((r) => r.code === "MEMBER");
@@ -84,8 +96,7 @@ export function InviteMemberDialog({
           }
         }
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Không thể tải danh sách vai trò";
-        toast.error(msg);
+        if (isMounted) notifyLoadError(err);
       } finally {
         if (isMounted) {
           setIsLoadingRoles(false);
@@ -100,7 +111,9 @@ export function InviteMemberDialog({
 
   const toggleRole = (roleId: string) => {
     setSelectedRoleIds((prev) =>
-      prev.includes(roleId) ? prev.filter((id) => id !== roleId) : [...prev, roleId]
+      prev.includes(roleId)
+        ? prev.filter((id) => id !== roleId)
+        : [...prev, roleId],
     );
   };
 
@@ -109,20 +122,23 @@ export function InviteMemberDialog({
     const cleanEmail = email.trim();
 
     if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
-      setEmailError("Địa chỉ email không hợp lệ");
+      setEmailError("phase5.emailInvalid");
       return;
     }
     if (selectedRoleIds.length === 0) {
-      toast.error("Vui lòng chọn ít nhất một vai trò");
+      toast.error(t("phase5.rolesRequired"));
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const res = await createInvitationApi({
-        email: cleanEmail,
-        roleIds: selectedRoleIds,
-      }, effectiveTenantId);
+      const res = await createInvitationApi(
+        {
+          email: cleanEmail,
+          roleIds: selectedRoleIds,
+        },
+        effectiveTenantId,
+      );
 
       setInviteResult({
         inviteLink: res.inviteLink,
@@ -132,19 +148,23 @@ export function InviteMemberDialog({
       toast.success(t("iam.invitations.sendSuccess", { email: cleanEmail }));
       onSuccess();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Gửi lời mời thất bại";
+      const msg = formatIdentityError(err, t, "phase5.sendInvitationError");
       toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleCopyLink = () => {
+  const handleCopyLink = async () => {
     if (!inviteResult?.inviteLink) return;
-    navigator.clipboard.writeText(inviteResult.inviteLink);
-    setCopied(true);
-    toast.success(t("iam.invitations.copied"));
-    setTimeout(() => setCopied(false), 2500);
+    try {
+      await navigator.clipboard.writeText(inviteResult.inviteLink);
+      setCopied(true);
+      toast.success(t("iam.invitations.copied"));
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      toast.error(t("phase5.copyError"));
+    }
   };
 
   return (
@@ -158,17 +178,23 @@ export function InviteMemberDialog({
                 <Check className="h-6 w-6" />
               </div>
               <DialogTitle className="text-center text-lg font-bold">
-                Tạo lời mời thành công!
+                {t("phase5.invitationCreated")}
               </DialogTitle>
               <DialogDescription className="text-center text-xs text-muted-foreground">
-                Đã gửi lời mời tham gia đến <span className="font-semibold text-foreground">{email}</span>. Bạn có thể sao chép liên kết dưới đây để gửi trực tiếp.
+                {t("phase5.invitationCreatedDesc", { email })}
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-2">
-              <Label className="text-xs font-medium">Liên kết mời tham gia</Label>
+              <Label
+                htmlFor="created-invite-link"
+                className="text-xs font-medium"
+              >
+                {t("phase5.inviteLinkLabel")}
+              </Label>
               <div className="flex items-center gap-2">
                 <Input
+                  id="created-invite-link"
                   readOnly
                   value={inviteResult.inviteLink}
                   className="font-mono text-xs select-all bg-muted/40 h-9"
@@ -194,7 +220,9 @@ export function InviteMemberDialog({
                 </Button>
               </div>
               <p className="text-[11px] text-muted-foreground">
-                Liên kết này có hiệu lực trong 7 ngày (hết hạn lúc {new Date(inviteResult.expiresAt).toLocaleDateString("vi-VN")}).
+                {t("phase5.inviteExpires", {
+                  date: formatDateTime(inviteResult.expiresAt, locale),
+                })}
               </p>
             </div>
 
@@ -218,7 +246,8 @@ export function InviteMemberDialog({
               {/* Nhập Email */}
               <div className="space-y-1.5">
                 <Label htmlFor="invite-email">
-                  {t("iam.invitations.emailLabel")} <span className="text-destructive">*</span>
+                  {t("iam.invitations.emailLabel")}{" "}
+                  <span className="text-destructive">*</span>
                 </Label>
                 <div className="relative flex items-center">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
@@ -236,7 +265,7 @@ export function InviteMemberDialog({
                   />
                 </div>
                 {emailError && (
-                  <p className="text-xs text-destructive">{emailError}</p>
+                  <p className="text-xs text-destructive">{t(emailError)}</p>
                 )}
               </div>
 
@@ -244,7 +273,8 @@ export function InviteMemberDialog({
               <div className="space-y-2">
                 <div>
                   <Label className="text-xs font-semibold">
-                    {t("iam.invitations.rolesLabel")} <span className="text-destructive">*</span>
+                    {t("iam.invitations.rolesLabel")}{" "}
+                    <span className="text-destructive">*</span>
                   </Label>
                   <p className="text-[11px] text-muted-foreground">
                     {t("iam.invitations.rolesHint")}
@@ -254,39 +284,55 @@ export function InviteMemberDialog({
                 {isLoadingRoles ? (
                   <div className="flex items-center justify-center py-6 text-xs text-muted-foreground gap-2">
                     <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                    Đang tải danh sách vai trò...
+                    {t("phase5.loadingRoles")}
                   </div>
+                ) : !rolesLoaded ? (
+                  <p role="alert" className="text-xs text-destructive">
+                    {t("phase5.loadFailed")}
+                  </p>
                 ) : (
                   <div className="max-h-48 overflow-y-auto rounded-lg border border-border/70 p-2 space-y-1 divide-y divide-border/40">
                     {roles.map((r) => {
                       const isOwnerRole = r.code === "OWNER";
                       // Chỉ Owner hoặc SuperAdmin mới được chỉ định vai trò Owner
-                      const canAssignThisRole = !isOwnerRole || isSuperAdmin || isOwner;
+                      const canAssignThisRole =
+                        !isOwnerRole || isSuperAdmin || isOwner;
                       const isChecked = selectedRoleIds.includes(r.id);
 
                       return (
                         <div
                           key={r.id}
                           className={`flex items-start gap-2.5 pt-1.5 first:pt-0 pb-1.5 ${
-                            !canAssignThisRole ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                            !canAssignThisRole
+                              ? "opacity-50 cursor-not-allowed"
+                              : "cursor-pointer"
                           }`}
                         >
                           <Checkbox
                             id={`role-${r.id}`}
                             checked={isChecked}
                             disabled={!canAssignThisRole || isSubmitting}
-                            onCheckedChange={() => canAssignThisRole && toggleRole(r.id)}
+                            onCheckedChange={() =>
+                              canAssignThisRole && toggleRole(r.id)
+                            }
                             className="mt-0.5"
                           />
                           <label
                             htmlFor={`role-${r.id}`}
                             className={`flex-1 text-xs select-none ${
-                              canAssignThisRole ? "cursor-pointer" : "cursor-not-allowed"
+                              canAssignThisRole
+                                ? "cursor-pointer"
+                                : "cursor-not-allowed"
                             }`}
                           >
                             <div className="flex items-center gap-1.5">
-                              <span className="font-medium text-foreground">{r.name}</span>
-                              <Badge variant={r.isSystem ? "default" : "secondary"} className="text-[9px] px-1 py-0">
+                              <span className="font-medium text-foreground">
+                                {r.name}
+                              </span>
+                              <Badge
+                                variant={r.isSystem ? "default" : "secondary"}
+                                className="text-[9px] px-1 py-0"
+                              >
                                 {r.code}
                               </Badge>
                             </div>
@@ -321,7 +367,16 @@ export function InviteMemberDialog({
               >
                 {t("common.cancel")}
               </Button>
-              <Button type="submit" disabled={isSubmitting || isLoadingRoles} className="gap-1.5">
+              <Button
+                type="submit"
+                disabled={
+                  isSubmitting ||
+                  isLoadingRoles ||
+                  !rolesLoaded ||
+                  selectedRoleIds.length === 0
+                }
+                className="gap-1.5"
+              >
                 {isSubmitting ? (
                   <>
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />

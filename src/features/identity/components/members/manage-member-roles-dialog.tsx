@@ -1,14 +1,11 @@
 "use client";
 
+import { formatIdentityError } from "../../utils/error-formatter";
+
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useEffectEvent } from "react";
 import { toast } from "sonner";
-import {
-  Shield,
-  ShieldAlert,
-  Loader2,
-  Check,
-} from "lucide-react";
+import { Shield, ShieldAlert, Loader2, Check } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -20,7 +17,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { getRolesApi, assignMemberRolesApi, getMembersApi } from "../../api/roles.api";
+import {
+  getRolesApi,
+  assignMemberRolesApi,
+  getMembersApi,
+} from "../../api/roles.api";
 import type { RoleItem, MemberWithRolesItem } from "../../schemas/role.schema";
 import type { OrgMember } from "../../schemas/auth.schema";
 import { useTranslation } from "@/lib/i18n";
@@ -46,8 +47,12 @@ export function ManageMemberRolesDialog({
   const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   const isOwner = member?.role === "OWNER";
+  const notifyLoadError = useEffectEvent((err: unknown) => {
+    toast.error(formatIdentityError(err, t, "tenant.loadRolesError"));
+  });
 
   useEffect(() => {
     if (!open || !member) return;
@@ -55,44 +60,58 @@ export function ManageMemberRolesDialog({
     let isMounted = true;
     (async () => {
       setIsLoading(true);
+      setLoadFailed(false);
+      setSelectedRoleIds([]);
+      setRoles([]);
       try {
         const [allRoles, membersWithRoles] = await Promise.all([
-          getRolesApi(tenantId).catch(() => [] as RoleItem[]),
-          getMembersApi(tenantId).catch(() => [] as MemberWithRolesItem[]),
+          getRolesApi(tenantId),
+          getMembersApi(tenantId),
         ]);
 
         if (!isMounted) return;
 
         // Bỏ role SUPER_ADMIN và OWNER khỏi danh sách vai trò có thể gán thông thường
         const assignableRoles = allRoles.filter(
-          (r) => r.code !== "SUPER_ADMIN" && r.code !== "OWNER"
+          (r) => r.code !== "SUPER_ADMIN" && r.code !== "OWNER",
         );
         setRoles(assignableRoles);
 
         // Tìm vai trò hiện tại của thành viên
         const currentMemberData = membersWithRoles.find(
-          (m: MemberWithRolesItem) => m.userId === member.userId || m.id === member.id
+          (m: MemberWithRolesItem) =>
+            m.userId === member.userId || m.id === member.id,
         );
 
-        if (currentMemberData && Array.isArray(currentMemberData.roles) && currentMemberData.roles.length > 0) {
+        if (
+          currentMemberData &&
+          Array.isArray(currentMemberData.roles) &&
+          currentMemberData.roles.length > 0
+        ) {
           const currentRoleIds = currentMemberData.roles
             .map((r: RoleItem) => r.id)
             .filter((id: string) => assignableRoles.some((ar) => ar.id === id));
           setSelectedRoleIds(currentRoleIds);
         } else {
           // Fallback: Tìm role khớp với member.role code
-          const matchedRole = assignableRoles.find((r) => r.code === member.role);
+          const matchedRole = assignableRoles.find(
+            (r) => r.code === member.role,
+          );
           if (matchedRole) {
             setSelectedRoleIds([matchedRole.id]);
           } else {
             // Mặc định chọn role MEMBER nếu có
-            const defaultMemberRole = assignableRoles.find((r) => r.code === "MEMBER");
+            const defaultMemberRole = assignableRoles.find(
+              (r) => r.code === "MEMBER",
+            );
             setSelectedRoleIds(defaultMemberRole ? [defaultMemberRole.id] : []);
           }
         }
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : t("tenant.loadRolesError");
-        toast.error(msg);
+        if (isMounted) {
+          setLoadFailed(true);
+          notifyLoadError(err);
+        }
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -101,7 +120,7 @@ export function ManageMemberRolesDialog({
     return () => {
       isMounted = false;
     };
-  }, [open, member, tenantId, t]);
+  }, [open, member, tenantId]);
 
   const handleToggleRole = (roleId: string) => {
     if (isOwner) return;
@@ -121,7 +140,7 @@ export function ManageMemberRolesDialog({
   };
 
   const handleSave = async () => {
-    if (!member) return;
+    if (!member || loadFailed || isLoading) return;
 
     if (isOwner) {
       toast.error(t("tenant.ownerProtectionNotice"));
@@ -136,11 +155,13 @@ export function ManageMemberRolesDialog({
     setIsSubmitting(true);
     try {
       await assignMemberRolesApi(member.userId, selectedRoleIds, tenantId);
-      toast.success(t("tenant.updateRolesSuccess", { name: member.displayName }));
+      toast.success(
+        t("tenant.updateRolesSuccess", { name: member.displayName }),
+      );
       onOpenChange(false);
       onSuccess();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : t("tenant.updateRolesError");
+      const msg = formatIdentityError(err, t, "tenant.updateRolesError");
       toast.error(msg);
     } finally {
       setIsSubmitting(false);
@@ -150,6 +171,11 @@ export function ManageMemberRolesDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg p-6 rounded-2xl">
+        {loadFailed && (
+          <p role="alert" className="text-sm text-destructive">
+            {t("phase5.loadFailed")}
+          </p>
+        )}
         <DialogHeader>
           <div className="flex items-center gap-3">
             <div className="size-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20">
@@ -178,7 +204,9 @@ export function ManageMemberRolesDialog({
               />
             ) : (
               <div className="size-10 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold flex items-center justify-center shrink-0 border border-emerald-500/20 text-sm uppercase">
-                {member.displayName ? member.displayName.charAt(0).toUpperCase() : "U"}
+                {member.displayName
+                  ? member.displayName.charAt(0).toUpperCase()
+                  : "U"}
               </div>
             )}
             <div className="min-w-0 flex-1">
@@ -204,7 +232,9 @@ export function ManageMemberRolesDialog({
           <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 text-xs leading-relaxed flex items-start gap-3 mt-1">
             <ShieldAlert className="size-5 shrink-0 mt-0.5 text-amber-500" />
             <div>
-              <strong className="font-semibold block mb-0.5">{t("tenant.ownerCannotBeEditedTitle")}</strong>
+              <strong className="font-semibold block mb-0.5">
+                {t("tenant.ownerCannotBeEditedTitle")}
+              </strong>
               {t("tenant.ownerCannotBeEditedDesc")}
             </div>
           </div>
@@ -241,7 +271,7 @@ export function ManageMemberRolesDialog({
                         "flex items-start gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none",
                         isChecked
                           ? "bg-emerald-500/5 border-emerald-500/40 shadow-2xs"
-                          : "bg-background border-border/70 hover:bg-muted/30 hover:border-border"
+                          : "bg-background border-border/70 hover:bg-muted/30 hover:border-border",
                       )}
                     >
                       <Checkbox
@@ -262,11 +292,17 @@ export function ManageMemberRolesDialog({
                             {role.code}
                           </span>
                           {role.isSystem ? (
-                            <Badge variant="outline" className="text-[10px] py-0 px-1.5 font-normal text-muted-foreground">
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] py-0 px-1.5 font-normal text-muted-foreground"
+                            >
                               {t("iam.roles.systemRoleBadge")}
                             </Badge>
                           ) : (
-                            <Badge variant="secondary" className="text-[10px] py-0 px-1.5 font-normal bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                            <Badge
+                              variant="secondary"
+                              className="text-[10px] py-0 px-1.5 font-normal bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20"
+                            >
                               {t("iam.roles.customRoleBadge")}
                             </Badge>
                           )}
@@ -300,7 +336,12 @@ export function ManageMemberRolesDialog({
             <Button
               type="button"
               onClick={handleSave}
-              disabled={isSubmitting || isLoading || selectedRoleIds.length === 0}
+              disabled={
+                isSubmitting ||
+                isLoading ||
+                loadFailed ||
+                selectedRoleIds.length === 0
+              }
               className="h-10 px-5 rounded-xl font-semibold gap-2 cursor-pointer shadow-xs bg-emerald-600 hover:bg-emerald-500 text-white text-sm"
             >
               {isSubmitting ? (
