@@ -1,5 +1,7 @@
 "use client";
 
+import { formatIdentityError } from "../../utils/error-formatter";
+
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Table,
@@ -45,6 +47,7 @@ export function RoleListView({ tenantId }: RoleListViewProps) {
 
   const [roles, setRoles] = useState<RoleItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   // Dialog states
@@ -63,11 +66,13 @@ export function RoleListView({ tenantId }: RoleListViewProps) {
 
   const loadRoles = useCallback(async () => {
     setIsLoading(true);
+    setLoadFailed(false);
     try {
       const data = await getRolesApi(effectiveTenantId);
       setRoles(data);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : t("tenant.loadRolesError");
+      setLoadFailed(true);
+      const msg = formatIdentityError(err, t, "tenant.loadRolesError");
       toast.error(msg);
     } finally {
       setIsLoading(false);
@@ -84,7 +89,8 @@ export function RoleListView({ tenantId }: RoleListViewProps) {
         }
       } catch (err: unknown) {
         if (isMounted) {
-          const msg = err instanceof Error ? err.message : t("tenant.loadRolesError");
+          setLoadFailed(true);
+          const msg = formatIdentityError(err, t, "tenant.loadRolesError");
           toast.error(msg);
         }
       } finally {
@@ -106,7 +112,7 @@ export function RoleListView({ tenantId }: RoleListViewProps) {
       (r) =>
         r.name.toLowerCase().includes(q) ||
         r.code.toLowerCase().includes(q) ||
-        (r.description && r.description.toLowerCase().includes(q))
+        (r.description && r.description.toLowerCase().includes(q)),
     );
   }, [roles, searchQuery]);
 
@@ -178,13 +184,29 @@ export function RoleListView({ tenantId }: RoleListViewProps) {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-32 text-center text-xs text-muted-foreground">
+                <TableCell
+                  colSpan={6}
+                  className="h-32 text-center text-xs text-muted-foreground"
+                >
                   {t("common.loading")}...
+                </TableCell>
+              </TableRow>
+            ) : loadFailed ? (
+              <TableRow>
+                <TableCell
+                  colSpan={6}
+                  role="alert"
+                  className="p-6 text-sm text-destructive"
+                >
+                  {t("phase5.loadFailed")}
                 </TableCell>
               </TableRow>
             ) : filteredRoles.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-32 text-center text-xs text-muted-foreground">
+                <TableCell
+                  colSpan={6}
+                  className="h-32 text-center text-xs text-muted-foreground"
+                >
                   {t("common.noData")}
                 </TableCell>
               </TableRow>
@@ -194,7 +216,10 @@ export function RoleListView({ tenantId }: RoleListViewProps) {
                 const isSystemRole = Boolean(role.isSystem);
 
                 return (
-                  <TableRow key={role.id} className="hover:bg-muted/30 transition-colors">
+                  <TableRow
+                    key={role.id}
+                    className="hover:bg-muted/30 transition-colors"
+                  >
                     {/* Tên vai trò & Mô tả */}
                     <TableCell className="py-3">
                       <div className="flex items-center gap-2">
@@ -215,7 +240,10 @@ export function RoleListView({ tenantId }: RoleListViewProps) {
                           <div className="font-medium text-xs text-foreground flex items-center gap-1.5">
                             {role.name}
                             {isOwnerRole && (
-                              <Badge variant="outline" className="text-[10px] text-amber-600 border-amber-500/30">
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] text-amber-600 border-amber-500/30"
+                              >
                                 {t("iam.roles.ownerFullAccess")}
                               </Badge>
                             )}
@@ -237,11 +265,17 @@ export function RoleListView({ tenantId }: RoleListViewProps) {
                     {/* Phân loại badge */}
                     <TableCell>
                       {isSystemRole ? (
-                        <Badge variant="default" className="text-[10px] font-medium bg-primary/90">
+                        <Badge
+                          variant="default"
+                          className="text-[10px] font-medium bg-primary/90"
+                        >
                           {t("iam.roles.systemRoleBadge")}
                         </Badge>
                       ) : (
-                        <Badge variant="secondary" className="text-[10px] font-medium">
+                        <Badge
+                          variant="secondary"
+                          className="text-[10px] font-medium"
+                        >
                           {t("iam.roles.customRoleBadge")}
                         </Badge>
                       )}
@@ -264,7 +298,10 @@ export function RoleListView({ tenantId }: RoleListViewProps) {
                       ) : (
                         <span className="font-mono text-xs font-medium text-foreground">
                           {t("iam.roles.permissionsCount", {
-                            count: role.permissionCount || role.permissionIds?.length || 0,
+                            count:
+                              role.permissionCount ||
+                              role.permissionIds?.length ||
+                              0,
                           })}
                         </span>
                       )}
@@ -280,6 +317,7 @@ export function RoleListView({ tenantId }: RoleListViewProps) {
                             disabled
                             className="h-8 w-8 p-0 text-muted-foreground cursor-not-allowed"
                             title={t("iam.roles.ownerFullAccess")}
+                            aria-label={t("iam.roles.ownerFullAccess")}
                           >
                             <Lock className="h-3.5 w-3.5" />
                           </Button>
@@ -291,13 +329,16 @@ export function RoleListView({ tenantId }: RoleListViewProps) {
                               size="xs"
                               className="h-8 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground"
                               title={t("iam.matrix.title")}
+                              aria-label={t("iam.matrix.title")}
                               onClick={() => {
                                 setRoleForMatrix(role);
                                 setMatrixOpen(true);
                               }}
                             >
                               <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-                              <span className="hidden md:inline">{t("iam.matrix.title")}</span>
+                              <span className="hidden md:inline">
+                                {t("iam.matrix.title")}
+                              </span>
                             </Button>
 
                             {/* Nút chỉnh sửa (chỉ cho custom role) */}
@@ -307,6 +348,7 @@ export function RoleListView({ tenantId }: RoleListViewProps) {
                                 size="xs"
                                 className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
                                 title={t("iam.roles.editRole")}
+                                aria-label={t("iam.roles.editRole")}
                                 onClick={() => {
                                   setRoleToEdit(role);
                                   setCreateEditOpen(true);
@@ -323,6 +365,7 @@ export function RoleListView({ tenantId }: RoleListViewProps) {
                                 size="xs"
                                 className="h-8 w-8 p-0 text-destructive/80 hover:text-destructive hover:bg-destructive/10"
                                 title={t("iam.roles.deleteRole")}
+                                aria-label={t("iam.roles.deleteRole")}
                                 onClick={() => {
                                   setRoleToDelete(role);
                                   setDeleteOpen(true);

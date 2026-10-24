@@ -27,19 +27,24 @@ export const roleItemSchema = z.object({
 export type RoleItem = z.infer<typeof roleItemSchema>;
 
 export const createRoleSchema = z.object({
-  name: z.string().min(2, "Tên vai trò phải có ít nhất 2 ký tự").max(100),
+  name: z.string().min(2, "phase5.roleNameMin").max(100, "phase5.roleNameMax"),
   code: z
     .string()
-    .min(2, "Mã vai trò phải có ít nhất 2 ký tự")
-    .max(50)
-    .regex(/^[A-Z0-9_]+$/, "Mã vai trò chỉ chứa chữ in hoa, số và dấu gạch dưới"),
-  description: z.string().max(255).optional(),
+    .min(2, "phase5.roleCodeMin")
+    .max(50, "phase5.roleCodeMax")
+    .regex(/^[A-Z0-9_]+$/, "phase5.roleCodePattern")
+    .refine((value) => value !== "SUPER_ADMIN", "phase5.reservedRole"),
+  description: z.string().max(255, "phase5.descriptionMax").optional(),
 });
 export type CreateRoleFormValues = z.infer<typeof createRoleSchema>;
 
 export const updateRoleSchema = z.object({
-  name: z.string().min(2, "Tên vai trò phải có ít nhất 2 ký tự").max(100).optional(),
-  description: z.string().max(255).optional(),
+  name: z
+    .string()
+    .min(2, "phase5.roleNameMin")
+    .max(100, "phase5.roleNameMax")
+    .optional(),
+  description: z.string().max(255, "phase5.descriptionMax").optional(),
 });
 export type UpdateRoleFormValues = z.infer<typeof updateRoleSchema>;
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { formatIdentityError } from "../../utils/error-formatter";
+
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Table,
@@ -43,36 +45,40 @@ interface InvitationListViewProps {
 }
 
 export function InvitationListView({ tenantId }: InvitationListViewProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { activeTenant, hasPermission, isSuperAdmin, isOwner } = useAuth();
 
   const [invitations, setInvitations] = useState<InvitationItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [now, setNow] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
-  const canManage = isSuperAdmin || isOwner || hasPermission("iam:member:invite");
+  const canManage =
+    isSuperAdmin || isOwner || hasPermission("iam:member:invite");
   const effectiveTenantId = tenantId || activeTenant?.id;
 
   const loadInvitations = useCallback(async () => {
     setIsLoading(true);
+    setLoadFailed(false);
     try {
       const data = await getInvitationsApi(
         statusFilter === "ALL" ? undefined : statusFilter,
-        effectiveTenantId
+        effectiveTenantId,
       );
       setInvitations(data);
       setNow(Date.now());
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Không thể tải danh sách lời mời";
+      setLoadFailed(true);
+      const msg = formatIdentityError(err, t, "phase5.loadInvitationsError");
       toast.error(msg);
     } finally {
       setIsLoading(false);
     }
-  }, [statusFilter, effectiveTenantId]);
+  }, [statusFilter, effectiveTenantId, t]);
 
   useEffect(() => {
     let isMounted = true;
@@ -80,7 +86,7 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
       try {
         const data = await getInvitationsApi(
           statusFilter === "ALL" ? undefined : statusFilter,
-          effectiveTenantId
+          effectiveTenantId,
         );
         if (isMounted) {
           setInvitations(data);
@@ -88,7 +94,12 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
         }
       } catch (err: unknown) {
         if (isMounted) {
-          const msg = err instanceof Error ? err.message : "Không thể tải danh sách lời mời";
+          setLoadFailed(true);
+          const msg = formatIdentityError(
+            err,
+            t,
+            "phase5.loadInvitationsError",
+          );
           toast.error(msg);
         }
       } finally {
@@ -101,7 +112,7 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
     return () => {
       isMounted = false;
     };
-  }, [statusFilter, effectiveTenantId]);
+  }, [statusFilter, effectiveTenantId, t]);
 
   const filteredInvitations = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
@@ -111,7 +122,11 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
         inv.email.toLowerCase().includes(q) ||
         inv.inviter?.displayName?.toLowerCase().includes(q) ||
         inv.inviter?.email.toLowerCase().includes(q) ||
-        inv.roles.some((r) => r.name.toLowerCase().includes(q) || r.code.toLowerCase().includes(q));
+        inv.roles.some(
+          (r) =>
+            r.name.toLowerCase().includes(q) ||
+            r.code.toLowerCase().includes(q),
+        );
 
       const matchesStatus =
         statusFilter === "ALL" || inv.status === statusFilter;
@@ -121,11 +136,18 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
   }, [invitations, searchQuery, statusFilter]);
 
   // Sao chép liên kết mời
-  const handleCopyLink = (token: string) => {
-    const origin = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
-    const inviteUrl = `${origin}/invite?token=${token}`;
-    navigator.clipboard.writeText(inviteUrl);
-    toast.success(t("iam.invitations.copied"));
+  const handleCopyLink = async (id: string) => {
+    setActionLoadingId(id);
+    try {
+      const result = await resendInvitationApi(id, effectiveTenantId);
+      await navigator.clipboard.writeText(result.inviteLink);
+      toast.success(t("iam.invitations.copied"));
+      await loadInvitations();
+    } catch (cause) {
+      toast.error(formatIdentityError(cause, t, "tenant.copyInviteLinkError"));
+    } finally {
+      setActionLoadingId(null);
+    }
   };
 
   // Gửi lại lời mời
@@ -135,12 +157,12 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
       const res = await resendInvitationApi(id, effectiveTenantId);
       toast.success(t("iam.invitations.resendSuccess", { email }));
       if (res.inviteLink) {
-        navigator.clipboard.writeText(res.inviteLink);
+        await navigator.clipboard.writeText(res.inviteLink);
         toast.info(t("iam.invitations.copied"));
       }
       void loadInvitations();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Gửi lại lời mời thất bại";
+      const msg = formatIdentityError(err, t, "tenant.resendInviteError");
       toast.error(msg);
     } finally {
       setActionLoadingId(null);
@@ -155,7 +177,7 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
       toast.success(t("iam.invitations.revokeSuccess"));
       void loadInvitations();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Thu hồi lời mời thất bại";
+      const msg = formatIdentityError(err, t, "tenant.revokeInviteError");
       toast.error(msg);
     } finally {
       setActionLoadingId(null);
@@ -170,7 +192,7 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
       toast.success(t("iam.invitations.deleteSuccess"));
       void loadInvitations();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Xóa lời mời thất bại";
+      const msg = formatIdentityError(err, t, "tenant.deleteInviteError");
       toast.error(msg);
     } finally {
       setActionLoadingId(null);
@@ -180,26 +202,36 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
   // Render status badge
   const renderStatusBadge = (status: string, expiresAt: string) => {
     const isExpired = now > 0 && new Date(expiresAt).getTime() < now;
-    const effectiveStatus = status === "PENDING" && isExpired ? "EXPIRED" : status;
+    const effectiveStatus =
+      status === "PENDING" && isExpired ? "EXPIRED" : status;
 
     switch (effectiveStatus) {
       case "ACCEPTED":
         return (
-          <Badge variant="outline" className="text-emerald-600 bg-emerald-500/10 border-emerald-500/30 gap-1 text-[10px]">
+          <Badge
+            variant="outline"
+            className="text-emerald-600 bg-emerald-500/10 border-emerald-500/30 gap-1 text-[10px]"
+          >
             <CheckCircle2 className="h-3 w-3" />
             {t("iam.invitations.status.accepted")}
           </Badge>
         );
       case "REVOKED":
         return (
-          <Badge variant="secondary" className="text-muted-foreground gap-1 text-[10px]">
+          <Badge
+            variant="secondary"
+            className="text-muted-foreground gap-1 text-[10px]"
+          >
             <Ban className="h-3 w-3" />
             {t("iam.invitations.status.revoked")}
           </Badge>
         );
       case "EXPIRED":
         return (
-          <Badge variant="outline" className="text-amber-600 bg-amber-500/10 border-amber-500/30 gap-1 text-[10px]">
+          <Badge
+            variant="outline"
+            className="text-amber-600 bg-amber-500/10 border-amber-500/30 gap-1 text-[10px]"
+          >
             <AlertCircle className="h-3 w-3" />
             {t("iam.invitations.status.expired")}
           </Badge>
@@ -207,7 +239,10 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
       case "PENDING":
       default:
         return (
-          <Badge variant="outline" className="text-blue-600 bg-blue-500/10 border-blue-500/30 gap-1 text-[10px]">
+          <Badge
+            variant="outline"
+            className="text-blue-600 bg-blue-500/10 border-blue-500/30 gap-1 text-[10px]"
+          >
             <Clock className="h-3 w-3" />
             {t("iam.invitations.status.pending")}
           </Badge>
@@ -225,7 +260,7 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t("common.search") + " email, vai trò..."}
+              placeholder={t("phase5.searchRolesHint")}
               className="pl-9 h-9 text-xs"
             />
           </div>
@@ -243,7 +278,9 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {st === "ALL" ? t("common.all") : t(`iam.invitations.status.${st.toLowerCase()}`)}
+                {st === "ALL"
+                  ? t("common.all")
+                  : t(`iam.invitations.status.${st.toLowerCase()}`)}
               </button>
             ))}
           </div>
@@ -257,7 +294,9 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
             disabled={isLoading}
             className="h-9 gap-1.5 px-3"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`}
+            />
             {t("common.refresh")}
           </Button>
 
@@ -302,31 +341,53 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-32 text-center text-xs text-muted-foreground">
+                <TableCell
+                  colSpan={6}
+                  className="h-32 text-center text-xs text-muted-foreground"
+                >
                   {t("common.loading")}...
+                </TableCell>
+              </TableRow>
+            ) : loadFailed ? (
+              <TableRow>
+                <TableCell
+                  colSpan={6}
+                  role="alert"
+                  className="p-6 text-sm text-destructive"
+                >
+                  {t("phase5.loadFailed")}
                 </TableCell>
               </TableRow>
             ) : filteredInvitations.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-32 text-center text-xs text-muted-foreground">
+                <TableCell
+                  colSpan={6}
+                  className="h-32 text-center text-xs text-muted-foreground"
+                >
                   {t("common.noData")}
                 </TableCell>
               </TableRow>
             ) : (
               filteredInvitations.map((inv) => {
                 const isPending = inv.status === "PENDING";
-                const isExpired = now > 0 && new Date(inv.expiresAt).getTime() < now;
+                const isExpired =
+                  now > 0 && new Date(inv.expiresAt).getTime() < now;
                 const isActionLoading = actionLoadingId === inv.id;
 
                 return (
-                  <TableRow key={inv.id} className="hover:bg-muted/30 transition-colors">
+                  <TableRow
+                    key={inv.id}
+                    className="hover:bg-muted/30 transition-colors"
+                  >
                     {/* Email */}
                     <TableCell className="py-3">
                       <div className="flex items-center gap-2">
                         <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
                           <Mail className="h-4 w-4" />
                         </div>
-                        <span className="font-medium text-xs text-foreground">{inv.email}</span>
+                        <span className="font-medium text-xs text-foreground">
+                          {inv.email}
+                        </span>
                       </div>
                     </TableCell>
 
@@ -336,7 +397,9 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
                         {inv.roles?.map((r) => (
                           <Badge
                             key={r.id}
-                            variant={r.code === "OWNER" ? "default" : "secondary"}
+                            variant={
+                              r.code === "OWNER" ? "default" : "secondary"
+                            }
                             className="text-[10px] font-medium"
                           >
                             {r.name}
@@ -351,7 +414,9 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
                         <span className="text-foreground font-medium block">
                           {inv.inviter?.displayName || t("iam.roles.adminRole")}
                         </span>
-                        <span className="text-[11px] font-mono">{inv.inviter?.email}</span>
+                        <span className="text-[11px] font-mono">
+                          {inv.inviter?.email}
+                        </span>
                       </div>
                     </TableCell>
 
@@ -362,8 +427,10 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
 
                     {/* Expiry */}
                     <TableCell className="text-xs text-muted-foreground">
-                      <span title={new Date(inv.expiresAt).toLocaleString("vi-VN")}>
-                        {new Date(inv.expiresAt).toLocaleDateString("vi-VN")}
+                      <span
+                        title={new Date(inv.expiresAt).toLocaleString(locale)}
+                      >
+                        {new Date(inv.expiresAt).toLocaleDateString(locale)}
                       </span>
                     </TableCell>
 
@@ -377,6 +444,7 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
                             size="xs"
                             className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
                             title={t("iam.invitations.copyLink")}
+                            aria-label={t("iam.invitations.copyLink")}
                             onClick={() => handleCopyLink(inv.id)}
                             disabled={isActionLoading}
                           >
@@ -385,18 +453,24 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
                         )}
 
                         {/* Resend button */}
-                        {canManage && (isPending || isExpired || inv.status === "REVOKED") && (
-                          <Button
-                            variant="ghost"
-                            size="xs"
-                            className="h-8 w-8 p-0 text-muted-foreground hover:text-primary"
-                            title={t("iam.invitations.resend")}
-                            onClick={() => handleResend(inv.id, inv.email)}
-                            disabled={isActionLoading}
-                          >
-                            <RotateCw className={`h-3.5 w-3.5 ${isActionLoading ? "animate-spin" : ""}`} />
-                          </Button>
-                        )}
+                        {canManage &&
+                          (isPending ||
+                            isExpired ||
+                            inv.status === "REVOKED") && (
+                            <Button
+                              variant="ghost"
+                              size="xs"
+                              className="h-8 w-8 p-0 text-muted-foreground hover:text-primary"
+                              title={t("iam.invitations.resend")}
+                              aria-label={t("iam.invitations.resend")}
+                              onClick={() => handleResend(inv.id, inv.email)}
+                              disabled={isActionLoading}
+                            >
+                              <RotateCw
+                                className={`h-3.5 w-3.5 ${isActionLoading ? "animate-spin" : ""}`}
+                              />
+                            </Button>
+                          )}
 
                         {/* Revoke button */}
                         {canManage && isPending && !isExpired && (
@@ -404,7 +478,8 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
                             variant="ghost"
                             size="xs"
                             className="h-8 w-8 p-0 text-amber-600/80 hover:text-amber-600 hover:bg-amber-500/10"
-                            title="Thu hồi lời mời"
+                            title={t("iam.invitations.table.revoke")}
+                            aria-label={t("iam.invitations.table.revoke")}
                             onClick={() => handleRevoke(inv.id)}
                             disabled={isActionLoading}
                           >
@@ -419,6 +494,7 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
                             size="xs"
                             className="h-8 w-8 p-0 text-destructive/80 hover:text-destructive hover:bg-destructive/10"
                             title={t("iam.invitations.delete")}
+                            aria-label={t("iam.invitations.delete")}
                             onClick={() => handleDelete(inv.id)}
                             disabled={isActionLoading}
                           >

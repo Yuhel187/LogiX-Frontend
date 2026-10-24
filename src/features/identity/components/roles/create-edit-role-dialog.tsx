@@ -1,5 +1,7 @@
 "use client";
 
+import { formatIdentityError } from "../../utils/error-formatter";
+
 import React, { useState } from "react";
 import {
   Dialog,
@@ -16,6 +18,7 @@ import { toast } from "sonner";
 import { useTranslation } from "@/lib/i18n";
 import { createRoleApi, updateRoleApi } from "../../api/roles.api";
 import type { RoleItem } from "../../schemas/role.schema";
+import { createRoleSchema, updateRoleSchema } from "../../schemas/role.schema";
 
 interface CreateEditRoleDialogProps {
   open: boolean;
@@ -57,15 +60,15 @@ function RoleFormModalContent({
     e.preventDefault();
     const newErrors: Record<string, string> = {};
 
-    if (!name.trim() || name.trim().length < 2) {
-      newErrors.name = t("iam.roles.roleNamePlaceholder");
-    }
-
-    if (!isEditing) {
-      if (!code.trim() || code.trim().length < 2) {
-        newErrors.code = t("iam.roles.roleCodePlaceholder");
-      } else if (!/^[A-Z0-9_]+$/.test(code.trim())) {
-        newErrors.code = t("iam.roles.codeValidation");
+    const parsed = (isEditing ? updateRoleSchema : createRoleSchema).safeParse({
+      name: name.trim(),
+      code: code.trim(),
+      description: description.trim() || undefined,
+    });
+    if (!parsed.success) {
+      for (const issue of parsed.error.issues) {
+        const field = String(issue.path[0]);
+        if (!newErrors[field]) newErrors[field] = issue.message;
       }
     }
 
@@ -77,23 +80,30 @@ function RoleFormModalContent({
     setIsSubmitting(true);
     try {
       if (isEditing && roleToEdit) {
-        await updateRoleApi(roleToEdit.id, {
-          name: name.trim(),
-          description: description.trim() || undefined,
-        }, tenantId);
-        toast.success(t("common.save"));
+        await updateRoleApi(
+          roleToEdit.id,
+          {
+            name: name.trim(),
+            description: description.trim() || undefined,
+          },
+          tenantId,
+        );
+        toast.success(t("phase5.roleSaved"));
       } else {
-        await createRoleApi({
-          name: name.trim(),
-          code: code.trim(),
-          description: description.trim() || undefined,
-        }, tenantId);
-        toast.success(t("iam.roles.createRole"));
+        await createRoleApi(
+          {
+            name: name.trim(),
+            code: code.trim(),
+            description: description.trim() || undefined,
+          },
+          tenantId,
+        );
+        toast.success(t("phase5.roleSaved"));
       }
       onSuccess();
       onClose();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : t("common.error");
+      const msg = formatIdentityError(err, t, "common.error");
       toast.error(msg);
     } finally {
       setIsSubmitting(false);
@@ -112,7 +122,8 @@ function RoleFormModalContent({
         {/* Tên vai trò */}
         <div className="space-y-1.5">
           <Label htmlFor="role-name">
-            {t("iam.roles.roleName")} <span className="text-destructive">*</span>
+            {t("iam.roles.roleName")}{" "}
+            <span className="text-destructive">*</span>
           </Label>
           <Input
             id="role-name"
@@ -123,17 +134,22 @@ function RoleFormModalContent({
             }}
             placeholder={t("iam.roles.roleNamePlaceholder")}
             disabled={isSubmitting}
-            className={errors.name ? "h-10 rounded-xl border-destructive focus-visible:ring-destructive" : "h-10 rounded-xl"}
+            className={
+              errors.name
+                ? "h-10 rounded-xl border-destructive focus-visible:ring-destructive"
+                : "h-10 rounded-xl"
+            }
           />
           {errors.name && (
-            <p className="text-xs text-destructive">{errors.name}</p>
+            <p className="text-xs text-destructive">{t(errors.name)}</p>
           )}
         </div>
 
         {/* Mã vai trò (Khóa khi chỉnh sửa) */}
         <div className="space-y-1.5">
           <Label htmlFor="role-code">
-            {t("iam.roles.roleCode")} <span className="text-destructive">*</span>
+            {t("iam.roles.roleCode")}{" "}
+            <span className="text-destructive">*</span>
           </Label>
           <Input
             id="role-code"
@@ -141,7 +157,11 @@ function RoleFormModalContent({
             onChange={handleCodeChange}
             placeholder={t("iam.roles.roleCodePlaceholder")}
             disabled={isEditing || isSubmitting}
-            className={errors.code ? "h-10 rounded-xl border-destructive focus-visible:ring-destructive" : "h-10 rounded-xl"}
+            className={
+              errors.code
+                ? "h-10 rounded-xl border-destructive focus-visible:ring-destructive"
+                : "h-10 rounded-xl"
+            }
           />
           {isEditing && (
             <p className="text-[11px] text-muted-foreground">
@@ -149,7 +169,7 @@ function RoleFormModalContent({
             </p>
           )}
           {errors.code && (
-            <p className="text-xs text-destructive">{errors.code}</p>
+            <p className="text-xs text-destructive">{t(errors.code)}</p>
           )}
         </div>
 
@@ -165,6 +185,9 @@ function RoleFormModalContent({
             disabled={isSubmitting}
             className="rounded-xl resize-none"
           />
+          {errors.description && (
+            <p className="text-xs text-destructive">{t(errors.description)}</p>
+          )}
         </div>
       </div>
 
@@ -183,7 +206,11 @@ function RoleFormModalContent({
           disabled={isSubmitting}
           className="h-10 px-5 rounded-xl font-semibold cursor-pointer shadow-xs bg-emerald-600 hover:bg-emerald-500 text-white text-sm"
         >
-          {isSubmitting ? t("common.saving") : isEditing ? t("common.save") : t("iam.roles.createRole")}
+          {isSubmitting
+            ? t("common.saving")
+            : isEditing
+              ? t("common.save")
+              : t("iam.roles.createRole")}
         </Button>
       </DialogFooter>
     </form>

@@ -13,6 +13,10 @@ import {
   legalProfileFormSchema,
   type LegalProfile,
 } from "../../schemas/auth.schema";
+import {
+  formatIdentityError,
+  getIdentityErrorKey,
+} from "../../utils/error-formatter";
 
 type LegalField = keyof LegalProfile;
 type LegalFormValues = Record<LegalField, string>;
@@ -41,7 +45,7 @@ const FIELD_MAX: Record<LegalField, number> = {
   postalCode: 20,
 };
 
-// Mirrors identity-service: only OWNER/ADMIN members may PATCH the organization.
+// The verified account flag takes precedence over the actual membership role.
 const EDITOR_ROLES = new Set(["OWNER", "ADMIN"]);
 
 function toFormValues(profile?: LegalProfile | null): LegalFormValues {
@@ -51,16 +55,23 @@ function toFormValues(profile?: LegalProfile | null): LegalFormValues {
   return next;
 }
 
-export function LegalProfileForm({ tenantId, role }: { tenantId: string; role: string }) {
-  const { accessToken } = useAuth();
+export function LegalProfileForm({
+  tenantId,
+  role,
+}: {
+  tenantId: string;
+  role: string;
+}) {
+  const { accessToken, isSuperAdmin } = useAuth();
   const { t } = useTranslation();
-  const canEdit = EDITOR_ROLES.has(role);
+  const canEdit = isSuperAdmin || EDITOR_ROLES.has(role);
 
   const [values, setValues] = useState<LegalFormValues>(EMPTY_FORM);
   const [saved, setSaved] = useState<LegalFormValues>(EMPTY_FORM);
   const [errors, setErrors] = useState<Partial<Record<LegalField, string>>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -68,13 +79,14 @@ export function LegalProfileForm({ tenantId, role }: { tenantId: string; role: s
     getOrganizationApi(tenantId, accessToken ?? undefined)
       .then((org) => {
         if (cancelled) return;
+        setLoadError(null);
         const next = toFormValues(org.legalProfile);
         setValues(next);
         setSaved(next);
       })
       .catch((err: unknown) => {
         if (cancelled) return;
-        setLoadError(err instanceof Error ? err.message : t("tenant.legalProfileLoadError"));
+        setLoadError(getIdentityErrorKey(err, "tenant.legalProfileLoadError"));
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);
@@ -82,15 +94,18 @@ export function LegalProfileForm({ tenantId, role }: { tenantId: string; role: s
     return () => {
       cancelled = true;
     };
-  }, [tenantId, accessToken, t]);
+  }, [tenantId, accessToken, loadAttempt]);
 
-  const isDirty = LEGAL_FIELDS.some((key) => values[key].trim() !== saved[key].trim());
+  const isDirty = LEGAL_FIELDS.some(
+    (key) => values[key].trim() !== saved[key].trim(),
+  );
 
-  const handleChange = (key: LegalField) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setValues((prev) => ({ ...prev, [key]: value }));
-    setErrors((prev) => ({ ...prev, [key]: undefined }));
-  };
+  const handleChange =
+    (key: LegalField) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setValues((prev) => ({ ...prev, [key]: value }));
+      setErrors((prev) => ({ ...prev, [key]: undefined }));
+    };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,14 +132,18 @@ export function LegalProfileForm({ tenantId, role }: { tenantId: string; role: s
 
     try {
       setIsSaving(true);
-      const res = await updateOrganizationApi(tenantId, payload, accessToken ?? undefined);
+      const res = await updateOrganizationApi(
+        tenantId,
+        payload,
+        accessToken ?? undefined,
+      );
       const next = toFormValues(res.legalProfile);
       setValues(next);
       setSaved(next);
       setErrors({});
       toast.success(t("tenant.legalProfileSaveSuccess"));
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : t("tenant.saveError"));
+      toast.error(formatIdentityError(err, t, "tenant.saveError"));
     } finally {
       setIsSaving(false);
     }
@@ -133,10 +152,17 @@ export function LegalProfileForm({ tenantId, role }: { tenantId: string; role: s
   const renderField = (
     key: LegalField,
     labelKey: string,
-    options: { placeholderKey?: string; required?: boolean; wide?: boolean } = {}
+    options: {
+      placeholderKey?: string;
+      required?: boolean;
+      wide?: boolean;
+    } = {},
   ) => (
     <div className={options.wide ? "space-y-2 sm:col-span-2" : "space-y-2"}>
-      <label htmlFor={`legal-${key}`} className="text-sm font-semibold text-foreground">
+      <label
+        htmlFor={`legal-${key}`}
+        className="text-sm font-semibold text-foreground"
+      >
         {t(labelKey)}
         {options.required && <span className="text-destructive"> *</span>}
       </label>
@@ -144,17 +170,25 @@ export function LegalProfileForm({ tenantId, role }: { tenantId: string; role: s
         id={`legal-${key}`}
         value={values[key]}
         onChange={handleChange(key)}
-        placeholder={options.placeholderKey ? t(options.placeholderKey) : undefined}
+        placeholder={
+          options.placeholderKey ? t(options.placeholderKey) : undefined
+        }
         disabled={!canEdit || isSaving}
         maxLength={FIELD_MAX[key]}
         aria-invalid={!!errors[key]}
+        aria-describedby={errors[key] ? `legal-${key}-error` : undefined}
         className="h-10 px-4 text-sm rounded-xl bg-background border-border/80 w-full"
       />
-      {errors[key] && <p className="text-xs text-destructive">{errors[key]}</p>}
+      {errors[key] && (
+        <p id={`legal-${key}-error`} className="text-xs text-destructive">
+          {t(errors[key])}
+        </p>
+      )}
     </div>
   );
 
-  const addressRequired = !!values.addressLine.trim() || !!values.province.trim();
+  const addressRequired =
+    !!values.addressLine.trim() || !!values.province.trim();
 
   return (
     <div className="pt-6 border-t border-border/60 space-y-6">
@@ -171,11 +205,29 @@ export function LegalProfileForm({ tenantId, role }: { tenantId: string; role: s
       </div>
 
       {isLoading ? (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div
+          role="status"
+          className="flex items-center gap-2 text-sm text-muted-foreground"
+        >
           <Loader2 className="size-4 animate-spin" />
+          <span className="sr-only">{t("common.loading")}</span>
         </div>
       ) : loadError ? (
-        <p className="text-sm text-destructive">{loadError}</p>
+        <div role="alert" className="flex flex-wrap items-center gap-3">
+          <p className="text-sm text-destructive">{t(loadError)}</p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setIsLoading(true);
+              setLoadError(null);
+              setLoadAttempt((attempt) => attempt + 1);
+            }}
+          >
+            {t("displayLabels.retry")}
+          </Button>
+        </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-5 w-full">
           {!canEdit && (
@@ -190,8 +242,12 @@ export function LegalProfileForm({ tenantId, role }: { tenantId: string; role: s
               placeholderKey: "tenant.legalNamePlaceholder",
               wide: true,
             })}
-            {renderField("taxCode", "tenant.taxCode", { placeholderKey: "tenant.taxCodePlaceholder" })}
-            {renderField("phone", "tenant.legalPhone", { placeholderKey: "tenant.legalPhonePlaceholder" })}
+            {renderField("taxCode", "tenant.taxCode", {
+              placeholderKey: "tenant.taxCodePlaceholder",
+            })}
+            {renderField("phone", "tenant.legalPhone", {
+              placeholderKey: "tenant.legalPhonePlaceholder",
+            })}
             {renderField("addressLine", "tenant.legalAddressLine", {
               placeholderKey: "tenant.legalAddressLinePlaceholder",
               required: addressRequired,
@@ -199,11 +255,15 @@ export function LegalProfileForm({ tenantId, role }: { tenantId: string; role: s
             })}
             {renderField("ward", "tenant.legalWard")}
             {renderField("district", "tenant.legalDistrict")}
-            {renderField("province", "tenant.legalProvince", { required: addressRequired })}
+            {renderField("province", "tenant.legalProvince", {
+              required: addressRequired,
+            })}
             {renderField("postalCode", "tenant.legalPostalCode")}
           </div>
 
-          <p className="text-xs text-muted-foreground">{t("tenant.legalAddressHint")}</p>
+          <p className="text-xs text-muted-foreground">
+            {t("tenant.legalAddressHint")}
+          </p>
 
           {canEdit && (
             <div className="flex justify-end">

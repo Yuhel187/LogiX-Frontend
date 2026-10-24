@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import { formatIdentityError } from "../../utils/error-formatter";
+
+import React, { useState, useEffect, useEffectEvent, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +17,11 @@ import { Badge } from "@/components/ui/badge";
 import { Shield, CheckCheck, Eye, XSquare, Save, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "@/lib/i18n";
-import { getAllPermissionsApi, updateRolePermissionsApi, getRoleByIdApi } from "../../api/roles.api";
+import {
+  getAllPermissionsApi,
+  updateRolePermissionsApi,
+  getRoleByIdApi,
+} from "../../api/roles.api";
 import type { RoleItem, PermissionItem } from "../../schemas/role.schema";
 
 interface RolePermissionMatrixDialogProps {
@@ -39,8 +45,12 @@ export function RolePermissionMatrixDialog({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   const isOwnerRole = role?.code === "OWNER";
+  const notifyLoadError = useEffectEvent((err: unknown) => {
+    toast.error(formatIdentityError(err, t, "iam.matrix.loadError"));
+  });
 
   // Tải danh mục quyền và danh sách quyền hiện tại của vai trò
   useEffect(() => {
@@ -49,10 +59,12 @@ export function RolePermissionMatrixDialog({
     let isMounted = true;
     (async () => {
       setIsLoading(true);
+      setLoadFailed(false);
+      setSelectedIds(new Set());
       try {
         const [perms, roleDetail] = await Promise.all([
           getAllPermissionsApi(),
-          getRoleByIdApi(role.id, tenantId).catch(() => role),
+          getRoleByIdApi(role.id, tenantId),
         ]);
 
         if (isMounted) {
@@ -61,8 +73,10 @@ export function RolePermissionMatrixDialog({
           setSelectedIds(currentIds);
         }
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : t("iam.matrix.loadError");
-        toast.error(msg);
+        if (isMounted) {
+          setLoadFailed(true);
+          notifyLoadError(err);
+        }
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -73,7 +87,7 @@ export function RolePermissionMatrixDialog({
     return () => {
       isMounted = false;
     };
-  }, [open, role, tenantId, t]);
+  }, [open, role, tenantId]);
 
   // Nhóm danh mục quyền theo Module và Resource
   const groupedModules = useMemo(() => {
@@ -90,13 +104,17 @@ export function RolePermissionMatrixDialog({
       resourceMap.get(perm.resource)!.push(perm);
     }
 
-    return Array.from(modulesMap.entries()).map(([moduleName, resourceMap]) => ({
-      module: moduleName,
-      resources: Array.from(resourceMap.entries()).map(([resourceName, perms]) => ({
-        resource: resourceName,
-        permissions: perms,
-      })),
-    }));
+    return Array.from(modulesMap.entries()).map(
+      ([moduleName, resourceMap]) => ({
+        module: moduleName,
+        resources: Array.from(resourceMap.entries()).map(
+          ([resourceName, perms]) => ({
+            resource: resourceName,
+            permissions: perms,
+          }),
+        ),
+      }),
+    );
   }, [allPermissions]);
 
   // Xử lý toggle một quyền
@@ -155,16 +173,20 @@ export function RolePermissionMatrixDialog({
 
   // Lưu ma trận phân quyền
   const handleSave = async () => {
-    if (!role || isOwnerRole) return;
+    if (!role || isOwnerRole || loadFailed || isLoading) return;
 
     setIsSaving(true);
     try {
-      await updateRolePermissionsApi(role.id, Array.from(selectedIds), tenantId);
+      await updateRolePermissionsApi(
+        role.id,
+        Array.from(selectedIds),
+        tenantId,
+      );
       toast.success(t("iam.matrix.saveSuccess"));
       onSuccess();
       onOpenChange(false);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : t("iam.matrix.saveError");
+      const msg = formatIdentityError(err, t, "iam.matrix.saveError");
       toast.error(msg);
     } finally {
       setIsSaving(false);
@@ -176,6 +198,11 @@ export function RolePermissionMatrixDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] sm:max-w-4xl lg:max-w-5xl max-h-[88vh] flex flex-col p-0 overflow-hidden">
+        {loadFailed && (
+          <p role="alert" className="p-4 text-sm text-destructive">
+            {t("phase5.loadFailed")}
+          </p>
+        )}
         {/* Header */}
         <DialogHeader className="px-6 pt-6 pb-4 border-b border-border/60">
           <div className="flex items-center justify-between pr-8">
@@ -184,7 +211,10 @@ export function RolePermissionMatrixDialog({
                 <DialogTitle className="text-lg font-bold">
                   {t("iam.matrix.title")} - {role.name}
                 </DialogTitle>
-                <Badge variant={role.isSystem ? "default" : "secondary"} className="text-[10px] font-mono">
+                <Badge
+                  variant={role.isSystem ? "default" : "secondary"}
+                  className="text-[10px] font-mono"
+                >
                   {role.code}
                 </Badge>
               </div>
@@ -194,7 +224,9 @@ export function RolePermissionMatrixDialog({
             </div>
             <div className="text-right shrink-0">
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
-                {isOwnerRole ? t("iam.roles.ownerFullAccess") : t("tenant.selectedCount", { count: selectedIds.size })}
+                {isOwnerRole
+                  ? t("iam.roles.ownerFullAccess")
+                  : t("tenant.selectedCount", { count: selectedIds.size })}
               </span>
             </div>
           </div>
@@ -205,12 +237,16 @@ export function RolePermissionMatrixDialog({
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-12 gap-3">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-xs text-muted-foreground">{t("iam.matrix.loadingPermissions")}</p>
+              <p className="text-xs text-muted-foreground">
+                {t("iam.matrix.loadingPermissions")}
+              </p>
             </div>
           ) : isOwnerRole ? (
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center space-y-2">
               <Shield className="h-10 w-10 text-primary mx-auto" />
-              <h3 className="font-semibold text-foreground text-sm">{t("iam.matrix.ownerRoleTitle")}</h3>
+              <h3 className="font-semibold text-foreground text-sm">
+                {t("iam.matrix.ownerRoleTitle")}
+              </h3>
               <p className="text-xs text-muted-foreground max-w-md mx-auto">
                 {t("iam.matrix.ownerRoleDesc")}
               </p>
@@ -229,7 +265,9 @@ export function RolePermissionMatrixDialog({
                   <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 bg-muted/40 border-b border-border/60">
                     <div className="flex items-center gap-2">
                       <span className="h-2 w-2 rounded-full bg-primary" />
-                      <h4 className="font-semibold text-sm text-foreground">{moduleLabel}</h4>
+                      <h4 className="font-semibold text-sm text-foreground">
+                        {moduleLabel}
+                      </h4>
                     </div>
 
                     <div className="flex items-center gap-1.5">
@@ -269,7 +307,8 @@ export function RolePermissionMatrixDialog({
                   {/* Bảng phân quyền chi tiết của từng resource */}
                   <div className="divide-y divide-border/50">
                     {resources.map(({ resource, permissions }) => {
-                      const resourceLabel = t(`iam.resources.${resource}`) || resource;
+                      const resourceLabel =
+                        t(`iam.resources.${resource}`) || resource;
 
                       return (
                         <div
@@ -288,7 +327,9 @@ export function RolePermissionMatrixDialog({
                           <div className="flex flex-wrap items-center gap-2 sm:gap-3 sm:w-2/3 sm:justify-end">
                             {permissions.map((perm) => {
                               const isChecked = selectedIds.has(perm.id);
-                              const actionLabel = t(`iam.matrix.actions.${perm.action}`) || perm.action;
+                              const actionLabel =
+                                t(`iam.matrix.actions.${perm.action}`) ||
+                                perm.action;
 
                               return (
                                 <label
@@ -301,11 +342,11 @@ export function RolePermissionMatrixDialog({
                                 >
                                   <Checkbox
                                     checked={isChecked}
-                                    onCheckedChange={() => togglePermission(perm.id)}
+                                    onCheckedChange={() =>
+                                      togglePermission(perm.id)
+                                    }
                                   />
-                                  <span>
-                                    {actionLabel}
-                                  </span>
+                                  <span>{actionLabel}</span>
                                 </label>
                               );
                             })}
@@ -323,7 +364,8 @@ export function RolePermissionMatrixDialog({
         {/* Footer */}
         <DialogFooter className="px-6 py-4 border-t border-border/60 bg-muted/20 sm:justify-between items-center">
           <div className="text-xs text-muted-foreground">
-            {!isOwnerRole && t("tenant.selectedCount", { count: selectedIds.size })}
+            {!isOwnerRole &&
+              t("tenant.selectedCount", { count: selectedIds.size })}
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -338,7 +380,7 @@ export function RolePermissionMatrixDialog({
             {!isOwnerRole && (
               <Button
                 onClick={handleSave}
-                disabled={isSaving || isLoading}
+                disabled={isSaving || isLoading || loadFailed}
                 className="h-10 px-5 rounded-xl font-semibold gap-2 cursor-pointer shadow-xs bg-emerald-600 hover:bg-emerald-500 text-white text-sm"
               >
                 {isSaving ? (

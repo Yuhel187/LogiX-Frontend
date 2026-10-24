@@ -1,4 +1,92 @@
 {
+  "admin": {
+    "navTitle": "Platform Admin",
+    "organizations": {
+      "title": "All organizations",
+      "description": "Search and review organizations across the platform.",
+      "searchPlaceholder": "Organization name or code"
+    },
+    "users": {
+      "title": "All users",
+      "description": "Search and review user accounts across the platform.",
+      "searchPlaceholder": "Email or display name"
+    },
+    "filters": {
+      "search": "Search",
+      "allStatuses": "All statuses"
+    },
+    "actions": {
+      "search": "Search",
+      "reset": "Reset filters",
+      "refresh": "Refresh",
+      "retry": "Retry",
+      "login": "Sign in again",
+      "userMenu": "Actions for {name}",
+      "lockAccountSoon": "Lock account (coming soon)"
+    },
+    "columns": {
+      "id": "Reference ID",
+      "organization": "Organization",
+      "owner": "Organization owner",
+      "phoneNumber": "Phone number",
+      "user": "User",
+      "status": "Status",
+      "accountType": "Account type",
+      "tenantCount": "Active memberships",
+      "lastLoginAt": "Last sign-in",
+      "createdAt": "Created",
+      "updatedAt": "Updated",
+      "actions": "Actions"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "SUSPENDED": "Suspended",
+      "DISABLED": "Disabled",
+      "LOCKED": "Locked"
+    },
+    "account": {
+      "superAdmin": "Super Admin",
+      "standard": "Standard account",
+      "neverLoggedIn": "Never signed in",
+      "noOwner": "No owner assigned",
+      "noPhone": "Not provided"
+    },
+    "loading": "Loading results…",
+    "empty": {
+      "title": "No results found",
+      "description": "Try a different search or reset the filters.",
+      "outOfRangeTitle": "This page has no results",
+      "outOfRangeDescription": "The results may have changed. Return to the first page to continue."
+    },
+    "pagination": {
+      "label": "Result pagination",
+      "range": "{from}–{to} of {total} results",
+      "page": "Page {page} of {totalPages}",
+      "noPages": "No pages",
+      "pageSize": "Rows per page",
+      "previous": "Previous",
+      "next": "Next",
+      "first": "Go to first page"
+    },
+    "errors": {
+      "unauthorized": "Your session has expired. Sign in again to continue.",
+      "forbidden": "You do not have permission to view this list.",
+      "invalidQuery": "The search or pagination options are invalid. Reset the filters and try again.",
+      "invalidResponse": "The results could not be read. Please retry.",
+      "timeout": "Loading took too long. Please retry.",
+      "network": "Unable to connect. Check your connection and retry.",
+      "unavailable": "Unable to load the list right now. Please retry."
+    },
+    "inject": {
+      "access": "Access organization",
+      "switching": "Verifying organization session...",
+      "unknown": "The switch outcome is unknown. The workspace is locked to prevent using the wrong context. Verify the current session before continuing; do not repeat the switch.",
+      "verify": "Verify current session",
+      "recoveryError": "Unable to verify the session. Try verifying again or sign in again.",
+      "error": "Unable to access this organization. Check its status and your access.",
+      "unavailable": "Only active organizations can be accessed."
+    }
+  },
   "displayLabels": {
     "actor": "Performed by",
     "system": "System",
@@ -11,7 +99,7 @@
     "referenceLoadError": "Unable to load the reference document.",
     "referenceDenied": "You do not have permission to view the reference document",
     "manualAdjustment": "Manual stock adjustment",
-    "technicalDetails": "Technical details (ID)",
+    "technicalDetails": "Reference ID",
     "retry": "Retry",
     "referenceTypes": {
       "STOCK_RECEIPT": "Stock receipt",
@@ -20,14 +108,18 @@
     }
   },
   "pickers": {
-    "loading": "Loading…", "retry": "Retry", "clear": "Clear selection",
+    "loading": "Loading…",
+    "retry": "Retry",
+    "clear": "Clear selection",
     "warehouse": {
-      "placeholder": "Select a warehouse…", "search": "Search by warehouse code or name…",
+      "placeholder": "Select a warehouse…",
+      "search": "Search by warehouse code or name…",
       "empty": "No matching warehouses found.",
       "loadError": "Unable to load warehouse information. Please retry."
     },
     "product": {
-      "placeholder": "Select a product…", "search": "Search by SKU or product name…",
+      "placeholder": "Select a product…",
+      "search": "Search by SKU or product name…",
       "empty": "No matching products found.",
       "loadError": "Unable to load product information. Please retry.",
       "summary": "Unit: {unit} · Weight: {weight} kg · Volume: {volume} m³"
@@ -37,31 +129,63 @@
     "navTitle": "Shipment pool",
     "title": "Shipment pool",
     "description": "Prepare confirmed orders and track dispatch and delivery outcomes.",
-    "allStatuses": "All statuses", "allWarehouses": "All warehouses",
-    "createdFrom": "Created from", "createdTo": "Created to",
-    "loading": "Loading backend preview…", "empty": "No shipments match these filters.",
+    "allStatuses": "All statuses",
+    "allWarehouses": "All warehouses",
+    "createdFrom": "Created from",
+    "createdTo": "Created to",
+    "loading": "Loading confirmation details…",
+    "empty": "No shipments match these filters.",
     "pagination": "Page {page} / {pages} · {total} shipments",
-    "items": "Shipment items", "history": "Status history", "destination": "Delivery address",
-    "actor": "Actor", "system": "System", "failureReason": "Failure reason (required, max. 1,000 characters)",
+    "items": "Shipment items",
+    "history": "Status history",
+    "destination": "Delivery address",
+    "actor": "Performed by",
+    "system": "System",
+    "failureReason": "Failure reason (required, max. 1,000 characters)",
     "failureReasonPlaceholder": "Enter the reason delivery failed…",
-    "saved": "Backend accepted the change. Related services may still be synchronizing.",
-    "refreshHint": "Refreshes every 5 seconds for up to 12 attempts, and when this tab regains focus. Use Refresh after that.",
-    "orderPanel": "Shipment", "orderEmpty": "No shipment exists yet. Confirmed orders may still be processing.",
+    "saved": "Your action has been received. The order status and stock levels may take a moment to update.",
+    "refreshHint": "This page updates automatically for about a minute and when you return. Select Refresh to check the latest status.",
+    "orderPanel": "Shipment",
+    "orderEmpty": "No shipment exists yet. Confirmed orders may still be processing.",
     "columns": {
-      "shipment": "Shipment", "order": "Order", "customer": "Customer", "warehouse": "Warehouse",
-      "status": "Status", "weight": "Weight (kg)", "volume": "Volume (m³)", "createdAt": "Created",
-      "sku": "SKU", "product": "Product", "quantity": "Quantity", "unit": "Unit"
+      "shipment": "Shipment",
+      "order": "Order",
+      "customer": "Customer",
+      "warehouse": "Warehouse",
+      "status": "Status",
+      "weight": "Weight (kg)",
+      "volume": "Volume (m³)",
+      "createdAt": "Created",
+      "sku": "SKU",
+      "product": "Product",
+      "quantity": "Quantity",
+      "unit": "Unit"
     },
     "status": {
-      "PENDING_PICK": "Pending pick", "PICKING": "Picking", "READY_TO_SHIP": "Ready to ship",
-      "DISPATCHED": "Dispatched", "DELIVERED": "Delivered", "FAILED": "Delivery failed", "CANCELED": "Canceled"
+      "PENDING_PICK": "Pending pick",
+      "PICKING": "Picking",
+      "READY_TO_SHIP": "Ready to ship",
+      "DISPATCHED": "Dispatched",
+      "DELIVERED": "Delivered",
+      "FAILED": "Delivery failed",
+      "CANCELED": "Canceled"
     },
     "actions": {
-      "refresh": "Refresh", "retry": "Retry", "reload": "Reload latest data", "resetFilters": "Reset filters",
-      "previous": "Previous", "next": "Next", "back": "Back to shipment pool", "dismiss": "Close",
-      "retryPreview": "Retry preview", "confirmDescription": "Confirm this change for the shipment shown below.",
-      "start-picking": "Start picking", "mark-ready": "Mark ready", "dispatch": "Confirm dispatch",
-      "mark-delivered": "Confirm delivered", "mark-failed": "Confirm delivery failed"
+      "refresh": "Refresh",
+      "retry": "Retry",
+      "reload": "Reload latest data",
+      "resetFilters": "Reset filters",
+      "previous": "Previous",
+      "next": "Next",
+      "back": "Back to shipment pool",
+      "dismiss": "Close",
+      "retryPreview": "Reload confirmation details",
+      "confirmDescription": "Confirm this change for the shipment shown below.",
+      "start-picking": "Start picking",
+      "mark-ready": "Mark ready",
+      "dispatch": "Confirm dispatch",
+      "mark-delivered": "Confirm delivered",
+      "mark-failed": "Confirm delivery failed"
     },
     "confirmations": {
       "start-picking": "Confirm that preparation is starting for this shipment.",
@@ -70,22 +194,23 @@
       "mark-failed": "Confirm that delivery failed and provide a reason. This does not cancel the order or automatically return stock."
     },
     "dispatch": {
-      "warning": "Dispatch is irreversible: cancellation will be blocked and inventory will be issued asynchronously. Check the shipment before confirming.",
-      "versions": "Shipment version {shipment} · Order version {order}",
-      "unknownOutcome": "If the connection fails, the backend may already have accepted dispatch. Retry in this dialog to reuse the same request, or close and refresh to inspect recovery. Do not create a replacement request while processing.",
+      "warning": "You cannot undo dispatch or cancel the order after confirming. Stock will be deducted when processing finishes. Check the shipment carefully before confirming.",
+      "versions": "Shipment update {shipment} · Order update {order}",
+      "unknownOutcome": "If the connection is lost, dispatch may still be in progress. You can try again in this dialog, or close it and select Refresh to check the status. Do not confirm dispatch again while the shipment is being processed.",
       "processing": "Dispatch processing",
-      "processingDescription": "The backend is resolving this dispatch request. Actions are locked until its result is known. Refresh to check progress; this is not confirmation that stock has been issued.",
-      "rejected": "Dispatch was rejected by the backend. Reload latest data before starting another request."
+      "processingDescription": "Dispatch does not have a final result yet, so other actions are temporarily unavailable for this shipment. Select Refresh to check progress. Stock may not have been deducted yet.",
+      "rejected": "This shipment could not be dispatched. Reload the latest data and check its status before trying again."
     },
     "errors": {
-      "generic": "Unable to complete the request. Check your connection and retry; the previous request may already have been accepted.",
+      "generic": "The result of your action is not yet known. Check your connection and refresh to see the status before trying again.",
       "invalidRequest": "Invalid request or date range. Check the selected values before retrying.",
-      "unauthorized": "Your session has expired. Sign in again.", "forbidden": "You do not have permission to view or change shipments.",
-      "SHIPMENT_NOT_FOUND": "Shipment not found in this workspace.",
+      "unauthorized": "Your session has expired. Sign in again.",
+      "forbidden": "You do not have permission to view or change shipments.",
+      "SHIPMENT_NOT_FOUND": "Shipment not found in the current organization.",
       "SHIPMENT_VERSION_CONFLICT": "Shipment or order state changed. Reload latest data before continuing.",
       "SHIPMENT_INVALID_TRANSITION": "This action is not valid for the current shipment status.",
-      "SHIPMENT_DISPATCH_PENDING": "Dispatch is processing. Wait and refresh; do not submit a new request.",
-      "ORDER_UNAVAILABLE": "Order service is unavailable. Dispatch may still be processing; refresh before retrying.",
+      "SHIPMENT_DISPATCH_PENDING": "Dispatch is in progress. Please wait and select Refresh to check the status. Do not confirm dispatch again.",
+      "ORDER_UNAVAILABLE": "The order cannot be checked right now. Dispatch may still be in progress; refresh to check the status before trying again.",
       "ORDER_REJECTED": "The order no longer permits dispatch. Reload latest data."
     }
   },
@@ -191,6 +316,7 @@
     }
   },
   "nav": {
+    "navigationMenu": "LogiX navigation menu",
     "brandSubtitle": "Inteligent Logistic",
     "systemManagement": "System Management",
     "overview": "Overview",
@@ -231,12 +357,12 @@
   },
   "home": {
     "welcomeTitle": "Welcome to LogiX Enterprise",
-    "welcomeDescription": "This is the main workspace layout template. Select an option from the sidebar to begin, or start customizing this template for your application needs."
+    "welcomeDescription": "Select an option from the sidebar to manage your organization's orders, stock, and deliveries."
   },
   "auth": {
     "brandTitle": "Management System for",
     "brandHighlight": "Comprehensive Logistics",
-    "brandSubtitle": "Multi-service centralized operations solution. Optimize your supply chain today.",
+    "brandSubtitle": "Manage orders, warehouses, and deliveries in one place. Optimize your supply chain today.",
     "consoleBadge": "LogiX Console",
     "loginTitle": "System Login",
     "loginSubtitle": "Welcome back to LogiX OS",
@@ -283,17 +409,17 @@
     "registerErrorDefault": "Registration failed. Please try again.",
     "forgotPasswordSuccessMessage": "Password reset link sent to your email.",
     "forgotPasswordErrorDefault": "Failed to send reset link. Please try again.",
-    "missingTokenError": "Missing reset token in link. Please check your email.",
+    "missingTokenError": "The password reset link is incomplete. Open the link in your email again or request a new one.",
     "resetPasswordSuccessMessage": "Password reset successfully! Redirecting to login...",
     "resetPasswordErrorDefault": "Failed to reset password. Please try again.",
-    "devResetLinkTitle": "[Dev Mode] Quick reset link:",
+    "devResetLinkTitle": "Password reset link for the trial version:",
     "devResetLinkClick": "Click here to reset password",
     "invalidCredentialsError": "Email or password is incorrect.",
     "accountLockedError": "Your account has been locked or disabled.",
     "noActiveOrganizationError": "You do not belong to any active organization.",
     "emailAlreadyRegisteredError": "This email is already registered.",
     "accountExistsLoginPromptError": "Account already exists. Please sign in or create a new organization after signing in.",
-    "serviceUnavailableError": "Authentication service is not responding. Please try again later."
+    "serviceUnavailableError": "Your sign-in details cannot be processed right now. Please try again later."
   },
   "tenant": {
     "yourOrganizations": "Your Organizations",
@@ -344,11 +470,11 @@
     "tabApps": "Apps",
     "tabWorkflows": "Workflows",
     "tabPermissions": "Permissions",
-    "security2FATitle": "Security (SUPER_ADMIN)",
-    "security2FADesc": "Enforce 2FA installation and usage for ALL members in this organization to sign in.",
+    "security2FATitle": "Security (System administrator)",
+    "security2FADesc": "Require all members of this organization to enable two-step verification to sign in.",
     "uploadLogo": "Upload from Computer",
     "uploadLogoHint": "Enter a URL or upload an image from your computer as logo (Must be under 500KB).",
-    "instantSyncNote": "Changes will be updated and synchronized immediately.",
+    "instantSyncNote": "Information will be updated as soon as you save.",
     "defaultSettingTitle": "Default Organization",
     "defaultSettingDesc": "Set this organization as default to prioritize it when signing in",
     "isDefaultButton": "Currently Default",
@@ -380,7 +506,7 @@
     "deleteSuccess": "Organization deleted successfully.",
     "deleteError": "Failed to delete organization. Please check permissions or member constraints.",
     "legalProfileTitle": "Legal profile",
-    "legalProfileDesc": "Business details printed on delivery notes and goods issue slips. A snapshot is captured when a document is issued, so later changes do not alter issued documents.",
+    "legalProfileDesc": "Business details printed on delivery notes and goods issue slips. Issued documents keep the details recorded at the time of issue, even if you update the business information later.",
     "legalName": "Legal name",
     "legalNamePlaceholder": "e.g. ABC Logistics Co., Ltd.",
     "taxCode": "Tax code",
@@ -432,7 +558,7 @@
     "manageMemberRolesTitle": "Manage Member Roles",
     "manageMemberRolesDesc": "Configure assigned roles and permissions within the organization",
     "ownerCannotBeEditedTitle": "Cannot edit this role",
-    "ownerCannotBeEditedDesc": "This member holds the Owner role in this organization. System policy prevents changing the Owner's role.",
+    "ownerCannotBeEditedDesc": "This member is the organization's Owner. The Owner's role cannot be changed here.",
     "orgRolesList": "Organization Roles",
     "selectedCount": "Selected: {count} roles",
     "loadingOrgRoles": "Loading organization roles...",
@@ -514,7 +640,7 @@
       "noAvatar": "No avatar selected",
       "nameMinLengthError": "Display name must be at least 2 characters.",
       "updateFailed": "An error occurred while updating profile information.",
-      "payloadTooLarge": "The avatar image is too large for the server to accept. Please choose a smaller image or use a preset avatar."
+      "payloadTooLarge": "The profile picture exceeds the size limit. Please choose a smaller image or use a preset picture."
     },
     "security": {
       "title": "Change Password",
@@ -600,7 +726,7 @@
       "ownerRole": "Owner",
       "adminRole": "Administrator",
       "memberRole": "Member",
-      "ownerFullAccess": "Full Access (*)",
+      "ownerFullAccess": "Full access",
       "permissionsCount": "{count} permissions",
       "table": {
         "type": "Type",
@@ -610,7 +736,7 @@
       },
       "deleteConfirmTitle": "Confirm Role Deletion",
       "deleteConfirmDesc": "Are you sure you want to delete role \"{name}\"? This action cannot be undone.",
-      "cannotDeleteSystemRole": "Default system roles (OWNER, ADMIN, MEMBER) cannot be deleted.",
+      "cannotDeleteSystemRole": "The default Owner, Administrator, and Member roles cannot be deleted.",
       "cannotDeleteRoleWithMembers": "This role is currently assigned to {count} members. Please reassign them before deleting.",
       "cannotChangeCode": "Role code cannot be changed once created.",
       "codeValidation": "Code can only contain uppercase letters, numbers, and underscores",
@@ -622,7 +748,7 @@
       "loadError": "Failed to load permissions matrix",
       "saveError": "Failed to update permissions",
       "loadingPermissions": "Loading system permissions...",
-      "ownerRoleTitle": "Owner Role (OWNER)",
+      "ownerRoleTitle": "Owner role",
       "ownerRoleDesc": "The Owner role has unrestricted full access across all organization modules and resources.",
       "actions": {
         "read": "View",
@@ -664,7 +790,7 @@
       "emailPlaceholder": "employee@company.com",
       "rolesLabel": "Pre-assigned Roles",
       "rolesHint": "Member will automatically receive these roles immediately upon activation.",
-      "roleOwnerNotice": "Only Organization Owner or Super Admin can assign the Owner role.",
+      "roleOwnerNotice": "Only the Owner or a System administrator can invite someone as an Owner.",
       "sendInvite": "Send Invitation",
       "sending": "Sending...",
       "sendSuccess": "Invitation successfully created and sent to {email}",
@@ -792,7 +918,10 @@
       "title": "Low Stock Alert Threshold",
       "description": "When available stock is at or below this number, the system marks the item as 'Low stock'.",
       "currentAvailable": "Current available stock:",
-      "label": "Min Stock Threshold",
+      "label": "Minimum stock level",
+      "placeholder": "E.g., 10 or 50",
+      "invalidValue": "Enter a non-negative stock level with up to 15 digits before the decimal point and 3 digits after it.",
+      "saveError": "The alert level could not be saved. Check that you have permission to change stock settings, refresh, and try again.",
       "hint": "Non-negative decimal (up to 3 decimal places). Enter 0 to disable alert.",
       "submit": "Save Settings",
       "success": "Low stock threshold updated successfully"
@@ -810,7 +939,7 @@
   },
   "orders": {
     "lifecycle": {
-      "dispatchGranted": "Dispatch has been authorized. Cancellation is no longer allowed, even while the order projection is synchronizing."
+      "dispatchGranted": "This order has been approved for dispatch and can no longer be canceled. The displayed status may take a moment to update."
     },
     "navGroup": "Sales",
     "navTitle": "Orders",
@@ -942,11 +1071,11 @@
       "empty": "No history yet.",
       "created": "Created",
       "reason": "Reason",
-      "version": "Version {version}"
+      "version": "Update {version}"
     },
     "cancel": {
       "title": "Cancel order {orderNumber}",
-      "processing": "Cancellation is being processed. Editing and confirmation are locked; the system will retry releasing stock and completing cancellation.",
+      "processing": "This order is being canceled, so it cannot be edited or confirmed yet. Processing will continue automatically to release the stock held for this order and finish cancellation.",
       "description": "The order will move to Canceled and cannot be restored.",
       "reason": "Cancellation reason",
       "reasonPlaceholder": "Enter the reason for canceling...",
@@ -963,7 +1092,7 @@
       "title": "Confirm order {orderNumber}",
       "description": "Stock is reserved only when every line is available. Otherwise the order waits for stock.",
       "action": "Confirm order",
-      "retry": "Retry reservation",
+      "retry": "Check and hold stock again",
       "reference": "Reference quantities as of {date}; inventory is checked again on confirmation.",
       "result": "Result",
       "sufficient": "Available",
@@ -981,7 +1110,7 @@
       "detectedAt": "Checked at",
       "pendingSince": "Waiting for stock since {date}",
       "column": "Waiting since",
-      "awaitingCheck": "No current shortage result. Reload or retry reservation."
+      "awaitingCheck": "No stock shortage results are available yet. Reload or check and hold stock again."
     },
     "toast": {
       "created": "Order {orderNumber} created",
@@ -995,8 +1124,8 @@
       "forbidden": "You do not have permission to perform this order action.",
       "currentState": "current",
       "ORDER_DISPATCH_COMMITTED": "Dispatch has been authorized and this order can no longer be canceled. Reload latest data to track the shipment.",
-      "ORDER_DISPATCH_REQUEST_CONFLICT": "The dispatch request does not match the recorded decision. Reload latest data.",
-      "ORDER_RESERVATION_MISMATCH": "The reservation does not match this order. Reload latest data before continuing.",
+      "ORDER_DISPATCH_REQUEST_CONFLICT": "The dispatch details have changed. Reload the latest data and check the status before continuing.",
+      "ORDER_RESERVATION_MISMATCH": "The stock held does not match this order. Reload the latest data and check it before continuing.",
       "ORDER_NOT_FOUND": "The order was not found or you cannot access it.",
       "ORDER_INVALID_TRANSITION": "This action is not allowed while the order is {currentStatus}.",
       "ORDER_VERSION_CONFLICT": "The order was changed by someone else, please reload.",
@@ -1009,9 +1138,49 @@
       "ORDER_DUPLICATE_PRODUCT": "A product may appear only once per order.",
       "ORDER_TOO_MANY_LINES": "An order may have at most {maxLines} lines (currently {actualLines}).",
       "IDEMPOTENCY_KEY_REQUIRED": "Invalid create request, please reload the page.",
-      "IDEMPOTENCY_KEY_REUSED": "This create session was already used. The order may already exist ? check the list before creating it again.",
-      "UPSTREAM_UNAVAILABLE": "A dependent service is temporarily unavailable, please try again later.",
-      "UPSTREAM_REJECTED": "A dependent service rejected the request, please try again."
+      "IDEMPOTENCY_KEY_REUSED": "This order may already have been created. Check the order list before creating it again to avoid duplicates.",
+      "UPSTREAM_UNAVAILABLE": "The order cannot be processed right now. Please try again later.",
+      "UPSTREAM_REJECTED": "This action cannot be completed with the current information. Refresh and check the order before trying again."
     }
+  },
+  "phase5": {
+    "conflict": "The data has changed or a protection rule blocks this action. Reload and check the latest state.",
+    "notFound": "The requested data was not found or is no longer available.",
+    "validation": "The data is invalid or the action does not meet a protection rule. Please check again.",
+    "membershipRequired": "This action requires an actual membership. Super Admin access does not create a membership.",
+    "contextMismatch": "The organization in the URL does not match the active session. Select it using the organization switcher or platform management before opening this page.",
+    "orgNameInvalid": "The organization name must contain at least 2 characters.",
+    "loadInvitationsError": "Unable to load invitations. Please try again.",
+    "sendInvitationError": "Unable to send the invitation. Check its latest status before sending again.",
+    "emailInvalid": "Enter a valid email address.",
+    "rolesRequired": "Select at least one role.",
+    "roleIdInvalid": "The selected role is invalid.",
+    "invitationCreated": "Invitation created!",
+    "invitationCreatedDesc": "An invitation was created for {email}. You can copy the link below and share it directly.",
+    "inviteLinkLabel": "Invitation link",
+    "inviteExpires": "This link expires on {date}.",
+    "loadingRoles": "Loading roles...",
+    "copyError": "Unable to copy the link. Please check clipboard permissions.",
+    "legalNameMax": "Legal name must not exceed 255 characters.",
+    "taxCodeMax": "Tax code must not exceed 50 characters.",
+    "phoneMax": "Phone number must not exceed 30 characters.",
+    "addressMax": "Address must not exceed 500 characters.",
+    "wardMax": "Ward must not exceed 100 characters.",
+    "districtMax": "District must not exceed 100 characters.",
+    "provinceMax": "Province must not exceed 100 characters.",
+    "postalCodeMax": "Postal code must not exceed 20 characters.",
+    "provinceRequired": "Enter a province for the legal address.",
+    "addressRequired": "Enter the street address for the legal address.",
+    "roleNameMin": "Role name must contain at least 2 characters.",
+    "roleNameMax": "Role name must not exceed 100 characters.",
+    "roleCodeMin": "Role code must contain at least 2 characters.",
+    "roleCodeMax": "Role code must not exceed 50 characters.",
+    "roleCodePattern": "Role code may contain only uppercase letters, digits and underscores.",
+    "reservedRole": "Super Admin cannot be created as an organization role.",
+    "descriptionMax": "Description must not exceed 255 characters.",
+    "searchRolesHint": "Search by email, inviter or role",
+    "roleSaved": "Role saved.",
+    "roleDeleted": "Role deleted.",
+    "loadFailed": "Unable to load data. No changes were submitted. Please reload."
   }
 }

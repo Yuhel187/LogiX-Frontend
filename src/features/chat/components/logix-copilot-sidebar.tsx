@@ -174,7 +174,7 @@ function LogixCopilotSidebarContent({
 }
 
 export function LogixCopilotSidebar({
-  defaultOpen = true,
+  defaultOpen = false,
   agentId = "default",
   width = DEFAULT_SIDEBAR_WIDTH,
 }: LogixCopilotSidebarProps) {

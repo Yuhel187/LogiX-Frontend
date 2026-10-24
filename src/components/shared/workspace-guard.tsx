@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useEffect } from "react";
+import { toast } from "sonner";
 import { useRouter, usePathname } from "next/navigation";
-import { ShieldAlert, ArrowLeft } from "lucide-react";
+import { ShieldAlert, ArrowLeft, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useTranslation } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
@@ -16,33 +17,116 @@ interface RoutePermissionRule {
 }
 
 const ROUTE_PERMISSIONS: RoutePermissionRule[] = [
+  { pattern: /^\/admin(?:\/|$)/, superAdminOnly: true },
   { pattern: /^\/shipments(?:\/|$)/, permission: SHIPMENT_PERMISSIONS.read },
-  { pattern: /\/organization\/[^/]+\/roles/, anyPermissions: ["iam:role:read", "iam:role:manage"] },
-  { pattern: /\/organization\/[^/]+\/members/, anyPermissions: ["iam:member:read", "iam:member:invite"] },
-  { pattern: /\/settings\/roles/, anyPermissions: ["iam:role:read", "iam:role:manage"] },
-  { pattern: /\/inventory/, anyPermissions: ["inventory:stock:read", "inventory:stock:adjust", "inventory:warehouse:read"] },
-  { pattern: /\/orders/, anyPermissions: ["order:sales-order:read", "order:sales-order:create"] },
-  { pattern: /\/transport/, anyPermissions: ["transport:trip:read", "transport:trip:create"] },
+  {
+    pattern: /\/organization\/[^/]+\/roles/,
+    anyPermissions: ["iam:role:read", "iam:role:manage"],
+  },
+  {
+    pattern: /\/organization\/[^/]+\/members/,
+    anyPermissions: ["iam:member:read", "iam:member:invite"],
+  },
+  {
+    pattern: /\/settings\/roles/,
+    anyPermissions: ["iam:role:read", "iam:role:manage"],
+  },
+  {
+    pattern: /\/inventory/,
+    anyPermissions: [
+      "inventory:stock:read",
+      "inventory:stock:adjust",
+      "inventory:warehouse:read",
+    ],
+  },
+  {
+    pattern: /\/orders/,
+    anyPermissions: ["order:sales-order:read", "order:sales-order:create"],
+  },
+  {
+    pattern: /\/transport/,
+    anyPermissions: ["transport:trip:read", "transport:trip:create"],
+  },
 ];
 
 export function WorkspaceGuard({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading, hasPermission, hasAnyPermission, isSuperAdmin } = useAuth();
+  const {
+    isAuthenticated,
+    isLoading,
+    hasPermission,
+    hasAnyPermission,
+    isSuperAdmin,
+    tenantTransition,
+    recoverTenantContext,
+  } = useAuth();
   const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (
+      !isLoading &&
+      !isAuthenticated &&
+      tenantTransition !== "unknown" &&
+      tenantTransition !== "switching"
+    ) {
       router.replace("/login");
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, router, tenantTransition]);
+
+  if (tenantTransition === "switching") {
+    return (
+      <div
+        className="flex min-h-screen flex-col items-center justify-center gap-3 bg-background p-6 text-center text-foreground"
+        role="status"
+      >
+        <Loader2
+          aria-hidden="true"
+          className="size-8 animate-spin text-primary"
+        />
+        <p className="text-sm text-muted-foreground">
+          {t("admin.inject.switching")}
+        </p>
+      </div>
+    );
+  }
+
+  if (tenantTransition === "unknown") {
+    return (
+      <div
+        className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background p-6 text-center text-foreground"
+        role="status"
+      >
+        <p>{t("admin.inject.unknown")}</p>
+        <Button
+          onClick={async () => {
+            try {
+              await recoverTenantContext();
+            } catch {
+              toast.error(t("admin.inject.recoveryError"));
+            }
+          }}
+        >
+          {t("admin.inject.verify")}
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => window.location.replace("/login")}
+        >
+          {t("admin.actions.login")}
+        </Button>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
       <div className="flex min-h-screen w-full items-center justify-center bg-background text-foreground">
         <div className="flex flex-col items-center gap-2">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent" />
-          <p className="text-xs text-muted-foreground">{t("nav.loadingWorkspace")}</p>
+          <p className="text-xs text-muted-foreground">
+            {t("nav.loadingWorkspace")}
+          </p>
         </div>
       </div>
     );
@@ -53,12 +137,17 @@ export function WorkspaceGuard({ children }: { children: React.ReactNode }) {
   }
 
   // Kiểm tra quyền truy cập route tương ứng
-  const matchedRule = ROUTE_PERMISSIONS.find((rule) => rule.pattern.test(pathname));
+  const matchedRule = ROUTE_PERMISSIONS.find((rule) =>
+    rule.pattern.test(pathname),
+  );
   if (matchedRule) {
     let isBlocked = false;
     if (matchedRule.superAdminOnly && !isSuperAdmin) {
       isBlocked = true;
-    } else if (matchedRule.permission && !hasPermission(matchedRule.permission)) {
+    } else if (
+      matchedRule.permission &&
+      !hasPermission(matchedRule.permission)
+    ) {
       isBlocked = true;
     } else if (
       matchedRule.anyPermissions &&

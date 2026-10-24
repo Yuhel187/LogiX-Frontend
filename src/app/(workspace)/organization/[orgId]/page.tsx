@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useState, useRef, Suspense, use, useEffect } from "react";
+import { useState, useRef, Suspense, use } from "react";
 import { toast } from "sonner";
 import {
   Building2,
@@ -35,6 +35,7 @@ import {
   LegalProfileForm,
   RoleListView,
   UnifiedMembersView,
+  formatIdentityError,
 } from "@/features/identity";
 import { cn } from "@/lib/utils";
 
@@ -56,23 +57,34 @@ function GeneralSettingsForm({
   tenant: ActiveTenantProps;
   isDefaultTenant: boolean;
 }) {
-  const { updateOrganization, setDefaultTenant, deleteOrganization, leaveOrganization, tenants, isSuperAdmin } = useAuth();
+  const {
+    updateOrganization,
+    setDefaultTenant,
+    deleteOrganization,
+    leaveOrganization,
+    tenants,
+    isSuperAdmin,
+  } = useAuth();
   const { t } = useTranslation();
   const router = useRouter();
 
   // Kiểm tra quyền hạn: Tuyệt đối chỉ SUPER ADMIN hoặc OWNER mới có quyền xóa
   const isOwner = tenant.role === "OWNER";
   const canDeleteOrg = isSuperAdmin || isOwner;
+  const canEdit = isSuperAdmin || isOwner || tenant.role === "ADMIN";
+  const hasMembership = tenant.role !== "SUPER_ADMIN";
 
   // Quy tắc rời tổ chức (đồng bộ với backend): không phải OWNER, còn tổ chức khác, không phải tổ chức mặc định
   const hasOtherTenant = tenants.some((item) => item.id !== tenant.id);
-  const leaveBlockedReason = isOwner
-    ? t("tenant.leaveOrgBlockedOwner")
-    : !hasOtherTenant
-      ? t("tenant.leaveOrgBlockedOnlyOrg")
-      : isDefaultTenant
-        ? t("tenant.leaveOrgBlockedDefault")
-        : null;
+  const leaveBlockedReason = !hasMembership
+    ? t("phase5.membershipRequired")
+    : isOwner
+      ? t("tenant.leaveOrgBlockedOwner")
+      : !hasOtherTenant
+        ? t("tenant.leaveOrgBlockedOnlyOrg")
+        : isDefaultTenant
+          ? t("tenant.leaveOrgBlockedDefault")
+          : null;
 
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
@@ -112,7 +124,7 @@ function GeneralSettingsForm({
 
     const trimmedName = name.trim();
     if (!trimmedName || trimmedName.length < 2) {
-      toast.error(t("tenant.orgNameLabel"));
+      toast.error(t("phase5.orgNameInvalid"));
       return;
     }
 
@@ -124,7 +136,7 @@ function GeneralSettingsForm({
       });
       toast.success(t("tenant.saveSuccess"));
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : t("tenant.saveError");
+      const msg = formatIdentityError(err, t, "tenant.saveError");
       toast.error(msg);
     } finally {
       setIsSaving(false);
@@ -139,8 +151,7 @@ function GeneralSettingsForm({
       await setDefaultTenant(tenant.id);
       toast.success(t("tenant.setDefaultSuccess"));
     } catch (err: unknown) {
-      const msg =
-        err instanceof Error ? err.message : t("tenant.setDefaultError");
+      const msg = formatIdentityError(err, t, "tenant.setDefaultError");
       toast.error(msg);
     } finally {
       setIsSettingDefault(false);
@@ -153,12 +164,12 @@ function GeneralSettingsForm({
 
     try {
       setIsDeleting(true);
-      const res = await deleteOrganization(tenant.id);
-      toast.success(res?.message || t("tenant.deleteSuccess"));
+      await deleteOrganization(tenant.id);
+      toast.success(t("tenant.deleteSuccess"));
       setIsDeleteDialogOpen(false);
       router.push("/");
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : t("tenant.deleteError");
+      const msg = formatIdentityError(err, t, "tenant.deleteError");
       toast.error(msg);
     } finally {
       setIsDeleting(false);
@@ -170,12 +181,12 @@ function GeneralSettingsForm({
 
     try {
       setIsLeaving(true);
-      const res = await leaveOrganization(tenant.id);
-      toast.success(res?.message || t("tenant.leaveOrgSuccess", { name: tenant.name }));
+      await leaveOrganization(tenant.id);
+      toast.success(t("tenant.leaveOrgSuccess", { name: tenant.name }));
       setIsLeaveDialogOpen(false);
       router.push("/");
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : t("tenant.leaveOrgError");
+      const msg = formatIdentityError(err, t, "tenant.leaveOrgError");
       toast.error(msg);
     } finally {
       setIsLeaving(false);
@@ -199,12 +210,13 @@ function GeneralSettingsForm({
           {/* Tên tổ chức */}
           <div className="space-y-2 w-full">
             <label className="text-sm font-semibold text-foreground">
-              {t("tenant.orgNameLabel")} <span className="text-destructive">*</span>
+              {t("tenant.orgNameLabel")}{" "}
+              <span className="text-destructive">*</span>
             </label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              disabled={isSaving}
+              disabled={isSaving || !canEdit}
               className="h-10 px-4 text-sm rounded-xl bg-background border-border/80 w-full"
               required
               minLength={2}
@@ -220,7 +232,12 @@ function GeneralSettingsForm({
             <div className="flex items-center gap-3 w-full">
               {/* Logo Preview box */}
               <div className="size-10 rounded-xl overflow-hidden shrink-0 border border-border/80 shadow-2xs flex items-center justify-center bg-background">
-                <OrgLogo name={name} logoUrl={logoUrl} size="md" className="size-full rounded-xl" />
+                <OrgLogo
+                  name={name}
+                  logoUrl={logoUrl}
+                  size="md"
+                  className="size-full rounded-xl"
+                />
               </div>
 
               {/* URL Input */}
@@ -228,7 +245,7 @@ function GeneralSettingsForm({
                 value={logoUrl}
                 onChange={(e) => setLogoUrl(e.target.value)}
                 placeholder={t("tenant.orgLogoPlaceholder")}
-                disabled={isSaving}
+                disabled={isSaving || !canEdit}
                 className="h-10 px-4 text-sm rounded-xl bg-background border-border/80 flex-1 min-w-0"
               />
 
@@ -244,7 +261,7 @@ function GeneralSettingsForm({
                 type="button"
                 variant="outline"
                 onClick={() => fileInputRef.current?.click()}
-                disabled={isSaving}
+                disabled={isSaving || !canEdit}
                 className="h-10 px-4 rounded-xl gap-2 text-sm font-semibold shrink-0 cursor-pointer shadow-2xs hover:bg-muted/60"
               >
                 <Upload className="size-4" />
@@ -265,7 +282,7 @@ function GeneralSettingsForm({
             <div className="flex justify-end">
               <Button
                 type="submit"
-                disabled={isSaving || !name.trim()}
+                disabled={isSaving || !name.trim() || !canEdit}
                 className="h-10 px-5 rounded-xl text-sm font-semibold cursor-pointer shadow-xs min-w-32 bg-emerald-600 hover:bg-emerald-500 text-white"
               >
                 {isSaving ? (
@@ -282,7 +299,11 @@ function GeneralSettingsForm({
         </form>
       </div>
 
-      <LegalProfileForm key={tenant.id} tenantId={tenant.id} role={tenant.role} />
+      <LegalProfileForm
+        key={tenant.id}
+        tenantId={tenant.id}
+        role={tenant.role}
+      />
 
       {/* Thiết lập tổ chức mặc định */}
       <div className="pt-6 border-t border-border/60 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
@@ -296,6 +317,11 @@ function GeneralSettingsForm({
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
             {t("tenant.defaultSettingDesc")}
           </p>
+          {!hasMembership && (
+            <p className="text-xs text-muted-foreground">
+              {t("phase5.membershipRequired")}
+            </p>
+          )}
         </div>
 
         <div className="flex justify-end shrink-0">
@@ -308,7 +334,7 @@ function GeneralSettingsForm({
             <Button
               type="button"
               onClick={handleSetDefault}
-              disabled={isSettingDefault}
+              disabled={isSettingDefault || !hasMembership}
               className="h-10 px-5 rounded-xl text-sm font-semibold cursor-pointer shadow-xs min-w-32 bg-emerald-600 hover:bg-emerald-500 text-white"
             >
               {isSettingDefault ? (
@@ -446,7 +472,9 @@ function GeneralSettingsForm({
               type="button"
               variant="destructive"
               onClick={handleDeleteOrganization}
-              disabled={confirmOrgName.trim() !== tenant.name.trim() || isDeleting}
+              disabled={
+                confirmOrgName.trim() !== tenant.name.trim() || isDeleting
+              }
               className="h-10 rounded-xl font-semibold gap-2 cursor-pointer shadow-sm"
             >
               {isDeleting ? (
@@ -466,7 +494,10 @@ function GeneralSettingsForm({
       </Dialog>
 
       {/* DIALOG XÁC NHẬN RỜI TỔ CHỨC */}
-      <Dialog open={isLeaveDialogOpen} onOpenChange={(open) => !isLeaving && setIsLeaveDialogOpen(open)}>
+      <Dialog
+        open={isLeaveDialogOpen}
+        onOpenChange={(open) => !isLeaving && setIsLeaveDialogOpen(open)}
+      >
         <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader className="space-y-2">
             <div className="size-11 rounded-xl bg-destructive/10 text-destructive flex items-center justify-center border border-destructive/20 mb-1">
@@ -526,34 +557,22 @@ function GeneralSettingsForm({
 // MAIN DETAIL PAGE CONTENT
 // ==========================================
 function OrganizationDetailContent({ orgId }: { orgId: string }) {
-  const { activeTenant, tenants } = useAuth();
+  const { activeTenant, tenants, isLoading } = useAuth();
   const { t } = useTranslation();
 
   // Active tab: default is "members"
-  const [activeTab, setActiveTab] = useState<"members" | "roles" | "general">("members");
-
-  const currentTenant =
-    tenants.find((item) => item.id === orgId) ||
-    (activeTenant?.id === orgId ? activeTenant : activeTenant);
-
-  useEffect(() => {
-    if (currentTenant?.name) {
-      document.title = `LogiX - ${currentTenant.name.trim()}`;
-    }
-  }, [currentTenant?.name]);
-
-  const isDefaultTenant = tenants.some(
-    (item) => item.id === currentTenant?.id && item.isDefault
+  const [activeTab, setActiveTab] = useState<"members" | "roles" | "general">(
+    "members",
   );
 
-  const pageTitle = currentTenant?.name?.trim()
-    ? `LogiX - ${currentTenant.name.trim()}`
-    : "LogiX Platform";
+  const currentTenant = activeTenant?.id === orgId ? activeTenant : null;
+
+  const isDefaultTenant = tenants.some(
+    (item) => item.id === currentTenant?.id && item.isDefault,
+  );
 
   return (
     <div className="p-4 sm:p-6 md:p-8 max-w-5xl mx-auto space-y-6 w-full">
-      <title>{pageTitle}</title>
-
       {/* Header Breadcrumb */}
       <div className="flex items-center gap-3.5">
         <div className="flex size-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shadow-2xs">
@@ -581,7 +600,7 @@ function OrganizationDetailContent({ orgId }: { orgId: string }) {
                 "flex items-center gap-2 pb-3.5 px-1 text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap",
                 activeTab === "members"
                   ? "border-emerald-600 text-emerald-600 dark:text-emerald-400 dark:border-emerald-400"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
+                  : "border-transparent text-muted-foreground hover:text-foreground",
               )}
             >
               <Users className="size-4" />
@@ -596,7 +615,7 @@ function OrganizationDetailContent({ orgId }: { orgId: string }) {
                 "flex items-center gap-2 pb-3.5 px-1 text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap",
                 activeTab === "roles"
                   ? "border-emerald-600 text-emerald-600 dark:text-emerald-400 dark:border-emerald-400"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
+                  : "border-transparent text-muted-foreground hover:text-foreground",
               )}
             >
               <ShieldCheck className="size-4" />
@@ -611,7 +630,7 @@ function OrganizationDetailContent({ orgId }: { orgId: string }) {
                 "flex items-center gap-2 pb-3.5 px-1 text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap",
                 activeTab === "general"
                   ? "border-emerald-600 text-emerald-600 dark:text-emerald-400 dark:border-emerald-400"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
+                  : "border-transparent text-muted-foreground hover:text-foreground",
               )}
             >
               <Settings className="size-4" />
@@ -627,7 +646,13 @@ function OrganizationDetailContent({ orgId }: { orgId: string }) {
               <RoleListView tenantId={currentTenant.id} />
             ) : (
               <GeneralSettingsForm
-                key={currentTenant.id + "-" + (currentTenant.logoUrl || "") + "-" + currentTenant.name}
+                key={
+                  currentTenant.id +
+                  "-" +
+                  (currentTenant.logoUrl || "") +
+                  "-" +
+                  currentTenant.name
+                }
                 tenant={currentTenant}
                 isDefaultTenant={isDefaultTenant}
               />
@@ -636,7 +661,7 @@ function OrganizationDetailContent({ orgId }: { orgId: string }) {
         </div>
       ) : (
         <div className="rounded-2xl border border-border/70 bg-card p-10 text-center text-sm text-muted-foreground">
-          {t("tenant.loadingTenants")}
+          {t(isLoading ? "tenant.loadingTenants" : "phase5.contextMismatch")}
         </div>
       )}
     </div>
@@ -651,7 +676,7 @@ export default function OrganizationPage({
   const resolvedParams = use(params);
 
   return (
-    <Suspense fallback={<div className="p-8 text-xs text-muted-foreground">Loading...</div>}>
+    <Suspense fallback={null}>
       <OrganizationDetailContent orgId={resolvedParams.orgId} />
     </Suspense>
   );

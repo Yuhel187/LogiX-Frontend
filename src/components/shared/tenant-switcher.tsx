@@ -4,15 +4,7 @@ import * as React from "react";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import {
-  ChevronDown,
-  Building2,
-  Users,
-  ShieldCheck,
-  Settings,
-  Plus,
-  Loader2,
-} from "lucide-react";
+import { ChevronDown, Settings, Plus, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Popover,
@@ -47,9 +39,6 @@ export function TenantSwitcher({
   const switchingRef = useRef(false);
   const [createOpen, setCreateOpen] = useState(false);
 
-  const isAdmin =
-    activeTenant?.role === "OWNER" || activeTenant?.role === "ADMIN";
-
   const handleSelectTenant = async (tenantId: string, tenantName: string) => {
     if (switchingRef.current) return;
     if (tenantId === activeTenant?.id) {
@@ -60,7 +49,7 @@ export function TenantSwitcher({
     try {
       switchingRef.current = true;
       setSwitchingId(tenantId);
-      await switchTenant(tenantId);
+      await switchTenant(tenantId, { fullNavigation: true });
       toast.success(t("tenant.switchSuccess", { name: tenantName }));
       setOpen(false);
       // A full navigation discards tenant-scoped state and the App Router cache.
@@ -95,7 +84,7 @@ export function TenantSwitcher({
                   type="button"
                   className={cn(
                     "size-10 flex items-center justify-center rounded-xl hover:bg-muted/80 transition-all cursor-pointer focus-visible:outline-hidden",
-                    className
+                    className,
                   )}
                   aria-label={activeName}
                 >
@@ -105,7 +94,9 @@ export function TenantSwitcher({
             </TooltipTrigger>
             <TooltipContent side="right">
               <p className="font-semibold">{activeName}</p>
-              <p className="text-[10px] text-muted-foreground">{t("tenant.freePlan")}</p>
+              <p className="text-[10px] text-muted-foreground">
+                {t("tenant.freePlan")}
+              </p>
             </TooltipContent>
           </Tooltip>
         ) : (
@@ -114,7 +105,7 @@ export function TenantSwitcher({
               type="button"
               className={cn(
                 "flex items-center gap-3 w-full h-12 px-3 rounded-xl border border-border/70 bg-background/70 hover:bg-muted/60 hover:border-border transition-all text-left group cursor-pointer focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring shadow-2xs",
-                className
+                className,
               )}
             >
               <OrgLogo name={activeName} logoUrl={activeLogo} size="md" />
@@ -158,7 +149,7 @@ export function TenantSwitcher({
                     "flex items-center gap-2.5 w-full px-2.5 py-1.5 rounded-lg text-left transition-all cursor-pointer text-xs group",
                     isActive
                       ? "bg-accent/80 font-semibold shadow-2xs"
-                      : "hover:bg-accent/50 text-muted-foreground hover:text-foreground"
+                      : "hover:bg-accent/50 text-muted-foreground hover:text-foreground",
                   )}
                 >
                   <OrgLogo
@@ -202,54 +193,6 @@ export function TenantSwitcher({
             <Settings className="size-3.5 text-muted-foreground" />
             <span>{t("tenant.orgSettings")}</span>
           </button>
-
-          {/* Section 3: Admin Section (Only for OWNER/ADMIN) */}
-          {isAdmin && (
-            <>
-              <div className="h-px bg-border/40 my-1 mx-1" />
-              <div className="space-y-0.5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOpen(false);
-                    if (activeTenant?.id) {
-                      router.push(`/organization/${activeTenant.id}`);
-                    }
-                  }}
-                  className="flex items-center gap-2.5 w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-all cursor-pointer"
-                >
-                  <Building2 className="size-3.5 text-emerald-600 dark:text-emerald-400" />
-                  <span>{t("tenant.allOrgs")}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOpen(false);
-                    if (activeTenant?.id) {
-                      router.push(`/organization/${activeTenant.id}`);
-                    }
-                  }}
-                  className="flex items-center gap-2.5 w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-all cursor-pointer"
-                >
-                  <Users className="size-3.5 text-emerald-600 dark:text-emerald-400" />
-                  <span>{t("tenant.allUsers")}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOpen(false);
-                    if (activeTenant?.id) {
-                      router.push(`/organization/${activeTenant.id}`);
-                    }
-                  }}
-                  className="flex items-center gap-2.5 w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-all cursor-pointer"
-                >
-                  <ShieldCheck className="size-3.5 text-emerald-600 dark:text-emerald-400" />
-                  <span>{t("tenant.systemSecurity")}</span>
-                </button>
-              </div>
-            </>
-          )}
 
           <div className="h-px bg-border/40 my-1 mx-1" />
 
