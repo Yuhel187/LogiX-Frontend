@@ -214,6 +214,15 @@ export function RouteMap({
     }
   }, [routePlan, showBaseline, selectedStopId, onSelectStop]);
 
+  // Smooth pan/zoom when a stop is selected in timeline
+  React.useEffect(() => {
+    if (!selectedStopId || !mapInstanceRef.current) return;
+    const stop = routePlan.stops.find((s) => s.id === selectedStopId);
+    if (stop) {
+      mapInstanceRef.current.flyTo([stop.lat, stop.lng], 15, { duration: 0.8 });
+    }
+  }, [selectedStopId, routePlan.stops]);
+
   // Fit view helper
   const handleFitBounds = () => {
     const map = mapInstanceRef.current;

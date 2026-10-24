@@ -52,7 +52,7 @@ export function RouteSummaryPanel({
       setIsSubmitting(false);
       setIsApproveOpen(false);
       toast.success("Phê duyệt lộ trình thành công", {
-        description: `Chuyến xe ${routePlan.tripCode} đã được duyệt lộ trình tối ưu 21.2 km và sẵn sàng dispatch.`,
+        description: `Chuyến xe ${routePlan.tripCode} đã được duyệt lộ trình tối ưu ${routePlan.totalDistanceKm} km và sẵn sàng dispatch.`,
       });
       if (onApproveSuccess) onApproveSuccess(updated);
     }, 600);
@@ -135,15 +135,30 @@ export function RouteSummaryPanel({
             </div>
           </div>
 
-          <div className="p-2.5 rounded-lg bg-emerald-50/50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900">
-            <div className="text-[11px] text-muted-foreground font-medium">Tải trọng xe</div>
-            <div className="text-base font-bold text-emerald-700 dark:text-emerald-400 mt-0.5">
-              {routePlan.totalWeightKg} <span className="text-xs font-normal">/ {routePlan.vehicleCapacityKg} kg</span>
-            </div>
-            <div className="text-[10px] text-emerald-600 font-semibold mt-0.5">
-              85% (An toàn)
-            </div>
-          </div>
+          {(() => {
+            const capacityKg = routePlan.vehicleCapacityKg || 1000;
+            const weightPct = capacityKg > 0 ? Math.round((routePlan.totalWeightKg / capacityKg) * 100) : 0;
+            const isOvercapacity = routePlan.feasibilityStatus === "INFEASIBLE" || routePlan.totalWeightKg > capacityKg;
+            return (
+              <div className={`p-2.5 rounded-lg border ${
+                isOvercapacity
+                  ? "bg-red-50/60 dark:bg-red-950/40 border-red-200 dark:border-red-900"
+                  : "bg-emerald-50/50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900"
+              }`}>
+                <div className="text-[11px] text-muted-foreground font-medium">Tải trọng xe</div>
+                <div className={`text-base font-bold mt-0.5 ${
+                  isOvercapacity ? "text-red-700 dark:text-red-400" : "text-emerald-700 dark:text-emerald-400"
+                }`}>
+                  {routePlan.totalWeightKg} <span className="text-xs font-normal">/ {capacityKg} kg</span>
+                </div>
+                <div className={`text-[10px] font-semibold mt-0.5 ${
+                  isOvercapacity ? "text-red-600 dark:text-red-400" : "text-emerald-600"
+                }`}>
+                  {isOvercapacity ? `${weightPct}% (Quá tải!)` : `${weightPct}% (An toàn)`}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </div>
 
@@ -256,7 +271,7 @@ export function RouteSummaryPanel({
               Xác nhận phê duyệt phương án tuyến
             </DialogTitle>
             <DialogDescription className="text-xs">
-              Thao tác này sẽ khóa phương án đề xuất tối ưu (21.2 km) làm lộ trình chính thức cho chuyến xe {routePlan.tripCode}.
+              Thao tác này sẽ khóa phương án đề xuất tối ưu ({routePlan.totalDistanceKm} km) làm lộ trình chính thức cho chuyến xe {routePlan.tripCode}.
             </DialogDescription>
           </DialogHeader>
 
@@ -276,7 +291,10 @@ export function RouteSummaryPanel({
               </div>
               <div className="flex justify-between text-blue-600 font-bold">
                 <span>Quãng đường OSRM:</span>
-                <span>{routePlan.totalDistanceKm} km (Tiết kiệm 25.35%)</span>
+                <span>
+                  {routePlan.totalDistanceKm} km{" "}
+                  {routePlan.savingsPercent > 0 ? `(Tiết kiệm ${routePlan.savingsPercent}%)` : ""}
+                </span>
               </div>
             </div>
             <div className="text-[11px] text-muted-foreground flex items-center gap-1.5">
