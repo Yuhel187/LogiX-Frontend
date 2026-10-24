@@ -3,6 +3,9 @@ export { WarehousePicker } from "./components/warehouses/warehouse-picker";
 export { ProductsScreen } from "./components/products/products-screen";
 export { ProductPicker } from "./components/products/product-picker";
 export { VehiclesScreen } from "./components/vehicles/vehicles-screen";
+export { CustomersScreen } from "./components/customers/customers-screen";
+export { CustomerFormDialog } from "./components/customers/customer-form-dialog";
+export { CustomerAddressesDialog } from "./components/customers/customer-addresses-dialog";
 
 export * from "./schemas/common.schema";
 export * from "./schemas/warehouse.schema";

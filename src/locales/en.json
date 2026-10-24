@@ -134,6 +134,11 @@
       "summary": "Unit: {unit} · Weight: {weight} kg · Volume: {volume} m³"
     }
   },
+  "routes": {
+    "navTitle": "Routes & Trips",
+    "title": "Dispatch & Route Optimization",
+    "description": "Multi-stop delivery routing on OSRM road network with Google OR-Tools CVRP."
+  },
   "shipments": {
     "navTitle": "Shipment pool",
     "title": "Shipment pool",
@@ -352,6 +357,48 @@
       "duplicateCode": "This code or plate already exists in the organization",
       "disableDescription": "The vehicle will not be assigned to new trips. Running trips are unaffected.",
       "enableDescription": "The vehicle can be assigned to trips again."
+    },
+    "customer": {
+      "title": "Customers",
+      "description": "Manage business customers and their delivery addresses.",
+      "create": "Add Customer",
+      "createTitle": "Add Customer",
+      "editTitle": "Edit Customer",
+      "formDescription": "Customer details referenced across orders and billing.",
+      "code": "Customer Code",
+      "name": "Customer Name",
+      "taxCode": "Tax Code",
+      "phone": "Phone Number",
+      "email": "Email",
+      "searchPlaceholder": "Search by code, name, or phone...",
+      "empty": "No customers found.",
+      "duplicateCode": "This customer code already exists in your organization",
+      "codeImmutable": "Customer code cannot be changed after creation",
+      "disableDescription": "The customer will no longer be selectable for new orders. Existing orders remain unchanged.",
+      "enableDescription": "The customer will reappear in selection lists.",
+      "disableReason": "Reason for disabling",
+      "disableReasonPlaceholder": "Enter reason for termination...",
+      "manageAddresses": "Manage Addresses",
+      "addressesTitle": "Addresses for {name}",
+      "addressesDescription": "Manage shipping and billing addresses for this customer.",
+      "addAddress": "Add Address",
+      "createAddressTitle": "Add New Address",
+      "editAddressTitle": "Edit Address",
+      "addressFormDescription": "Address details and coordinates used for route dispatch.",
+      "addressType": "Address Type",
+      "shippingType": "Shipping Address (Ship-to)",
+      "billingType": "Billing Address (Bill-to)",
+      "label": "Address Label",
+      "labelPlaceholder": "e.g., Main Depot, Store #1...",
+      "recipientName": "Recipient Name",
+      "recipientPhone": "Recipient Phone",
+      "deliveryNote": "Delivery Note",
+      "deliveryNotePlaceholder": "Delivery instructions, call before arriving...",
+      "isDefault": "Set as default address",
+      "defaultBadge": "Default",
+      "setDefault": "Set as Default",
+      "setDefaultSuccess": "Set as default address",
+      "noAddresses": "This customer has no addresses yet."
     }
   },
   "nav": {

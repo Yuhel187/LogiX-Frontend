@@ -90,6 +90,17 @@ export async function listCustomerAddressesApi(
   );
 }
 
+export async function getCustomerAddressApi(
+  customerId: string,
+  addressId: string
+): Promise<CustomerAddress> {
+  const response = await authFetch(
+    `${BASE_URL}/${customerId}/addresses/${addressId}`,
+    { method: "GET" }
+  );
+  return customerAddressSchema.parse(await handleResponse<unknown>(response));
+}
+
 export async function createCustomerAddressApi(
   customerId: string,
   input: CreateCustomerAddressInput

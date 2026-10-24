@@ -9,11 +9,13 @@ import {
   ClipboardList,
   LayoutDashboard,
   Package,
+  Route,
   Settings,
   Truck,
   Warehouse,
   Building2,
   Users,
+  Contact,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -88,9 +90,13 @@ export function AppSidebar() {
         ],
       },
       {
-        // Customers joins this group once its screen lands.
         label: t("masterData.navTitle"),
         items: [
+          {
+            title: t("masterData.customer.title"),
+            href: "/master-data/customers",
+            icon: Contact,
+          },
           {
             title: t("masterData.warehouse.title"),
             href: "/master-data/warehouses",
@@ -122,6 +128,11 @@ export function AppSidebar() {
             href: "/shipments",
             icon: Package,
             permission: SHIPMENT_PERMISSIONS.read,
+          },
+          {
+            title: t("routes.navTitle", { defaultValue: "Lộ trình & Chuyến xe" }),
+            href: "/routes",
+            icon: Route,
           },
         ],
       },
