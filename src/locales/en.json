@@ -1,4 +1,101 @@
 {
+  "chat": {
+    "appTitle": "LogiX Copilot",
+    "welcomeMessage": "Hello! I am LogiX AI Assistant. How can I assist you with warehouse and logistics operations today?",
+    "inputPlaceholder": "Type your message or question...",
+    "expand": "Expand to full screen",
+    "collapse": "Collapse sidebar",
+    "newChat": "New conversation",
+    "openCopilot": "Open LogiX AI Assistant"
+  },
+  "admin": {
+    "navTitle": "Platform Admin",
+    "organizations": {
+      "title": "All organizations",
+      "description": "Search and review organizations across the platform.",
+      "searchPlaceholder": "Organization name or code"
+    },
+    "users": {
+      "title": "All users",
+      "description": "Search and review user accounts across the platform.",
+      "searchPlaceholder": "Email or display name"
+    },
+    "filters": {
+      "search": "Search",
+      "allStatuses": "All statuses"
+    },
+    "actions": {
+      "search": "Search",
+      "reset": "Reset filters",
+      "refresh": "Refresh",
+      "retry": "Retry",
+      "login": "Sign in again",
+      "userMenu": "Actions for {name}",
+      "lockAccountSoon": "Lock account (coming soon)"
+    },
+    "columns": {
+      "id": "Reference ID",
+      "organization": "Organization",
+      "owner": "Organization owner",
+      "phoneNumber": "Phone number",
+      "user": "User",
+      "status": "Status",
+      "accountType": "Account type",
+      "tenantCount": "Active memberships",
+      "lastLoginAt": "Last sign-in",
+      "createdAt": "Created",
+      "updatedAt": "Updated",
+      "actions": "Actions"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "SUSPENDED": "Suspended",
+      "DISABLED": "Disabled",
+      "LOCKED": "Locked"
+    },
+    "account": {
+      "superAdmin": "Super Admin",
+      "standard": "Standard account",
+      "neverLoggedIn": "Never signed in",
+      "noOwner": "No owner assigned",
+      "noPhone": "Not provided"
+    },
+    "loading": "Loading results…",
+    "empty": {
+      "title": "No results found",
+      "description": "Try a different search or reset the filters.",
+      "outOfRangeTitle": "This page has no results",
+      "outOfRangeDescription": "The results may have changed. Return to the first page to continue."
+    },
+    "pagination": {
+      "label": "Result pagination",
+      "range": "{from}–{to} of {total} results",
+      "page": "Page {page} of {totalPages}",
+      "noPages": "No pages",
+      "pageSize": "Rows per page",
+      "previous": "Previous",
+      "next": "Next",
+      "first": "Go to first page"
+    },
+    "errors": {
+      "unauthorized": "Your session has expired. Sign in again to continue.",
+      "forbidden": "You do not have permission to view this list.",
+      "invalidQuery": "The search or pagination options are invalid. Reset the filters and try again.",
+      "invalidResponse": "The results could not be read. Please retry.",
+      "timeout": "Loading took too long. Please retry.",
+      "network": "Unable to connect. Check your connection and retry.",
+      "unavailable": "Unable to load the list right now. Please retry."
+    },
+    "inject": {
+      "access": "Access organization",
+      "switching": "Verifying organization session...",
+      "unknown": "The switch outcome is unknown. The workspace is locked to prevent using the wrong context. Verify the current session before continuing; do not repeat the switch.",
+      "verify": "Verify current session",
+      "recoveryError": "Unable to verify the session. Try verifying again or sign in again.",
+      "error": "Unable to access this organization. Check its status and your access.",
+      "unavailable": "Only active organizations can be accessed."
+    }
+  },
   "displayLabels": {
     "actor": "Performed by",
     "system": "System",
@@ -20,14 +117,18 @@
     }
   },
   "pickers": {
-    "loading": "Loading…", "retry": "Retry", "clear": "Clear selection",
+    "loading": "Loading…",
+    "retry": "Retry",
+    "clear": "Clear selection",
     "warehouse": {
-      "placeholder": "Select a warehouse…", "search": "Search by warehouse code or name…",
+      "placeholder": "Select a warehouse…",
+      "search": "Search by warehouse code or name…",
       "empty": "No matching warehouses found.",
       "loadError": "Unable to load warehouse information. Please retry."
     },
     "product": {
-      "placeholder": "Select a product…", "search": "Search by SKU or product name…",
+      "placeholder": "Select a product…",
+      "search": "Search by SKU or product name…",
       "empty": "No matching products found.",
       "loadError": "Unable to load product information. Please retry.",
       "summary": "Unit: {unit} · Weight: {weight} kg · Volume: {volume} m³"
@@ -37,31 +138,63 @@
     "navTitle": "Shipment pool",
     "title": "Shipment pool",
     "description": "Prepare confirmed orders and track dispatch and delivery outcomes.",
-    "allStatuses": "All statuses", "allWarehouses": "All warehouses",
-    "createdFrom": "Created from", "createdTo": "Created to",
-    "loading": "Loading confirmation details…", "empty": "No shipments match these filters.",
+    "allStatuses": "All statuses",
+    "allWarehouses": "All warehouses",
+    "createdFrom": "Created from",
+    "createdTo": "Created to",
+    "loading": "Loading confirmation details…",
+    "empty": "No shipments match these filters.",
     "pagination": "Page {page} / {pages} · {total} shipments",
-    "items": "Shipment items", "history": "Status history", "destination": "Delivery address",
-    "actor": "Performed by", "system": "System", "failureReason": "Failure reason (required, max. 1,000 characters)",
+    "items": "Shipment items",
+    "history": "Status history",
+    "destination": "Delivery address",
+    "actor": "Performed by",
+    "system": "System",
+    "failureReason": "Failure reason (required, max. 1,000 characters)",
     "failureReasonPlaceholder": "Enter the reason delivery failed…",
     "saved": "Your action has been received. The order status and stock levels may take a moment to update.",
     "refreshHint": "This page updates automatically for about a minute and when you return. Select Refresh to check the latest status.",
-    "orderPanel": "Shipment", "orderEmpty": "No shipment exists yet. Confirmed orders may still be processing.",
+    "orderPanel": "Shipment",
+    "orderEmpty": "No shipment exists yet. Confirmed orders may still be processing.",
     "columns": {
-      "shipment": "Shipment", "order": "Order", "customer": "Customer", "warehouse": "Warehouse",
-      "status": "Status", "weight": "Weight (kg)", "volume": "Volume (m³)", "createdAt": "Created",
-      "sku": "SKU", "product": "Product", "quantity": "Quantity", "unit": "Unit"
+      "shipment": "Shipment",
+      "order": "Order",
+      "customer": "Customer",
+      "warehouse": "Warehouse",
+      "status": "Status",
+      "weight": "Weight (kg)",
+      "volume": "Volume (m³)",
+      "createdAt": "Created",
+      "sku": "SKU",
+      "product": "Product",
+      "quantity": "Quantity",
+      "unit": "Unit"
     },
     "status": {
-      "PENDING_PICK": "Pending pick", "PICKING": "Picking", "READY_TO_SHIP": "Ready to ship",
-      "DISPATCHED": "Dispatched", "DELIVERED": "Delivered", "FAILED": "Delivery failed", "CANCELED": "Canceled"
+      "PENDING_PICK": "Pending pick",
+      "PICKING": "Picking",
+      "READY_TO_SHIP": "Ready to ship",
+      "DISPATCHED": "Dispatched",
+      "DELIVERED": "Delivered",
+      "FAILED": "Delivery failed",
+      "CANCELED": "Canceled"
     },
     "actions": {
-      "refresh": "Refresh", "retry": "Retry", "reload": "Reload latest data", "resetFilters": "Reset filters",
-      "previous": "Previous", "next": "Next", "back": "Back to shipment pool", "dismiss": "Close",
-      "retryPreview": "Reload confirmation details", "confirmDescription": "Confirm this change for the shipment shown below.",
-      "start-picking": "Start picking", "mark-ready": "Mark ready", "dispatch": "Confirm dispatch",
-      "mark-delivered": "Confirm delivered", "mark-failed": "Confirm delivery failed"
+      "refresh": "Refresh",
+      "retry": "Retry",
+      "reload": "Reload latest data",
+      "resetFilters": "Reset filters",
+      "previous": "Previous",
+      "next": "Next",
+      "back": "Back to shipment pool",
+      "dismiss": "Close",
+      "retryPreview": "Reload confirmation details",
+      "confirmDescription": "Confirm this change for the shipment shown below.",
+      "start-picking": "Start picking",
+      "mark-ready": "Mark ready",
+      "dispatch": "Confirm dispatch",
+      "mark-delivered": "Confirm delivered",
+      "mark-failed": "Confirm delivery failed"
     },
     "confirmations": {
       "start-picking": "Confirm that preparation is starting for this shipment.",
@@ -80,7 +213,8 @@
     "errors": {
       "generic": "The result of your action is not yet known. Check your connection and refresh to see the status before trying again.",
       "invalidRequest": "Invalid request or date range. Check the selected values before retrying.",
-      "unauthorized": "Your session has expired. Sign in again.", "forbidden": "You do not have permission to view or change shipments.",
+      "unauthorized": "Your session has expired. Sign in again.",
+      "forbidden": "You do not have permission to view or change shipments.",
       "SHIPMENT_NOT_FOUND": "Shipment not found in the current organization.",
       "SHIPMENT_VERSION_CONFLICT": "Shipment or order state changed. Reload latest data before continuing.",
       "SHIPMENT_INVALID_TRANSITION": "This action is not valid for the current shipment status.",
@@ -182,6 +316,7 @@
     }
   },
   "nav": {
+    "navigationMenu": "LogiX navigation menu",
     "brandSubtitle": "Inteligent Logistic",
     "systemManagement": "System Management",
     "overview": "Overview",
@@ -448,7 +583,25 @@
     "sendInvite": "Send Invitation",
     "inviteFeatureComingSoon": "Email invitation feature is currently under development.",
     "roleUpdateSuccess": "Role updated successfully.",
-    "removeMemberSuccess": "Member removed from organization successfully."
+    "removeMemberSuccess": "Member removed from organization successfully.",
+    "legalProfileTitle": "Legal profile",
+    "legalName": "Legal name",
+    "legalNamePlaceholder": "e.g. ABC Logistics Co., Ltd.",
+    "taxCode": "Tax code",
+    "taxCodePlaceholder": "e.g. 0312345678",
+    "legalPhone": "Phone",
+    "legalPhonePlaceholder": "e.g. 028 3812 3456",
+    "legalAddressLine": "Street address",
+    "legalAddressLinePlaceholder": "House number, street",
+    "legalWard": "Ward",
+    "legalDistrict": "District",
+    "legalProvince": "Province/City",
+    "legalPostalCode": "Postal code",
+    "legalAddressHint": "Street address and Province/City must be provided together (or both left empty).",
+    "legalProfileReadonly": "Only Owners or Admins can edit the legal profile.",
+    "legalProfileLoadError": "Failed to load the legal profile.",
+    "legalProfileSave": "Save legal profile",
+    "legalProfileSaveSuccess": "Legal profile saved"
   },
   "account": {
     "pageTitle": "Account Settings",
@@ -989,5 +1142,45 @@
       "UPSTREAM_UNAVAILABLE": "The order cannot be processed right now. Please try again later.",
       "UPSTREAM_REJECTED": "This action cannot be completed with the current information. Refresh and check the order before trying again."
     }
+  },
+  "phase5": {
+    "conflict": "The data has changed or a protection rule blocks this action. Reload and check the latest state.",
+    "notFound": "The requested data was not found or is no longer available.",
+    "validation": "The data is invalid or the action does not meet a protection rule. Please check again.",
+    "membershipRequired": "This action requires an actual membership. Super Admin access does not create a membership.",
+    "contextMismatch": "The organization in the URL does not match the active session. Select it using the organization switcher or platform management before opening this page.",
+    "orgNameInvalid": "The organization name must contain at least 2 characters.",
+    "loadInvitationsError": "Unable to load invitations. Please try again.",
+    "sendInvitationError": "Unable to send the invitation. Check its latest status before sending again.",
+    "emailInvalid": "Enter a valid email address.",
+    "rolesRequired": "Select at least one role.",
+    "roleIdInvalid": "The selected role is invalid.",
+    "invitationCreated": "Invitation created!",
+    "invitationCreatedDesc": "An invitation was created for {email}. You can copy the link below and share it directly.",
+    "inviteLinkLabel": "Invitation link",
+    "inviteExpires": "This link expires on {date}.",
+    "loadingRoles": "Loading roles...",
+    "copyError": "Unable to copy the link. Please check clipboard permissions.",
+    "legalNameMax": "Legal name must not exceed 255 characters.",
+    "taxCodeMax": "Tax code must not exceed 50 characters.",
+    "phoneMax": "Phone number must not exceed 30 characters.",
+    "addressMax": "Address must not exceed 500 characters.",
+    "wardMax": "Ward must not exceed 100 characters.",
+    "districtMax": "District must not exceed 100 characters.",
+    "provinceMax": "Province must not exceed 100 characters.",
+    "postalCodeMax": "Postal code must not exceed 20 characters.",
+    "provinceRequired": "Enter a province for the legal address.",
+    "addressRequired": "Enter the street address for the legal address.",
+    "roleNameMin": "Role name must contain at least 2 characters.",
+    "roleNameMax": "Role name must not exceed 100 characters.",
+    "roleCodeMin": "Role code must contain at least 2 characters.",
+    "roleCodeMax": "Role code must not exceed 50 characters.",
+    "roleCodePattern": "Role code may contain only uppercase letters, digits and underscores.",
+    "reservedRole": "Super Admin cannot be created as an organization role.",
+    "descriptionMax": "Description must not exceed 255 characters.",
+    "searchRolesHint": "Search by email, inviter or role",
+    "roleSaved": "Role saved.",
+    "roleDeleted": "Role deleted.",
+    "loadFailed": "Unable to load data. No changes were submitted. Please reload."
   }
 }

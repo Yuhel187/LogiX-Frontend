@@ -12,6 +12,8 @@ import {
   Settings,
   Truck,
   Warehouse,
+  Building2,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -52,6 +54,23 @@ export function AppSidebar() {
 
   const navGroups: NavGroup[] = React.useMemo(
     () => [
+      {
+        label: t("admin.navTitle"),
+        items: [
+          {
+            title: t("admin.organizations.title"),
+            href: "/admin/organizations",
+            icon: Building2,
+            superAdminOnly: true,
+          },
+          {
+            title: t("admin.users.title"),
+            href: "/admin/users",
+            icon: Users,
+            superAdminOnly: true,
+          },
+        ],
+      },
       {
         label: t("nav.systemManagement"),
         items: [
@@ -316,7 +335,7 @@ export function AppSidebar() {
       {/* Mobile Drawer (Sheet) */}
       <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
         <SheetContent side="left" className="w-72 p-0 flex flex-col bg-sidebar">
-          <SheetTitle className="sr-only">Menu điều hướng LogiX</SheetTitle>
+          <SheetTitle className="sr-only">{t("nav.navigationMenu")}</SheetTitle>
 
           {/* Mobile Tenant Switcher Header */}
           <div className="flex h-16 items-center border-b border-border/70 px-3.5 shrink-0">

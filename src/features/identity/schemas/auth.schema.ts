@@ -43,6 +43,19 @@ export const authResponseSchema = z.object({
   tenants: z.array(tenantListItemSchema).optional().default([]),
 });
 
+export const profileResponseSchema = authUserSchema.extend({
+  isSuperAdmin: z.boolean(),
+  status: z.string(),
+  lastLoginAt: z.string().nullable().optional(),
+  activeTenant: activeTenantSchema.nullable(),
+  tenants: z.array(tenantListItemSchema),
+});
+
+export const switchTenantResponseSchema = z.object({
+  accessToken: z.string().min(1),
+  activeTenant: activeTenantSchema,
+});
+
 export const loginCredentialsSchema = z.object({
   email: z.string().email("Email không đúng định dạng"),
   password: z.string().min(8, "Mật khẩu phải có ít nhất 8 ký tự"),
@@ -83,34 +96,36 @@ const optionalLegalText = (max: number, message: string) =>
 
 /** Blank strings / null clear a field; addressLine and province must be set together. */
 export const legalProfileSchema = z.object({
-  legalName: optionalLegalText(255, "Tên pháp lý tối đa 255 ký tự"),
-  taxCode: optionalLegalText(50, "Mã số thuế tối đa 50 ký tự"),
-  phone: optionalLegalText(30, "Số điện thoại tối đa 30 ký tự"),
-  addressLine: optionalLegalText(500, "Địa chỉ tối đa 500 ký tự"),
-  ward: optionalLegalText(100, "Phường/xã tối đa 100 ký tự"),
-  district: optionalLegalText(100, "Quận/huyện tối đa 100 ký tự"),
-  province: optionalLegalText(100, "Tỉnh/thành phố tối đa 100 ký tự"),
-  postalCode: optionalLegalText(20, "Mã bưu chính tối đa 20 ký tự"),
+  legalName: optionalLegalText(255, "phase5.legalNameMax"),
+  taxCode: optionalLegalText(50, "phase5.taxCodeMax"),
+  phone: optionalLegalText(30, "phase5.phoneMax"),
+  addressLine: optionalLegalText(500, "phase5.addressMax"),
+  ward: optionalLegalText(100, "phase5.wardMax"),
+  district: optionalLegalText(100, "phase5.districtMax"),
+  province: optionalLegalText(100, "phase5.provinceMax"),
+  postalCode: optionalLegalText(20, "phase5.postalCodeMax"),
 });
 
-export const legalProfileFormSchema = legalProfileSchema.superRefine((data, ctx) => {
-  const hasAddress = !!data.addressLine?.trim();
-  const hasProvince = !!data.province?.trim();
-  if (hasAddress && !hasProvince) {
-    ctx.addIssue({
-      code: "custom",
-      path: ["province"],
-      message: "Vui lòng nhập tỉnh/thành phố cho địa chỉ pháp lý",
-    });
-  }
-  if (hasProvince && !hasAddress) {
-    ctx.addIssue({
-      code: "custom",
-      path: ["addressLine"],
-      message: "Vui lòng nhập địa chỉ chi tiết cho địa chỉ pháp lý",
-    });
-  }
-});
+export const legalProfileFormSchema = legalProfileSchema.superRefine(
+  (data, ctx) => {
+    const hasAddress = !!data.addressLine?.trim();
+    const hasProvince = !!data.province?.trim();
+    if (hasAddress && !hasProvince) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["province"],
+        message: "phase5.provinceRequired",
+      });
+    }
+    if (hasProvince && !hasAddress) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["addressLine"],
+        message: "phase5.addressRequired",
+      });
+    }
+  },
+);
 
 export const updateOrganizationSchema = z.object({
   name: z.string().min(2, "Tên tổ chức phải có ít nhất 2 ký tự").optional(),
@@ -144,7 +159,10 @@ export const organizationDetailSchema = z.object({
 });
 
 export const updateProfileSchema = z.object({
-  displayName: z.string().min(2, "Tên hiển thị phải có ít nhất 2 ký tự").optional(),
+  displayName: z
+    .string()
+    .min(2, "Tên hiển thị phải có ít nhất 2 ký tự")
+    .optional(),
   phoneNumber: z.string().optional(),
   avatarUrl: z.string().optional(),
 });
@@ -209,4 +227,3 @@ export type UpdateProfileData = z.infer<typeof updateProfileSchema>;
 export type ChangePasswordData = z.infer<typeof changePasswordSchema>;
 export type UserSession = z.infer<typeof userSessionSchema>;
 export type OrgMember = z.infer<typeof orgMemberSchema>;
-

@@ -27,7 +27,7 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
             </div>
 
             {/* Copilot AI Slide Bar */}
-            <LogixCopilotSidebar defaultOpen={true} />
+            <LogixCopilotSidebar />
           </div>
         </SidebarProvider>
       </CopilotChatProvider>

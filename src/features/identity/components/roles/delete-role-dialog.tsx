@@ -1,5 +1,7 @@
 "use client";
 
+import { formatIdentityError } from "../../utils/error-formatter";
+
 import React, { useState } from "react";
 import {
   AlertDialog,
@@ -46,11 +48,11 @@ export function DeleteRoleDialog({
     setIsDeleting(true);
     try {
       await deleteRoleApi(role.id, tenantId);
-      toast.success(t("common.save"));
+      toast.success(t("phase5.roleDeleted"));
       onSuccess();
       onOpenChange(false);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : t("iam.roles.deleteFailed");
+      const msg = formatIdentityError(err, t, "iam.roles.deleteFailed");
       toast.error(msg);
     } finally {
       setIsDeleting(false);
@@ -85,7 +87,11 @@ export function DeleteRoleDialog({
           {!isSystemRole && hasMembers && (
             <div className="flex items-start gap-2.5 rounded-lg border border-amber-500/20 bg-amber-500/10 p-3 text-left text-xs text-amber-600 dark:text-amber-400">
               <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-              <span>{t("iam.roles.cannotDeleteRoleWithMembers", { count: role.memberCount })}</span>
+              <span>
+                {t("iam.roles.cannotDeleteRoleWithMembers", {
+                  count: role.memberCount,
+                })}
+              </span>
             </div>
           )}
         </AlertDialogHeader>

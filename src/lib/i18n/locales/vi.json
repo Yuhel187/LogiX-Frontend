@@ -1,4 +1,92 @@
 {
+  "admin": {
+    "navTitle": "Quản trị nền tảng",
+    "organizations": {
+      "title": "Tất cả tổ chức",
+      "description": "Tra cứu và xem các tổ chức trên toàn nền tảng.",
+      "searchPlaceholder": "Tên hoặc mã tổ chức"
+    },
+    "users": {
+      "title": "Tất cả người dùng",
+      "description": "Tra cứu và xem tài khoản người dùng trên toàn nền tảng.",
+      "searchPlaceholder": "Email hoặc tên hiển thị"
+    },
+    "filters": {
+      "search": "Tìm kiếm",
+      "allStatuses": "Tất cả trạng thái"
+    },
+    "actions": {
+      "search": "Tìm kiếm",
+      "reset": "Đặt lại bộ lọc",
+      "refresh": "Làm mới",
+      "retry": "Thử lại",
+      "login": "Đăng nhập lại",
+      "userMenu": "Thao tác với {name}",
+      "lockAccountSoon": "Khóa tài khoản (sắp có)"
+    },
+    "columns": {
+      "id": "ID tham chiếu",
+      "organization": "Tổ chức",
+      "owner": "Chủ sở hữu tổ chức",
+      "phoneNumber": "Số điện thoại",
+      "user": "Người dùng",
+      "status": "Trạng thái",
+      "accountType": "Loại tài khoản",
+      "tenantCount": "Liên kết tổ chức hoạt động",
+      "lastLoginAt": "Đăng nhập gần nhất",
+      "createdAt": "Ngày tạo",
+      "updatedAt": "Cập nhật",
+      "actions": "Thao tác"
+    },
+    "status": {
+      "ACTIVE": "Đang hoạt động",
+      "SUSPENDED": "Tạm ngưng",
+      "DISABLED": "Vô hiệu hóa",
+      "LOCKED": "Đã khóa"
+    },
+    "account": {
+      "superAdmin": "Quản trị viên nền tảng",
+      "standard": "Tài khoản thông thường",
+      "neverLoggedIn": "Chưa đăng nhập",
+      "noOwner": "Chưa có chủ sở hữu",
+      "noPhone": "Chưa cập nhật"
+    },
+    "loading": "Đang tải kết quả…",
+    "empty": {
+      "title": "Không có kết quả",
+      "description": "Thử từ khóa khác hoặc đặt lại bộ lọc.",
+      "outOfRangeTitle": "Trang này không có kết quả",
+      "outOfRangeDescription": "Danh sách có thể đã thay đổi. Hãy về trang đầu để tiếp tục."
+    },
+    "pagination": {
+      "label": "Phân trang kết quả",
+      "range": "{from}–{to} trên {total} kết quả",
+      "page": "Trang {page} trên {totalPages}",
+      "noPages": "Không có trang kết quả",
+      "pageSize": "Số dòng mỗi trang",
+      "previous": "Trước",
+      "next": "Sau",
+      "first": "Về trang đầu"
+    },
+    "errors": {
+      "unauthorized": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để tiếp tục.",
+      "forbidden": "Bạn không có quyền xem danh sách này.",
+      "invalidQuery": "Điều kiện tìm kiếm hoặc phân trang không hợp lệ. Hãy đặt lại bộ lọc và thử lại.",
+      "invalidResponse": "Không thể đọc kết quả. Vui lòng thử lại.",
+      "timeout": "Tải dữ liệu quá lâu. Vui lòng thử lại.",
+      "network": "Không thể kết nối. Hãy kiểm tra kết nối mạng và thử lại.",
+      "unavailable": "Hiện không thể tải danh sách. Vui lòng thử lại."
+    },
+    "inject": {
+      "access": "Truy cập tổ chức",
+      "switching": "Đang xác minh phiên tổ chức...",
+      "unknown": "Chưa xác định được kết quả chuyển tổ chức. Workspace đã khóa để tránh dùng sai ngữ cảnh. Hãy xác minh phiên trước khi tiếp tục; không gửi lại lệnh chuyển.",
+      "verify": "Xác minh phiên hiện tại",
+      "recoveryError": "Không thể xác minh phiên. Vui lòng thử xác minh lại hoặc đăng nhập lại.",
+      "error": "Không thể truy cập tổ chức. Vui lòng kiểm tra quyền và trạng thái tổ chức.",
+      "unavailable": "Chỉ có thể truy cập tổ chức đang hoạt động."
+    }
+  },
   "displayLabels": {
     "actor": "Người thực hiện",
     "system": "Hệ thống",
@@ -38,33 +126,66 @@
     }
   },
   "shipments": {
-    "navTitle": "Lô giao hàng", "title": "Danh sách lô giao hàng",
+    "navTitle": "Lô giao hàng",
+    "title": "Danh sách lô giao hàng",
     "description": "Chuẩn bị đơn đã xác nhận, theo dõi xuất kho và kết quả giao hàng.",
-    "allStatuses": "Tất cả trạng thái", "allWarehouses": "Tất cả kho",
-    "createdFrom": "Tạo từ ngày", "createdTo": "Tạo đến ngày",
-    "loading": "Đang tải thông tin xác nhận…", "empty": "Không có lô giao phù hợp với bộ lọc.",
+    "allStatuses": "Tất cả trạng thái",
+    "allWarehouses": "Tất cả kho",
+    "createdFrom": "Tạo từ ngày",
+    "createdTo": "Tạo đến ngày",
+    "loading": "Đang tải thông tin xác nhận…",
+    "empty": "Không có lô giao phù hợp với bộ lọc.",
     "pagination": "Trang {page} / {pages} · {total} lô giao",
-    "items": "Hàng hóa trong lô", "history": "Lịch sử trạng thái", "destination": "Địa chỉ giao hàng",
-    "actor": "Người thực hiện", "system": "Hệ thống", "failureReason": "Lý do giao thất bại (bắt buộc, tối đa 1.000 ký tự)",
+    "items": "Hàng hóa trong lô",
+    "history": "Lịch sử trạng thái",
+    "destination": "Địa chỉ giao hàng",
+    "actor": "Người thực hiện",
+    "system": "Hệ thống",
+    "failureReason": "Lý do giao thất bại (bắt buộc, tối đa 1.000 ký tự)",
     "failureReasonPlaceholder": "Nhập lý do giao thất bại…",
     "saved": "Hệ thống đã nhận thao tác. Trạng thái đơn hàng và tồn kho có thể cần một lúc để cập nhật.",
     "refreshHint": "Trang tự cập nhật trong khoảng một phút và khi bạn quay lại. Chọn Làm mới để kiểm tra trạng thái mới nhất.",
-    "orderPanel": "Lô giao", "orderEmpty": "Chưa có lô giao. Đơn đã xác nhận có thể đang được xử lý.",
+    "orderPanel": "Lô giao",
+    "orderEmpty": "Chưa có lô giao. Đơn đã xác nhận có thể đang được xử lý.",
     "columns": {
-      "shipment": "Lô giao", "order": "Đơn hàng", "customer": "Khách hàng", "warehouse": "Kho",
-      "status": "Trạng thái", "weight": "Khối lượng (kg)", "volume": "Thể tích (m³)", "createdAt": "Ngày tạo",
-      "sku": "SKU", "product": "Sản phẩm", "quantity": "Số lượng", "unit": "Đơn vị"
+      "shipment": "Lô giao",
+      "order": "Đơn hàng",
+      "customer": "Khách hàng",
+      "warehouse": "Kho",
+      "status": "Trạng thái",
+      "weight": "Khối lượng (kg)",
+      "volume": "Thể tích (m³)",
+      "createdAt": "Ngày tạo",
+      "sku": "SKU",
+      "product": "Sản phẩm",
+      "quantity": "Số lượng",
+      "unit": "Đơn vị"
     },
     "status": {
-      "PENDING_PICK": "Chờ chuẩn bị", "PICKING": "Đang chuẩn bị", "READY_TO_SHIP": "Sẵn sàng xuất kho",
-      "DISPATCHED": "Đã xuất kho", "DELIVERED": "Đã giao", "FAILED": "Giao thất bại", "CANCELED": "Đã hủy"
+      "PENDING_PICK": "Chờ chuẩn bị",
+      "PICKING": "Đang chuẩn bị",
+      "READY_TO_SHIP": "Sẵn sàng xuất kho",
+      "DISPATCHED": "Đã xuất kho",
+      "DELIVERED": "Đã giao",
+      "FAILED": "Giao thất bại",
+      "CANCELED": "Đã hủy"
     },
     "actions": {
-      "refresh": "Làm mới", "retry": "Thử lại", "reload": "Tải dữ liệu mới nhất", "resetFilters": "Xóa bộ lọc",
-      "previous": "Trước", "next": "Sau", "back": "Về danh sách lô giao", "dismiss": "Đóng",
-      "retryPreview": "Tải lại thông tin xác nhận", "confirmDescription": "Xác nhận thay đổi cho lô giao dưới đây.",
-      "start-picking": "Bắt đầu chuẩn bị", "mark-ready": "Đánh dấu sẵn sàng", "dispatch": "Xác nhận xuất kho",
-      "mark-delivered": "Xác nhận đã giao", "mark-failed": "Xác nhận giao thất bại"
+      "refresh": "Làm mới",
+      "retry": "Thử lại",
+      "reload": "Tải dữ liệu mới nhất",
+      "resetFilters": "Xóa bộ lọc",
+      "previous": "Trước",
+      "next": "Sau",
+      "back": "Về danh sách lô giao",
+      "dismiss": "Đóng",
+      "retryPreview": "Tải lại thông tin xác nhận",
+      "confirmDescription": "Xác nhận thay đổi cho lô giao dưới đây.",
+      "start-picking": "Bắt đầu chuẩn bị",
+      "mark-ready": "Đánh dấu sẵn sàng",
+      "dispatch": "Xác nhận xuất kho",
+      "mark-delivered": "Xác nhận đã giao",
+      "mark-failed": "Xác nhận giao thất bại"
     },
     "confirmations": {
       "start-picking": "Xác nhận bắt đầu chuẩn bị hàng cho lô giao này.",
@@ -83,7 +204,8 @@
     "errors": {
       "generic": "Chưa xác định được kết quả thao tác. Hãy kiểm tra kết nối và làm mới để xem trạng thái trước khi thực hiện lại.",
       "invalidRequest": "Yêu cầu hoặc khoảng ngày không hợp lệ. Kiểm tra lại giá trị đã chọn trước khi thử lại.",
-      "unauthorized": "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.", "forbidden": "Bạn không có quyền xem hoặc thay đổi lô giao.",
+      "unauthorized": "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.",
+      "forbidden": "Bạn không có quyền xem hoặc thay đổi lô giao.",
       "SHIPMENT_NOT_FOUND": "Không tìm thấy lô giao trong tổ chức hiện tại.",
       "SHIPMENT_VERSION_CONFLICT": "Đơn hoặc lô giao đã thay đổi. Tải dữ liệu mới nhất trước khi tiếp tục.",
       "SHIPMENT_INVALID_TRANSITION": "Thao tác không hợp lệ với trạng thái hiện tại của lô giao.",
@@ -194,6 +316,7 @@
     }
   },
   "nav": {
+    "navigationMenu": "Menu điều hướng LogiX",
     "brandSubtitle": "Inteligent Logistic",
     "systemManagement": "Quản lý Hệ thống",
     "overview": "Tổng quan",
@@ -1019,5 +1142,45 @@
       "UPSTREAM_UNAVAILABLE": "Tạm thời chưa thể xử lý đơn hàng. Vui lòng thử lại sau.",
       "UPSTREAM_REJECTED": "Không thể thực hiện thao tác với thông tin hiện tại. Hãy làm mới và kiểm tra đơn hàng trước khi thử lại."
     }
+  },
+  "phase5": {
+    "conflict": "Dữ liệu đã thay đổi hoặc thao tác bị chặn bởi quy tắc bảo vệ. Vui lòng tải lại và kiểm tra trạng thái mới nhất.",
+    "notFound": "Không tìm thấy dữ liệu hoặc dữ liệu không còn khả dụng.",
+    "validation": "Dữ liệu không hợp lệ hoặc thao tác không đáp ứng quy tắc bảo vệ. Vui lòng kiểm tra lại.",
+    "membershipRequired": "Thao tác này yêu cầu tư cách thành viên thực tế. Truy cập bằng quyền Super Admin không tạo tư cách thành viên.",
+    "contextMismatch": "Tổ chức trên đường dẫn không trùng với phiên đang hoạt động. Hãy chọn đúng tổ chức qua bộ chuyển tổ chức hoặc trang quản trị trước khi mở trang này.",
+    "orgNameInvalid": "Tên tổ chức phải có ít nhất 2 ký tự.",
+    "loadInvitationsError": "Không thể tải danh sách lời mời. Vui lòng thử lại.",
+    "sendInvitationError": "Không thể gửi lời mời. Vui lòng kiểm tra trạng thái trước khi gửi lại.",
+    "emailInvalid": "Địa chỉ email không hợp lệ.",
+    "rolesRequired": "Vui lòng chọn ít nhất một vai trò.",
+    "roleIdInvalid": "Vai trò đã chọn không hợp lệ.",
+    "invitationCreated": "Tạo lời mời thành công!",
+    "invitationCreatedDesc": "Đã tạo lời mời cho {email}. Bạn có thể sao chép liên kết bên dưới để gửi trực tiếp.",
+    "inviteLinkLabel": "Liên kết mời tham gia",
+    "inviteExpires": "Liên kết hết hạn lúc {date}.",
+    "loadingRoles": "Đang tải danh sách vai trò...",
+    "copyError": "Không thể sao chép liên kết. Vui lòng kiểm tra quyền truy cập clipboard.",
+    "legalNameMax": "Tên pháp lý tối đa 255 ký tự.",
+    "taxCodeMax": "Mã số thuế tối đa 50 ký tự.",
+    "phoneMax": "Số điện thoại tối đa 30 ký tự.",
+    "addressMax": "Địa chỉ tối đa 500 ký tự.",
+    "wardMax": "Phường/xã tối đa 100 ký tự.",
+    "districtMax": "Quận/huyện tối đa 100 ký tự.",
+    "provinceMax": "Tỉnh/thành phố tối đa 100 ký tự.",
+    "postalCodeMax": "Mã bưu chính tối đa 20 ký tự.",
+    "provinceRequired": "Vui lòng nhập tỉnh/thành phố cho địa chỉ pháp lý.",
+    "addressRequired": "Vui lòng nhập địa chỉ chi tiết cho địa chỉ pháp lý.",
+    "roleNameMin": "Tên vai trò phải có ít nhất 2 ký tự.",
+    "roleNameMax": "Tên vai trò tối đa 100 ký tự.",
+    "roleCodeMin": "Mã vai trò phải có ít nhất 2 ký tự.",
+    "roleCodeMax": "Mã vai trò tối đa 50 ký tự.",
+    "roleCodePattern": "Mã vai trò chỉ chứa chữ in hoa, số và dấu gạch dưới.",
+    "reservedRole": "Không thể tạo Super Admin dưới dạng vai trò tổ chức.",
+    "descriptionMax": "Mô tả tối đa 255 ký tự.",
+    "searchRolesHint": "Tìm theo email, người mời hoặc vai trò",
+    "roleSaved": "Đã lưu vai trò.",
+    "roleDeleted": "Đã xóa vai trò.",
+    "loadFailed": "Không thể tải dữ liệu. Không có thay đổi nào được gửi. Hãy thử tải lại."
   }
 }

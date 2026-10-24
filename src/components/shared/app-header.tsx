@@ -40,11 +40,14 @@ export function AppHeader() {
   const pathname = usePathname();
   const { toggleMobile, isCollapsed, toggleCollapse } = useSidebar();
   const { t } = useTranslation();
-  const { user, activeTenant, logout } = useAuth();
+  const { user, activeTenant, logout, isSuperAdmin } = useAuth();
   const [unreadCount, setUnreadCount] = React.useState(3);
 
   const getPageTitle = () => {
     if (pathname === "/") return t("nav.overview");
+    if (pathname.startsWith("/admin/organizations"))
+      return t("admin.organizations.title");
+    if (pathname.startsWith("/admin/users")) return t("admin.users.title");
     if (
       pathname.startsWith("/organization") ||
       pathname.startsWith("/settings/organization")
@@ -189,7 +192,12 @@ export function AppHeader() {
                     key={n.id}
                     className="flex items-start gap-3 p-3 transition-colors hover:bg-muted/50 cursor-pointer"
                   >
-                    <div className={cn("mt-0.5 rounded-md p-1.5 bg-muted", n.color)}>
+                    <div
+                      className={cn(
+                        "mt-0.5 rounded-md p-1.5 bg-muted",
+                        n.color,
+                      )}
+                    >
                       <Icon className="size-4" />
                     </div>
                     <div className="flex-1 space-y-0.5">
@@ -245,9 +253,15 @@ export function AppHeader() {
               className="flex items-center gap-3 h-11 px-3 rounded-xl border border-border/70 bg-background/70 hover:bg-accent/80 transition-all cursor-pointer focus-visible:ring-1"
             >
               <Avatar className="size-8.5 border border-border/80 rounded-xl overflow-hidden">
-                <AvatarImage src={user?.avatarUrl || ""} alt={user?.displayName || "Avatar"} className="object-cover" />
+                <AvatarImage
+                  src={user?.avatarUrl || ""}
+                  alt={user?.displayName || "Avatar"}
+                  className="object-cover"
+                />
                 <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs">
-                  {user?.displayName ? user.displayName.slice(0, 2).toUpperCase() : "LX"}
+                  {user?.displayName
+                    ? user.displayName.slice(0, 2).toUpperCase()
+                    : "LX"}
                 </AvatarFallback>
               </Avatar>
               <div className="hidden text-left md:block min-w-0">
@@ -255,13 +269,18 @@ export function AppHeader() {
                   {user?.displayName || "LogiX User"}
                 </p>
                 <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider leading-tight mt-0.5">
-                  {activeTenant?.role || t("header.userRole")}
+                  {isSuperAdmin
+                    ? t("admin.account.superAdmin")
+                    : activeTenant?.role || t("header.userRole")}
                 </p>
               </div>
               <ChevronDown className="size-4 text-muted-foreground hidden md:block" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-72 p-2 rounded-2xl shadow-2xl border border-border/70 bg-popover/95 backdrop-blur-md">
+          <DropdownMenuContent
+            align="end"
+            className="w-72 p-2 rounded-2xl shadow-2xl border border-border/70 bg-popover/95 backdrop-blur-md"
+          >
             <DropdownMenuLabel className="p-2 pb-2.5">
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-bold text-foreground">
@@ -272,15 +291,22 @@ export function AppHeader() {
                 </p>
                 <div className="pt-1">
                   <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
-                    <CheckCircle2 className="size-3.5" /> {activeTenant?.name || t("header.adminBadge")}
+                    <CheckCircle2 className="size-3.5" />{" "}
+                    {activeTenant?.name || t("header.adminBadge")}
                   </span>
                 </div>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="my-1" />
             <DropdownMenuGroup className="space-y-0.5">
-              <DropdownMenuItem asChild className="cursor-pointer px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-accent transition-colors gap-3">
-                <Link href="/settings/account" className="flex items-center gap-3 w-full">
+              <DropdownMenuItem
+                asChild
+                className="cursor-pointer px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-accent transition-colors gap-3"
+              >
+                <Link
+                  href="/settings/account"
+                  className="flex items-center gap-3 w-full"
+                >
                   <Settings className="size-4.5 text-muted-foreground" />
                   <span>{t("userMenu.settings")}</span>
                 </Link>

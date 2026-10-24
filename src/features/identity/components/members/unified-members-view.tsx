@@ -1,5 +1,7 @@
 "use client";
 
+import { formatIdentityError } from "../../utils/error-formatter";
+
 import * as React from "react";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { toast } from "sonner";
@@ -42,10 +44,7 @@ import {
 import { useAuth } from "@/lib/auth/auth-context";
 import { useTranslation } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
-import {
-  getOrganizationMembersApi,
-  removeMemberApi,
-} from "../../api/auth.api";
+import { getOrganizationMembersApi, removeMemberApi } from "../../api/auth.api";
 import {
   getInvitationsApi,
   resendInvitationApi,
@@ -56,6 +55,7 @@ import type { OrgMember } from "../../schemas/auth.schema";
 import type { InvitationItem } from "../../schemas/invitation.schema";
 import { InviteMemberDialog } from "./invite-member-dialog";
 import { ManageMemberRolesDialog } from "./manage-member-roles-dialog";
+import { formatDateTime } from "@/lib/format";
 
 interface UnifiedMembersViewProps {
   tenantId: string;
@@ -63,56 +63,48 @@ interface UnifiedMembersViewProps {
 
 type StatusFilter = "ALL" | "ACTIVE" | "PENDING" | "OTHER";
 
-function formatDate(dateStr?: string | null) {
-  if (!dateStr) return "-";
-  try {
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return "-";
-    return d.toLocaleDateString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-  } catch {
-    return "-";
-  }
-}
-
 export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
   const { user } = useAuth();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   const [members, setMembers] = useState<OrgMember[]>([]);
   const [invitations, setInvitations] = useState<InvitationItem[]>([]);
   const [now, setNow] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
 
   // Dialog & Action states
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
-  const [memberToManageRoles, setMemberToManageRoles] = useState<OrgMember | null>(null);
+  const [memberToManageRoles, setMemberToManageRoles] =
+    useState<OrgMember | null>(null);
   const [memberToRemove, setMemberToRemove] = useState<OrgMember | null>(null);
   const [isRemovingMember, setIsRemovingMember] = useState(false);
 
-  const [invitationToRevoke, setInvitationToRevoke] = useState<InvitationItem | null>(null);
+  const [invitationToRevoke, setInvitationToRevoke] =
+    useState<InvitationItem | null>(null);
   const [isRevokingInvitation, setIsRevokingInvitation] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
   // Load both active members and invitations
   const loadData = useCallback(async () => {
+    setLoadError(false);
     try {
       const [membersData, invitationsData] = await Promise.all([
-        getOrganizationMembersApi(tenantId).catch(() => [] as OrgMember[]),
-        getInvitationsApi(undefined, tenantId).catch(() => [] as InvitationItem[]),
+        getOrganizationMembersApi(tenantId),
+        getInvitationsApi(undefined, tenantId),
       ]);
       setMembers(membersData);
       setInvitations(invitationsData);
       setNow(Date.now());
+      return true;
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : t("tenant.loadMembersError");
+      setLoadError(true);
+      const msg = formatIdentityError(err, t, "tenant.loadMembersError");
       toast.error(msg);
+      return false;
     }
   }, [tenantId, t]);
 
@@ -130,9 +122,9 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await loadData();
+    const loaded = await loadData();
     setIsRefreshing(false);
-    toast.success(t("tenant.refreshSuccess"));
+    if (loaded) toast.success(t("tenant.refreshSuccess"));
   };
 
   // -------------------------------------------------------------
@@ -158,11 +150,13 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
     setIsRemovingMember(true);
     try {
       await removeMemberApi(tenantId, memberToRemove.id);
-      toast.success(t("tenant.removeMemberSuccess", { name: memberToRemove.displayName }));
+      toast.success(
+        t("tenant.removeMemberSuccess", { name: memberToRemove.displayName }),
+      );
       setMembers((prev) => prev.filter((m) => m.id !== memberToRemove.id));
       setMemberToRemove(null);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : t("tenant.removeMemberError");
+      const msg = formatIdentityError(err, t, "tenant.removeMemberError");
       toast.error(msg);
     } finally {
       setIsRemovingMember(false);
@@ -177,12 +171,12 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
     try {
       const res = await resendInvitationApi(inv.id, tenantId);
       if (res.inviteLink) {
-        navigator.clipboard.writeText(res.inviteLink);
+        await navigator.clipboard.writeText(res.inviteLink);
         toast.success(t("tenant.copyInviteLinkSuccess"));
       }
       await loadData();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : t("tenant.copyInviteLinkError");
+      const msg = formatIdentityError(err, t, "tenant.copyInviteLinkError");
       toast.error(msg);
     } finally {
       setActionLoadingId(null);
@@ -195,12 +189,12 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
       const res = await resendInvitationApi(inv.id, tenantId);
       toast.success(t("tenant.resendInviteSuccess", { email: inv.email }));
       if (res.inviteLink) {
-        navigator.clipboard.writeText(res.inviteLink);
+        await navigator.clipboard.writeText(res.inviteLink);
         toast.info(t("tenant.copyNewInviteLinkSuccess"));
       }
       await loadData();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : t("tenant.resendInviteError");
+      const msg = formatIdentityError(err, t, "tenant.resendInviteError");
       toast.error(msg);
     } finally {
       setActionLoadingId(null);
@@ -212,11 +206,13 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
     setIsRevokingInvitation(true);
     try {
       await revokeInvitationApi(invitationToRevoke.id, tenantId);
-      toast.success(t("tenant.revokeInviteSuccess", { email: invitationToRevoke.email }));
+      toast.success(
+        t("tenant.revokeInviteSuccess", { email: invitationToRevoke.email }),
+      );
       setInvitationToRevoke(null);
       await loadData();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : t("tenant.revokeInviteError");
+      const msg = formatIdentityError(err, t, "tenant.revokeInviteError");
       toast.error(msg);
     } finally {
       setIsRevokingInvitation(false);
@@ -230,7 +226,7 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
       toast.success(t("tenant.deleteInviteSuccess"));
       setInvitations((prev) => prev.filter((i) => i.id !== invId));
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : t("tenant.deleteInviteError");
+      const msg = formatIdentityError(err, t, "tenant.deleteInviteError");
       toast.error(msg);
     } finally {
       setActionLoadingId(null);
@@ -243,15 +239,17 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
   // Bỏ qua lời mời đã tham gia (ACCEPTED) hoặc người dùng đã có trong danh sách thành viên chính thức
   const activeMemberEmails = useMemo(
     () => new Set(members.map((m) => m.email.toLowerCase())),
-    [members]
+    [members],
   );
 
   const pendingInvitations = useMemo(
     () =>
       invitations.filter(
-        (i) => i.status === "PENDING" && !activeMemberEmails.has(i.email.toLowerCase())
+        (i) =>
+          i.status === "PENDING" &&
+          !activeMemberEmails.has(i.email.toLowerCase()),
       ),
-    [invitations, activeMemberEmails]
+    [invitations, activeMemberEmails],
   );
 
   const otherInvitations = useMemo(
@@ -259,9 +257,9 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
       invitations.filter(
         (i) =>
           (i.status === "REVOKED" || i.status === "EXPIRED") &&
-          !activeMemberEmails.has(i.email.toLowerCase())
+          !activeMemberEmails.has(i.email.toLowerCase()),
       ),
-    [invitations, activeMemberEmails]
+    [invitations, activeMemberEmails],
   );
 
   const activeCount = members.length;
@@ -278,7 +276,7 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
       (m) =>
         m.displayName.toLowerCase().includes(q) ||
         m.email.toLowerCase().includes(q) ||
-        m.role.toLowerCase().includes(q)
+        m.role.toLowerCase().includes(q),
     );
   }, [members, searchQuery, statusFilter]);
 
@@ -290,8 +288,8 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
       statusFilter === "PENDING"
         ? pendingInvitations
         : statusFilter === "OTHER"
-        ? otherInvitations
-        : [...pendingInvitations, ...otherInvitations];
+          ? otherInvitations
+          : [...pendingInvitations, ...otherInvitations];
 
     return candidateList.filter((inv) => {
       if (!q) return true;
@@ -299,12 +297,17 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
         inv.email.toLowerCase().includes(q) ||
         inv.inviter?.displayName?.toLowerCase().includes(q) ||
         inv.inviter?.email?.toLowerCase().includes(q) ||
-        inv.roles.some((r) => r.name.toLowerCase().includes(q) || r.code.toLowerCase().includes(q))
+        inv.roles.some(
+          (r) =>
+            r.name.toLowerCase().includes(q) ||
+            r.code.toLowerCase().includes(q),
+        )
       );
     });
   }, [pendingInvitations, otherInvitations, searchQuery, statusFilter]);
 
-  const isEmpty = filteredMembers.length === 0 && filteredInvitations.length === 0;
+  const isEmpty =
+    filteredMembers.length === 0 && filteredInvitations.length === 0;
 
   return (
     <div className="space-y-6 w-full">
@@ -314,7 +317,10 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
           <h2 className="text-lg sm:text-xl font-bold text-foreground tracking-tight flex items-center gap-2.5">
             <Users className="size-5 text-emerald-600 dark:text-emerald-400" />
             <span>{t("tenant.membersAndInvitationsTitle")}</span>
-            <Badge variant="secondary" className="text-xs px-2 py-0.5 rounded-full font-semibold">
+            <Badge
+              variant="secondary"
+              className="text-xs px-2 py-0.5 rounded-full font-semibold"
+            >
               {totalCount}
             </Badge>
           </h2>
@@ -331,7 +337,9 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
             disabled={isRefreshing || isLoading}
             className="h-10 px-4 rounded-xl gap-2 font-semibold text-sm cursor-pointer shadow-2xs hover:bg-muted/60"
           >
-            <RotateCw className={cn("size-4", isRefreshing && "animate-spin")} />
+            <RotateCw
+              className={cn("size-4", isRefreshing && "animate-spin")}
+            />
             {t("tenant.refresh")}
           </Button>
 
@@ -387,7 +395,7 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
               "px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap",
               statusFilter === "ALL"
                 ? "bg-background text-foreground shadow-2xs"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground hover:text-foreground",
             )}
           >
             {t("tenant.statusAll")} ({totalCount})
@@ -399,7 +407,7 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
               "px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap",
               statusFilter === "ACTIVE"
                 ? "bg-background text-emerald-600 dark:text-emerald-400 shadow-2xs"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground hover:text-foreground",
             )}
           >
             {t("tenant.statusActive")} ({activeCount})
@@ -411,7 +419,7 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
               "px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap",
               statusFilter === "PENDING"
                 ? "bg-background text-amber-600 dark:text-amber-400 shadow-2xs"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground hover:text-foreground",
             )}
           >
             {t("tenant.statusPending")} ({pendingCount})
@@ -424,7 +432,7 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
                 "px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap",
                 statusFilter === "OTHER"
                   ? "bg-background text-muted-foreground shadow-2xs"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               {t("tenant.statusRevoked")} ({otherCount})
@@ -449,10 +457,16 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
             <Loader2 className="size-6 animate-spin text-emerald-600 dark:text-emerald-400" />
             <span>{t("tenant.loadingMembers")}</span>
           </div>
+        ) : loadError ? (
+          <p role="alert" className="p-6 text-sm text-destructive">
+            {t("phase5.loadFailed")}
+          </p>
         ) : isEmpty ? (
           <div className="py-16 text-center text-sm text-muted-foreground flex flex-col items-center justify-center gap-2">
             <Users className="size-8 text-muted-foreground/40 mb-1" />
-            <p className="font-semibold text-foreground">{t("tenant.noRecordsFound")}</p>
+            <p className="font-semibold text-foreground">
+              {t("tenant.noRecordsFound")}
+            </p>
             <p className="text-xs text-muted-foreground">
               {t("tenant.noRecordsFoundHint")}
             </p>
@@ -545,7 +559,9 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
                           className="size-8 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer"
                         >
                           <MoreHorizontal className="size-5" />
-                          <span className="sr-only">{t("tenant.colActions")}</span>
+                          <span className="sr-only">
+                            {t("tenant.colActions")}
+                          </span>
                         </Button>
                       </DropdownMenuTrigger>
 
@@ -555,13 +571,16 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
                       >
                         {isCurrentUser ? (
                           <div className="px-3 py-2 text-xs text-muted-foreground text-center">
-                            <span className="font-medium text-foreground block mb-0.5">{t("tenant.yourAccount")}</span>
+                            <span className="font-medium text-foreground block mb-0.5">
+                              {t("tenant.yourAccount")}
+                            </span>
                             {t("tenant.selfProtectionNotice")}
                           </div>
                         ) : member.role === "OWNER" ? (
                           <div className="px-3 py-2 text-xs text-muted-foreground text-center">
                             <span className="font-medium text-blue-600 dark:text-blue-400 block mb-0.5 flex items-center justify-center gap-1.5">
-                              <Shield className="size-3.5" /> {t("tenant.ownerRole")}
+                              <Shield className="size-3.5" />{" "}
+                              {t("tenant.ownerRole")}
                             </span>
                             {t("tenant.ownerProtectionNotice")}
                           </div>
@@ -596,7 +615,8 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
             {/* 2. Danh sách Lời mời tham gia */}
             {filteredInvitations.map((inv) => {
               const isPending = inv.status === "PENDING";
-              const isExpired = now > 0 && new Date(inv.expiresAt).getTime() < now;
+              const isExpired =
+                now > 0 && new Date(inv.expiresAt).getTime() < now;
               const isActionLoading = actionLoadingId === inv.id;
 
               return (
@@ -617,8 +637,12 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
                         </span>
                       </div>
                       <span className="text-xs text-muted-foreground truncate block mt-0.5">
-                        {t("iam.invitations.invitedBy")}: {inv.inviter?.displayName || inv.inviter?.email || t("tenant.adminRole")}
-                        {isPending && ` • ${t("iam.invitations.table.expiresAt")}: ${formatDate(inv.expiresAt)}`}
+                        {t("iam.invitations.invitedBy")}:{" "}
+                        {inv.inviter?.displayName ||
+                          inv.inviter?.email ||
+                          t("tenant.adminRole")}
+                        {isPending &&
+                          ` • ${t("iam.invitations.table.expiresAt")}: ${formatDateTime(inv.expiresAt, locale)}`}
                       </span>
                     </div>
                   </div>
@@ -635,7 +659,9 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
                         </span>
                       ))
                     ) : (
-                      <span className="text-xs text-muted-foreground italic">{t("tenant.defaultRole")}</span>
+                      <span className="text-xs text-muted-foreground italic">
+                        {t("tenant.defaultRole")}
+                      </span>
                     )}
                   </div>
 
@@ -681,7 +707,9 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
                           ) : (
                             <MoreHorizontal className="size-5" />
                           )}
-                          <span className="sr-only">{t("tenant.colActions")}</span>
+                          <span className="sr-only">
+                            {t("tenant.colActions")}
+                          </span>
                         </Button>
                       </DropdownMenuTrigger>
 
@@ -690,7 +718,8 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
                         className="w-56 p-1.5 rounded-xl shadow-lg border border-border/80 bg-popover"
                       >
                         <DropdownMenuLabel className="text-[11px] font-bold text-muted-foreground tracking-wider uppercase px-2.5 py-1.5">
-                          {t("iam.invitations.actions") || t("tenant.colActions")}
+                          {t("iam.invitations.actions") ||
+                            t("tenant.colActions")}
                         </DropdownMenuLabel>
 
                         <DropdownMenuItem
@@ -718,12 +747,17 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
                               className="text-destructive focus:text-destructive focus:bg-destructive/10 font-medium cursor-pointer rounded-lg px-2.5 py-2 text-sm flex items-center gap-2"
                             >
                               <Ban className="size-4 text-destructive" />
-                              <span>{t("tenant.revokeInvite") || t("iam.invitations.table.revoke")}</span>
+                              <span>
+                                {t("tenant.revokeInvite") ||
+                                  t("iam.invitations.table.revoke")}
+                              </span>
                             </DropdownMenuItem>
                           </>
                         )}
 
-                        {(inv.status === "REVOKED" || inv.status === "EXPIRED" || inv.status === "ACCEPTED") && (
+                        {(inv.status === "REVOKED" ||
+                          inv.status === "EXPIRED" ||
+                          inv.status === "ACCEPTED") && (
                           <>
                             <DropdownMenuSeparator className="my-1 border-border/60" />
                             <DropdownMenuItem
@@ -746,7 +780,10 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
       </div>
 
       {/* Dialog xác nhận Khai trừ thành viên */}
-      <Dialog open={!!memberToRemove} onOpenChange={(open) => !open && setMemberToRemove(null)}>
+      <Dialog
+        open={!!memberToRemove}
+        onOpenChange={(open) => !open && setMemberToRemove(null)}
+      >
         <DialogContent className="max-w-md rounded-2xl p-6">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-foreground">
@@ -794,7 +831,10 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
       </Dialog>
 
       {/* Dialog xác nhận Thu hồi lời mời */}
-      <Dialog open={!!invitationToRevoke} onOpenChange={(open) => !open && setInvitationToRevoke(null)}>
+      <Dialog
+        open={!!invitationToRevoke}
+        onOpenChange={(open) => !open && setInvitationToRevoke(null)}
+      >
         <DialogContent className="max-w-md rounded-2xl p-6">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-foreground">
@@ -832,7 +872,8 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
               ) : (
                 <>
                   <Ban className="size-4" />
-                  {t("tenant.revokeInvite") || t("iam.invitations.table.revoke")}
+                  {t("tenant.revokeInvite") ||
+                    t("iam.invitations.table.revoke")}
                 </>
               )}
             </Button>
