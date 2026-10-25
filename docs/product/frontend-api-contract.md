@@ -83,6 +83,16 @@ remain available under clearly labeled reference details, rather than developer
 terminology. Keep the source dictionaries and the dictionaries currently
 imported by the language provider aligned for every changed key.
 
+## Domain Contract References
+
+Endpoint inventories, domain permissions, request/response shapes and
+domain-specific confirmation flows belong in the corresponding product
+contract, not in the shared transport rules.
+
+- [Driver management API](driver-management-api.md): Driver profiles, eligible
+  members and account-link correction. These rules do not apply to other
+  resources unless their own accepted contract explicitly requires them.
+
 ## Authentication And Request Context
 
 The frontend may attach the accepted session, tenant context, correlation ID,

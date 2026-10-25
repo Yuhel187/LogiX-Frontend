@@ -22,6 +22,8 @@ interface ConfirmActionDialogProps {
   description: string;
   confirmLabel: string;
   destructive?: boolean;
+  resolveErrorMessage?: (error: unknown) => string;
+  onError?: (error: unknown) => void;
   onConfirm: () => Promise<unknown>;
   onDone: () => void;
 }
@@ -33,6 +35,8 @@ export function ConfirmActionDialog({
   description,
   confirmLabel,
   destructive,
+  resolveErrorMessage,
+  onError,
   onConfirm,
   onDone,
 }: ConfirmActionDialogProps) {
@@ -47,7 +51,10 @@ export function ConfirmActionDialog({
       onOpenChange(false);
       onDone();
     } catch (error) {
-      toast.error(resolveApiErrorMessage(error));
+      toast.error(
+        resolveErrorMessage?.(error) ?? resolveApiErrorMessage(error)
+      );
+      onError?.(error);
     } finally {
       setIsWorking(false);
     }

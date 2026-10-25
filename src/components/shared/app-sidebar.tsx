@@ -30,6 +30,7 @@ import { useAuth } from "@/lib/auth";
 import { TenantSwitcher } from "@/components/shared/tenant-switcher";
 import { ORDER_PERMISSIONS } from "@/features/orders";
 import { SHIPMENT_PERMISSIONS } from "@/features/shipments";
+import { DRIVER_PERMISSIONS } from "@/features/master-data";
 
 interface NavItem {
   title: string;
@@ -111,6 +112,12 @@ export function AppSidebar() {
             title: t("masterData.vehicle.title"),
             href: "/master-data/vehicles",
             icon: Truck,
+          },
+          {
+            title: t("masterData.driver.title"),
+            href: "/master-data/drivers",
+            icon: Truck,
+            permission: DRIVER_PERMISSIONS.read,
           },
         ],
       },

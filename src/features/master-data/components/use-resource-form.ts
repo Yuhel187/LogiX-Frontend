@@ -18,6 +18,10 @@ export function useResourceForm<TValues extends Record<string, string | boolean>
     /** Field the backend's 409 refers to, so the conflict lands on the input. */
     uniqueField: keyof TValues & string;
     uniqueMessage: string;
+    treatConflictAsDuplicate?: boolean;
+    resolveErrorMessage?: (error: unknown) => string;
+    resolveValidationMessage?: (message: string) => string;
+    onError?: (error: unknown) => void;
     submit: (values: TValues) => Promise<unknown>;
     onSuccess: () => void;
     successMessage: string;
@@ -51,7 +55,8 @@ export function useResourceForm<TValues extends Record<string, string | boolean>
       for (const issue of parsed.error.issues) {
         const key = issue.path[0];
         if (typeof key === "string" && !fieldErrors[key as keyof TValues & string]) {
-          fieldErrors[key as keyof TValues & string] = issue.message;
+          fieldErrors[key as keyof TValues & string] =
+            options.resolveValidationMessage?.(issue.message) ?? issue.message;
         }
       }
       setErrors(fieldErrors);
@@ -65,13 +70,19 @@ export function useResourceForm<TValues extends Record<string, string | boolean>
       options.onSuccess();
       return true;
     } catch (error) {
-      if (isDuplicateCodeError(error)) {
+      if (
+        isDuplicateCodeError(error) &&
+        options.treatConflictAsDuplicate !== false
+      ) {
         setErrors({
           [options.uniqueField]: options.uniqueMessage,
         } as FieldErrors<TValues>);
       } else {
-        toast.error(resolveApiErrorMessage(error));
+        toast.error(
+          options.resolveErrorMessage?.(error) ?? resolveApiErrorMessage(error)
+        );
       }
+      options.onError?.(error);
       return false;
     } finally {
       setIsSubmitting(false);

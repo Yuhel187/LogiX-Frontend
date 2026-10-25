@@ -30,8 +30,10 @@ interface ResourcePageProps<T extends { id: string; status: RecordStatus }> {
   searchPlaceholder: string;
   emptyMessage: string;
   createLabel: string;
+  canCreate?: boolean;
   columns: ResourceColumn<T>[];
   fetchPage: (params: MasterDataQueryParams) => Promise<Paginated<T>>;
+  resolveErrorMessage?: (error: unknown) => string;
   /** Built once; each action receives its row through `onSelect` and `hidden`. */
   buildActions: (reload: () => void) => ResourceRowAction<T>[];
   /** Rendered once; receives the reload the page owns so writes can refresh it. */
@@ -50,6 +52,8 @@ export function ResourcePage<T extends { id: string; status: RecordStatus }>({
   buildActions,
   renderDialogs,
   onCreate,
+  canCreate = true,
+  resolveErrorMessage: resolveError = resolveApiErrorMessage,
 }: ResourcePageProps<T>) {
   const { t } = useTranslation();
   const { q, status, page, pageSize, setQ, setStatus, setPage } =
@@ -93,14 +97,14 @@ export function ResourcePage<T extends { id: string; status: RecordStatus }>({
           key: requestKey,
           rows: [],
           total: 0,
-          error: resolveApiErrorMessage(cause),
+          error: resolveError(cause),
         });
       });
 
     return () => {
       cancelled = true;
     };
-  }, [fetchPage, q, status, page, pageSize, requestKey]);
+  }, [fetchPage, q, status, page, pageSize, requestKey, resolveError]);
 
   const lastPage = Math.max(1, Math.ceil(total / pageSize));
 
@@ -111,10 +115,12 @@ export function ResourcePage<T extends { id: string; status: RecordStatus }>({
           <h1 className="text-xl font-semibold">{title}</h1>
           <p className="text-sm text-muted-foreground">{description}</p>
         </div>
-        <Button onClick={onCreate}>
-          <Plus className="size-4" />
-          {createLabel}
-        </Button>
+        {canCreate ? (
+          <Button onClick={onCreate}>
+            <Plus className="size-4" />
+            {createLabel}
+          </Button>
+        ) : null}
       </div>
 
       <ResourceFilters
