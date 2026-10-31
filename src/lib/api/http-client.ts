@@ -100,8 +100,16 @@ function extractErrorMessage(data: unknown): string {
 
 function extractErrorCode(data: unknown): string | undefined {
   if (!data || typeof data !== "object") return undefined;
-  const code = data as { error?: unknown; code?: unknown };
+  const code = data as {
+    error?: unknown;
+    code?: unknown;
+    details?: unknown;
+  };
   if (typeof code.code === "string") return code.code;
+  if (code.details && typeof code.details === "object") {
+    const details = code.details as { code?: unknown };
+    if (typeof details.code === "string") return details.code;
+  }
   if (typeof code.error === "string") return code.error;
   return undefined;
 }

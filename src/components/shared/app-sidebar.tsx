@@ -8,7 +8,10 @@ import {
   Boxes,
   ClipboardList,
   LayoutDashboard,
+  MapPinned,
+  Navigation,
   Package,
+  PackageOpen,
   Route,
   Settings,
   TrendingUp,
@@ -17,6 +20,7 @@ import {
   Building2,
   Users,
   Contact,
+  ContactRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -31,6 +35,8 @@ import { useAuth } from "@/lib/auth";
 import { TenantSwitcher } from "@/components/shared/tenant-switcher";
 import { ORDER_PERMISSIONS } from "@/features/orders";
 import { SHIPMENT_PERMISSIONS } from "@/features/shipments";
+import { DRIVER_PERMISSIONS } from "@/features/master-data";
+import { TRANSPORT_PERMISSIONS } from "@/features/transport";
 
 interface NavItem {
   title: string;
@@ -41,6 +47,7 @@ interface NavItem {
   permission?: string;        // Quyền bắt buộc để hiển thị
   anyPermissions?: string[];  // Một trong các quyền để hiển thị
   superAdminOnly?: boolean;   // Chỉ hiển thị cho Super Admin
+  driverExperience?: boolean;
 }
 
 interface NavGroup {
@@ -53,7 +60,7 @@ export function AppSidebar() {
   const { isCollapsed, isMobileOpen, closeMobile, setIsMobileOpen } =
     useSidebar();
   const { t } = useTranslation();
-  const { hasPermission, hasAnyPermission, isSuperAdmin } = useAuth();
+  const { hasPermission, hasAnyPermission, isSuperAdmin, permissions } = useAuth();
 
   const navGroups: NavGroup[] = React.useMemo(
     () => [
@@ -82,12 +89,6 @@ export function AppSidebar() {
             href: "/",
             icon: LayoutDashboard,
           },
-          {
-            title: t("nav.generalConfig"),
-            href: "#config",
-            icon: Settings,
-            permission: "iam:role:read",
-          },
         ],
       },
       {
@@ -113,6 +114,12 @@ export function AppSidebar() {
             href: "/master-data/vehicles",
             icon: Truck,
           },
+          {
+            title: t("masterData.driver.title"),
+            href: "/master-data/drivers",
+            icon: ContactRound,
+            permission: DRIVER_PERMISSIONS.read,
+          },
         ],
       },
       {
@@ -127,13 +134,26 @@ export function AppSidebar() {
           {
             title: t("shipments.navTitle"),
             href: "/shipments",
-            icon: Package,
+            icon: PackageOpen,
             permission: SHIPMENT_PERMISSIONS.read,
+          },
+          {
+            title: t("transport.navTitle"),
+            href: "/transport",
+            icon: Navigation,
+            permission: TRANSPORT_PERMISSIONS.tripRead,
           },
           {
             title: t("routes.navTitle", { defaultValue: "Lộ trình & Chuyến xe" }),
             href: "/routes",
             icon: Route,
+            permission: TRANSPORT_PERMISSIONS.tripRead,
+          },
+          {
+            title: t("transport.driver.navTitle"),
+            href: "/driver/trips",
+            icon: MapPinned,
+            driverExperience: true,
           },
         ],
       },
@@ -161,6 +181,13 @@ export function AppSidebar() {
       .map((group) => {
         const visibleItems = group.items.filter((item) => {
           if (item.superAdminOnly && !isSuperAdmin) return false;
+          if (
+            item.driverExperience &&
+            !isSuperAdmin &&
+            !permissions.includes(TRANSPORT_PERMISSIONS.driverRead)
+          ) {
+            return false;
+          }
           if (item.permission && !hasPermission(item.permission)) return false;
           if (
             item.anyPermissions &&
@@ -178,7 +205,7 @@ export function AppSidebar() {
         };
       })
       .filter((group) => group.items.length > 0);
-  }, [navGroups, hasPermission, hasAnyPermission, isSuperAdmin]);
+  }, [navGroups, hasPermission, hasAnyPermission, isSuperAdmin, permissions]);
 
   const renderNavLinks = (collapsed: boolean) => (
     <div className="flex flex-col flex-1 py-4 overflow-y-auto overflow-x-hidden gap-3 px-3">

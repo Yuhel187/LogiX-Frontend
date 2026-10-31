@@ -1,6 +1,8 @@
 import { authFetch, handleResponse, toQueryString } from "@/lib/api";
 import { apiBaseUrl } from "@/lib/config";
 import {
+  createWarehouseSchema,
+  updateWarehouseSchema,
   paginatedWarehousesSchema,
   warehouseSchema,
   type CreateWarehouseInput,
@@ -36,7 +38,7 @@ export async function createWarehouseApi(
 ): Promise<Warehouse> {
   const response = await authFetch(BASE_URL, {
     method: "POST",
-    body: JSON.stringify(stripBlanks(input)),
+    body: JSON.stringify(stripBlanks(createWarehouseSchema.parse(input))),
   });
   return warehouseSchema.parse(await handleResponse<unknown>(response));
 }
@@ -47,7 +49,7 @@ export async function updateWarehouseApi(
 ): Promise<Warehouse> {
   const response = await authFetch(`${BASE_URL}/${id}`, {
     method: "PATCH",
-    body: JSON.stringify(stripBlanks(input)),
+    body: JSON.stringify(stripBlanks(updateWarehouseSchema.parse(input))),
   });
   return warehouseSchema.parse(await handleResponse<unknown>(response));
 }

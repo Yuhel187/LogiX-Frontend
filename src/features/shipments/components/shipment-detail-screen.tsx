@@ -20,7 +20,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getShipmentApi } from "../api/shipments.api";
-import { useShipmentResource } from "../hooks/use-shipment-resource";
+import {
+  invalidateShipmentResources,
+  useShipmentResource,
+} from "../hooks/use-shipment-resource";
 import { shipmentActions } from "../utils/shipment-actions";
 import { shipmentError } from "../utils/shipment-errors";
 import type { ShipmentAction } from "../constants/shipment.constants";
@@ -41,17 +44,28 @@ export function ShipmentDetailScreen({ shipmentId }: { shipmentId: string }) {
   } | null>(null);
   const [dispatchAttempt, setDispatchAttempt] =
     useState<DispatchAttempt | null>(null);
-  const { data, error, loading, reload } = useShipmentResource(
+  const [recoveryShipmentId, setRecoveryShipmentId] = useState<string | null>(
+    null
+  );
+  const recoveryRequired = recoveryShipmentId === shipmentId;
+  const { data, error, loading, reload, accept } = useShipmentResource(
     shipmentId,
     (signal) => getShipmentApi(shipmentId, signal),
-    selection?.shipment.id !== shipmentId
+    selection?.shipment.id !== shipmentId && !recoveryRequired
   );
+  const refresh = async () => {
+    const updated = await reload();
+    if (updated) {
+      setRecoveryShipmentId(null);
+      if (recoveryRequired) invalidateShipmentResources();
+    }
+  };
   if (!data)
     return error ? (
       <Alert variant="destructive" className="min-w-0">
         <AlertDescription className="space-y-3">
           <p>{shipmentError(error.cause, t)}</p>
-          <Button onClick={reload}>{t("shipments.actions.retry")}</Button>
+          <Button onClick={refresh}>{t("shipments.actions.retry")}</Button>
           <Button variant="link" asChild>
             <Link href="/shipments">{t("shipments.actions.back")}</Link>
           </Button>
@@ -79,7 +93,11 @@ export function ShipmentDetailScreen({ shipmentId }: { shipmentId: string }) {
           <ShipmentStatusBadge status={data.status} />
         </div>
         <div className="flex flex-wrap items-start gap-2">
-          <Button variant="outline" onClick={reload} disabled={loading}>
+          <Button
+            variant="outline"
+            onClick={refresh}
+            disabled={loading || !!selection}
+          >
             <RefreshCw className={loading ? "size-4 animate-spin" : "size-4"} />
             {t("shipments.actions.refresh")}
           </Button>
@@ -87,7 +105,7 @@ export function ShipmentDetailScreen({ shipmentId }: { shipmentId: string }) {
             <Button
               key={action}
               variant={action === "mark-failed" ? "destructive" : "default"}
-              disabled={loading || !!error}
+              disabled={loading || !!error || recoveryRequired}
               onClick={() =>
                 setSelection({
                   action,
@@ -109,6 +127,27 @@ export function ShipmentDetailScreen({ shipmentId }: { shipmentId: string }) {
         <Alert variant="destructive">
           <AlertDescription>{shipmentError(error.cause, t)}</AlertDescription>
         </Alert>
+      ) : null}
+      {recoveryRequired || error ? (
+        <Alert>
+          <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+            {t("shipments.pickList.stale")}
+            <Button
+              variant="outline"
+              onClick={refresh}
+              disabled={loading || !!selection}
+            >
+              {t("shipments.actions.reload")}
+            </Button>
+          </AlertDescription>
+        </Alert>
+      ) : null}
+      {data.status === "READY_TO_SHIP" ? (
+        <Button variant="outline" asChild>
+          <Link href="/shipments?view=ready">
+            {t("shipments.pickList.openReady")}
+          </Link>
+        </Button>
       ) : null}
       {pending ? (
         <Alert>
@@ -195,38 +234,103 @@ export function ShipmentDetailScreen({ shipmentId }: { shipmentId: string }) {
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>{t("shipments.items")}</CardTitle>
+          <CardTitle>{t("shipments.pickList.title")}</CardTitle>
+          <p className="break-words text-sm text-muted-foreground">
+            {t("shipments.pickList.warehouse")}: {data.warehouseSnapshot.code} ·{" "}
+            {data.warehouseSnapshot.name}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {t("shipments.pickList.description")}
+          </p>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {["sku", "product", "quantity", "unit", "weight", "volume"].map(
-                  (key) => (
-                    <TableHead key={key}>
-                      {t(`shipments.columns.${key}`)}
-                    </TableHead>
-                  )
-                )}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.items.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="max-w-48 break-words whitespace-normal font-mono text-xs">
+        <CardContent className="min-w-0">
+          <div className="space-y-3 @min-[48rem]:hidden">
+            {data.items.map((item) => (
+              <dl
+                key={item.id}
+                className="min-w-0 space-y-2 rounded-lg border p-3 text-sm"
+              >
+                <div>
+                  <dt className="text-muted-foreground">
+                    {t("shipments.columns.sku")}
+                  </dt>
+                  <dd className="break-all font-mono text-xs">
                     {item.skuSnapshot}
-                  </TableCell>
-                  <TableCell className="min-w-40 whitespace-normal">
-                    {item.productNameSnapshot}
-                  </TableCell>
-                  <TableCell>{formatDecimal(item.quantity, locale)}</TableCell>
-                  <TableCell>{item.unitSnapshot}</TableCell>
-                  <TableCell>{formatDecimal(item.weight, locale)}</TableCell>
-                  <TableCell>{formatDecimal(item.volume, locale)}</TableCell>
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">
+                    {t("shipments.columns.product")}
+                  </dt>
+                  <dd className="break-words">{item.productNameSnapshot}</dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">
+                    {t("shipments.pickList.requiredQuantity")}
+                  </dt>
+                  <dd className="break-words font-medium">
+                    {formatDecimal(item.quantity, locale)} {item.unitSnapshot}
+                  </dd>
+                </div>
+                <div className="flex flex-wrap gap-x-4 gap-y-2">
+                  <div>
+                    <dt className="text-muted-foreground">
+                      {t("shipments.columns.weight")}
+                    </dt>
+                    <dd>{formatDecimal(item.weight, locale)}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground">
+                      {t("shipments.columns.volume")}
+                    </dt>
+                    <dd>{formatDecimal(item.volume, locale)}</dd>
+                  </div>
+                </div>
+              </dl>
+            ))}
+          </div>
+          <div className="hidden @min-[48rem]:block">
+            <Table aria-label={t("shipments.pickList.title")}>
+              <TableHeader>
+                <TableRow>
+                  {[
+                    "sku",
+                    "product",
+                    "quantity",
+                    "unit",
+                    "weight",
+                    "volume",
+                  ].map((key) => (
+                    <TableHead key={key}>
+                      {t(
+                        key === "quantity"
+                          ? "shipments.pickList.requiredQuantity"
+                          : `shipments.columns.${key}`
+                      )}
+                    </TableHead>
+                  ))}
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {data.items.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell className="max-w-48 break-all whitespace-normal font-mono text-xs">
+                      {item.skuSnapshot}
+                    </TableCell>
+                    <TableCell className="min-w-40 whitespace-normal">
+                      {item.productNameSnapshot}
+                    </TableCell>
+                    <TableCell>
+                      {formatDecimal(item.quantity, locale)}
+                    </TableCell>
+                    <TableCell>{item.unitSnapshot}</TableCell>
+                    <TableCell>{formatDecimal(item.weight, locale)}</TableCell>
+                    <TableCell>{formatDecimal(item.volume, locale)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
       <Card>
@@ -273,24 +377,37 @@ export function ShipmentDetailScreen({ shipmentId }: { shipmentId: string }) {
       {selection?.shipment.id === shipmentId ? (
         <ShipmentActionDialog
           {...selection}
+          onMutationStarted={() => setRecoveryShipmentId(shipmentId)}
           onDispatchAttempt={setDispatchAttempt}
           onClose={() => {
             setSelection(null);
-            reload();
+            void refresh();
           }}
           onReload={() => {
             setSelection(null);
             setDispatchAttempt(null);
-            reload();
+            void refresh();
           }}
           onCompleted={(updated) => {
+            accept(updated);
+            setRecoveryShipmentId(null);
+            invalidateShipmentResources();
             setSelection(null);
             if (updated.dispatchIntent?.status !== "PENDING")
               setDispatchAttempt(null);
             if (updated.dispatchIntent?.status === "PENDING")
               toast.info(t("shipments.dispatch.processing"));
+            else if (
+              selection.action === "mark-ready" &&
+              updated.status === "READY_TO_SHIP"
+            )
+              toast.success(t("shipments.pickList.readySuccess"));
+            else if (
+              selection.action === "start-picking" &&
+              updated.status === "PICKING"
+            )
+              toast.success(t("shipments.pickList.startSuccess"));
             else toast.success(t("shipments.saved"));
-            reload();
           }}
         />
       ) : null}

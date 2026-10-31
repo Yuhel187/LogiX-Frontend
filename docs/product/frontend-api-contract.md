@@ -59,6 +59,17 @@ the blocker and stop the dependent implementation.
 - Do not leak generated DTOs into presentational component props when a smaller
   view model expresses the UI need.
 
+### Master Data display codes
+
+Customer, warehouse, vehicle and Driver `code`, and product `sku`, are editable
+metadata rather than internal identifiers. Create forms leave the field optional:
+omitted or whitespace-only input is omitted from the request so Master Data
+generates a per-tenant, type-prefixed increasing code when saving. User-provided
+codes are trimmed; edits can change a code but cannot clear it. The API owns
+generation and uniqueness; the frontend does not guess or reserve the next code.
+Code edits retain the resource UUID and do not refresh historical snapshots.
+Order, shipment and trip numbers are outside this editable-metadata scope.
+
 No runtime schema library is selected by this contract. Adopt one through an
 accepted decision when real endpoints demonstrate the need.
 
@@ -82,6 +93,17 @@ duplicate submissions, and checking the latest status. Reference identifiers
 remain available under clearly labeled reference details, rather than developer
 terminology. Keep the source dictionaries and the dictionaries currently
 imported by the language provider aligned for every changed key.
+
+## Domain Contract References
+
+Endpoint inventories, domain permissions, request/response shapes and
+domain-specific confirmation flows belong in the corresponding product
+contract, not in the shared transport rules.
+
+- [Driver management API](driver-management-api.md): Driver profiles, eligible
+  members and account-link correction. These rules do not apply to other
+  resources unless their own accepted contract explicitly requires them.
+- [Transport API contract](transport-api.md).
 
 ## Authentication And Request Context
 

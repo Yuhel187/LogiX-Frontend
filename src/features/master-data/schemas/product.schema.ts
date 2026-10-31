@@ -4,6 +4,8 @@ import {
   WEIGHT_DECIMAL,
   auditResponseFields,
   paginatedSchema,
+  metadataCodeSchema,
+  optionalGeneratedCodeSchema,
 } from "./common.schema";
 
 export const productSchema = z.object({
@@ -19,10 +21,7 @@ export const productSchema = z.object({
 export const paginatedProductsSchema = paginatedSchema(productSchema);
 
 export const createProductSchema = z.object({
-  sku: z
-    .string()
-    .min(1, "SKU không được để trống")
-    .max(100, "SKU tối đa 100 ký tự"),
+  sku: optionalGeneratedCodeSchema(100),
   name: z
     .string()
     .min(1, "Tên sản phẩm không được để trống")
@@ -40,8 +39,8 @@ export const createProductSchema = z.object({
 });
 
 export const updateProductSchema = createProductSchema
-  .omit({ sku: true })
-  .partial();
+  .partial()
+  .extend({ sku: metadataCodeSchema(100).optional() });
 
 export type Product = z.infer<typeof productSchema>;
 export type CreateProductInput = z.infer<typeof createProductSchema>;

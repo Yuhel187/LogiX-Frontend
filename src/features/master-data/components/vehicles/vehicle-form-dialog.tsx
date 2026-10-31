@@ -68,15 +68,17 @@ export function VehicleFormDialog({
       uniqueField: "code",
       uniqueMessage: t("masterData.vehicle.duplicateCode"),
       successMessage: t("masterData.saveSuccess"),
+      resolveValidationMessage: (message) => t(message),
       submit: async (values) => {
         if (isEdit) {
           return updateVehicleApi(vehicle.id, {
+            code: values.code.trim(),
             licensePlate: values.licensePlate,
             capacityWeight: values.capacityWeight,
             capacityVolume: values.capacityVolume,
           });
         }
-        return createVehicleApi(values);
+        return createVehicleApi({ ...values, code: values.code.trim() || undefined });
       },
       onSuccess: () => {
         onOpenChange(false);
@@ -115,9 +117,9 @@ export function VehicleFormDialog({
             <FormField
               id="vehicle-code"
               label={t("masterData.vehicle.code")}
-              required
-              disabled={isEdit}
-              hint={isEdit ? t("masterData.codeImmutable") : undefined}
+              required={isEdit}
+              disabled={form.isSubmitting}
+              hint={t(isEdit ? "masterData.codeEditable" : "masterData.codeAutoGenerate")}
               value={form.values.code}
               error={form.errors.code}
               onChange={(e) => form.setValue("code", e.target.value)}

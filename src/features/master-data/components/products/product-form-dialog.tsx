@@ -70,16 +70,18 @@ export function ProductFormDialog({
       uniqueField: "sku",
       uniqueMessage: t("masterData.product.duplicateCode"),
       successMessage: t("masterData.saveSuccess"),
+      resolveValidationMessage: (message) => t(message),
       submit: async (values) => {
         if (isEdit) {
           return updateProductApi(product.id, {
+            sku: values.sku.trim(),
             name: values.name,
             baseUnit: values.baseUnit,
             weight: values.weight,
             volume: values.volume,
           });
         }
-        return createProductApi(values);
+        return createProductApi({ ...values, sku: values.sku.trim() || undefined });
       },
       onSuccess: () => {
         onOpenChange(false);
@@ -118,9 +120,9 @@ export function ProductFormDialog({
             <FormField
               id="product-sku"
               label={t("masterData.product.sku")}
-              required
-              disabled={isEdit}
-              hint={isEdit ? t("masterData.product.skuImmutable") : undefined}
+              required={isEdit}
+              disabled={form.isSubmitting}
+              hint={t(isEdit ? "masterData.codeEditable" : "masterData.codeAutoGenerate")}
               value={form.values.sku}
               error={form.errors.sku}
               onChange={(e) => form.setValue("sku", e.target.value)}

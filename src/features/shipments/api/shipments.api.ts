@@ -1,4 +1,4 @@
-import { authFetch, handleResponse, toQueryString } from "@/lib/api";
+import { authFetch, getJson, handleResponse, toQueryString } from "@/lib/api";
 import { apiBaseUrl } from "@/lib/config";
 import {
   dispatchPreviewSchema,
@@ -10,27 +10,40 @@ import {
   type ShipmentListParams,
   type ShipmentPage,
 } from "../schemas/shipment.schema";
-import type { ShipmentAction } from "../constants/shipment.constants";
+import {
+  SHIPMENT_COMMAND_TIMEOUT_MS,
+  type ShipmentAction,
+} from "../constants/shipment.constants";
 
 const BASE = `${apiBaseUrl}/shipments`;
 export async function listShipmentsApi(
   params: ShipmentListParams = {},
   signal?: AbortSignal
 ): Promise<ShipmentPage> {
-  const response = await authFetch(`${BASE}${toQueryString({ ...params })}`, {
-    method: "GET",
-    signal,
-  });
+  const response = await authFetch(
+    `${BASE}${toQueryString({
+      ...params,
+      statuses: params.statuses?.join(","),
+    })}`,
+    {
+      method: "GET",
+      signal,
+    }
+  );
   return shipmentPageSchema.parse(await handleResponse<unknown>(response));
 }
-export async function getShipmentApi(id: string, signal?: AbortSignal): Promise<ShipmentDetail> {
-  const response = await authFetch(`${BASE}/${encodeURIComponent(id)}`, {
-    method: "GET",
-    signal,
-  });
-  return shipmentDetailSchema.parse(await handleResponse<unknown>(response));
+export async function getShipmentApi(
+  id: string,
+  signal?: AbortSignal
+): Promise<ShipmentDetail> {
+  return shipmentDetailSchema.parse(
+    await getJson(`${BASE}/${encodeURIComponent(id)}`, signal)
+  );
 }
-export async function getDispatchPreviewApi(id: string, signal?: AbortSignal): Promise<DispatchPreview> {
+export async function getDispatchPreviewApi(
+  id: string,
+  signal?: AbortSignal
+): Promise<DispatchPreview> {
   const response = await authFetch(
     `${BASE}/${encodeURIComponent(id)}/dispatch-preview`,
     { method: "GET", signal }
@@ -44,7 +57,12 @@ export async function commandShipmentApi(
 ): Promise<ShipmentDetail> {
   const response = await authFetch(
     `${BASE}/${encodeURIComponent(id)}/${action}`,
-    { method: "POST", body: JSON.stringify(input) }
+    {
+      method: "POST",
+      body: JSON.stringify(input),
+      signal: AbortSignal.timeout(SHIPMENT_COMMAND_TIMEOUT_MS),
+      skipAuthRefresh: true,
+    }
   );
   return shipmentDetailSchema.parse(await handleResponse<unknown>(response));
 }
