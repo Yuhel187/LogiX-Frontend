@@ -8,7 +8,6 @@ import {
   CheckCircle2,
   ChevronDown,
   Clock,
-  HelpCircle,
   LogOut,
   Menu,
   Package,
@@ -310,10 +309,6 @@ export function AppHeader() {
                   <Settings className="size-4.5 text-muted-foreground" />
                   <span>{t("userMenu.settings")}</span>
                 </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-accent transition-colors gap-3">
-                <HelpCircle className="size-4.5 text-muted-foreground" />
-                <span>{t("userMenu.help")}</span>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator className="my-1" />

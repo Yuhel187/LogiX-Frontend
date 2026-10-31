@@ -18,6 +18,7 @@ import {
 } from "../../api/drivers.api";
 import {
   driverFormSchema,
+  updateDriverFormSchema,
   type Driver,
   type EligibleDriverUser,
 } from "../../schemas/driver.schema";
@@ -75,7 +76,7 @@ export function DriverFormDialog({
     useState<EligibleDriverUser | null>(null);
   const form = useResourceForm<DriverFormValues>(
     toFormValues(driver),
-    driverFormSchema,
+    isEdit ? updateDriverFormSchema : driverFormSchema,
     {
       uniqueField: "code",
       uniqueMessage: t("masterData.driver.errors.conflict"),
@@ -97,6 +98,7 @@ export function DriverFormDialog({
         if (driver) {
           await updateDriverApi(driver.id, {
             version: driver.version,
+            code: values.code.trim(),
             licenseNumber: values.licenseNumber.trim(),
             licenseExpiry: values.licenseExpiry,
             phone: values.phone.trim() || null,
@@ -104,7 +106,7 @@ export function DriverFormDialog({
           return;
         }
         await createDriverApi({
-          code: values.code.trim(),
+          code: values.code.trim() || undefined,
           userId: values.userId,
           licenseNumber: values.licenseNumber.trim(),
           licenseExpiry: values.licenseExpiry,
@@ -149,9 +151,9 @@ export function DriverFormDialog({
             <FormField
               id="driver-code"
               label={t("masterData.driver.code")}
-              required={!isEdit}
-              disabled={isEdit}
-              hint={isEdit ? t("masterData.codeImmutable") : undefined}
+              required={isEdit}
+              disabled={form.isSubmitting}
+              hint={t(isEdit ? "masterData.codeEditable" : "masterData.codeAutoGenerate")}
               value={form.values.code}
               error={form.errors.code}
               onChange={(event) => form.setValue("code", event.target.value)}

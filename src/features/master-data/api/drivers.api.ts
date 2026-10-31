@@ -2,6 +2,8 @@ import { authFetch, handleResponse, toQueryString } from "@/lib/api";
 import { apiBaseUrl } from "@/lib/config";
 import type { Paginated } from "../schemas/common.schema";
 import {
+  createDriverSchema,
+  updateDriverSchema,
   driverSchema,
   driverRelinkPreviewSchema,
   relinkDriverUserSchema,
@@ -78,7 +80,7 @@ export async function createDriverApi(
 ): Promise<Driver> {
   const response = await authFetch(BASE_URL, {
     method: "POST",
-    body: JSON.stringify(stripBlanks(input)),
+    body: JSON.stringify(stripBlanks(createDriverSchema.parse(input))),
   });
   return driverSchema.parse(await handleResponse<unknown>(response));
 }
@@ -87,7 +89,7 @@ export async function updateDriverApi(
   id: string,
   input: UpdateDriverInput
 ): Promise<Driver> {
-  const payload = stripBlanks(input);
+  const payload = stripBlanks(updateDriverSchema.parse(input));
   if (input.phone === null) payload.phone = null;
   const response = await authFetch(`${BASE_URL}/${encodeURIComponent(id)}`, {
     method: "PATCH",

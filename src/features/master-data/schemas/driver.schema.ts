@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { paginatedSchema } from "./common.schema";
+import { metadataCodeSchema, optionalGeneratedCodeSchema, paginatedSchema } from "./common.schema";
 
 export const driverSchema = z.object({
   id: z.string().min(1),
@@ -30,11 +30,7 @@ export const paginatedEligibleDriverUsersSchema = paginatedSchema(
 );
 
 export const createDriverSchema = z.object({
-  code: z
-    .string()
-    .trim()
-    .min(1, "masterData.driver.validation.codeRequired")
-    .max(50, "masterData.driver.validation.codeTooLong"),
+  code: optionalGeneratedCodeSchema(50),
   userId: z
     .string()
     .trim()
@@ -55,6 +51,7 @@ export const createDriverSchema = z.object({
 
 export const updateDriverSchema = z.object({
   version: z.number().int().positive().safe(),
+  code: metadataCodeSchema(50).optional(),
   licenseNumber: z
     .string()
     .trim()
@@ -77,6 +74,10 @@ export const driverFormSchema = z.object({
   licenseNumber: createDriverSchema.shape.licenseNumber,
   licenseExpiry: createDriverSchema.shape.licenseExpiry,
   phone: createDriverSchema.shape.phone,
+});
+
+export const updateDriverFormSchema = driverFormSchema.extend({
+  code: metadataCodeSchema(50),
 });
 
 export const relinkDriverUserSchema = z.object({

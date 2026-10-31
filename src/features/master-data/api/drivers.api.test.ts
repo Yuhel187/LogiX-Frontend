@@ -74,6 +74,28 @@ describe("Driver feature API adapters", () => {
     });
   });
 
+  it("loads Drivers beyond the first 100 and preserves server pagination totals", async () => {
+      apiFetch.mockResolvedValueOnce(
+        jsonResponse({ items: [driver], page: 6, pageSize: 20, total: 121 })
+      );
+      await expect(
+        listDriversApi({ page: 6, pageSize: 20 })
+      ).resolves.toMatchObject({ items: [driver], page: 6, total: 121 });
+      expect(apiFetch).toHaveBeenCalledWith(
+        `${baseUrl}?page=6&pageSize=20`,
+        { method: "GET" }
+      );
+    });
+
+  it("resolves Driver picker pagination copy in both locales", () => {
+      for (const locale of ["vi", "en"] as const) {
+        for (const key of ["driverPagination", "driverPageSummary"]) {
+          const path = `transport.driver.${key}`;
+          expect(resolveLocaleMessage(locale, path)).not.toBe(path);
+        }
+      }
+  });
+
   it("creates a Driver with the accepted fields and omits blank optionals", async () => {
     apiFetch.mockResolvedValueOnce(jsonResponse(driver));
     await createDriverApi({
@@ -109,6 +131,29 @@ describe("Driver feature API adapters", () => {
         phone: null,
       }),
     });
+  });
+
+  it("omits blank code on creation and preserves the server-generated code", async () => {
+    apiFetch.mockResolvedValueOnce(jsonResponse({ ...driver, code: "DRV-000001" }));
+    const result = await createDriverApi({
+      code: "   ", userId: "member-1", licenseNumber: "LIC-001", licenseExpiry: "2028-02-29",
+    });
+    expect(result.code).toBe("DRV-000001");
+    const body = apiFetch.mock.calls[0][1]?.body;
+    expect(typeof body).toBe("string");
+    if (typeof body !== "string") throw new Error("Expected JSON request body");
+    expect(JSON.parse(body)).not.toHaveProperty("code");
+  });
+
+  it("sends code edits with the optimistic version and does not clear blank codes", async () => {
+    apiFetch.mockResolvedValueOnce(jsonResponse({ ...driver, code: "MY-DRIVER" }));
+    await updateDriverApi(driver.id, { version: 4, code: " MY-DRIVER " });
+    expect(apiFetch).toHaveBeenCalledWith(`${baseUrl}/${driver.id}`, {
+      method: "PATCH", body: JSON.stringify({ version: 4, code: "MY-DRIVER" }),
+    });
+    apiFetch.mockClear();
+    await expect(updateDriverApi(driver.id, { version: 4, code: " " })).rejects.toThrow();
+    expect(apiFetch).not.toHaveBeenCalled();
   });
 
   it.each(["enable", "disable"] as const)(

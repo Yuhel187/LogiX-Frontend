@@ -85,9 +85,11 @@ export function WarehouseFormDialog({
       uniqueField: "code",
       uniqueMessage: t("masterData.warehouse.duplicateCode"),
       successMessage: t("masterData.saveSuccess"),
+      resolveValidationMessage: (message) => t(message),
       submit: async (values) => {
         if (isEdit) {
           return updateWarehouseApi(warehouse.id, {
+            code: values.code.trim(),
             name: values.name,
             addressLine: values.addressLine,
             ward: values.ward,
@@ -98,7 +100,7 @@ export function WarehouseFormDialog({
             longitude: values.longitude,
           });
         }
-        return createWarehouseApi(values);
+        return createWarehouseApi({ ...values, code: values.code.trim() || undefined });
       },
       onSuccess: () => {
         onOpenChange(false);
@@ -137,9 +139,9 @@ export function WarehouseFormDialog({
             <FormField
               id="warehouse-code"
               label={t("masterData.warehouse.code")}
-              required
-              disabled={isEdit}
-              hint={isEdit ? t("masterData.codeImmutable") : undefined}
+              required={isEdit}
+              disabled={form.isSubmitting}
+              hint={t(isEdit ? "masterData.codeEditable" : "masterData.codeAutoGenerate")}
               value={form.values.code}
               error={form.errors.code}
               onChange={(e) => form.setValue("code", e.target.value)}

@@ -103,11 +103,11 @@ describe("Driver contract schemas", () => {
       }).success
     ).toBe(false);
     expect(
-      updateDriverSchema.safeParse({
+      updateDriverSchema.parse({
         version: 3,
         code: "DRV-CHANGED",
-      }).success
-    ).toBe(false);
+      })
+    ).toEqual({ version: 3, code: "DRV-CHANGED" });
     expect(
       updateDriverSchema.safeParse({
         version: 3,

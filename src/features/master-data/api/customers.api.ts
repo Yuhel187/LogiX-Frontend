@@ -1,6 +1,8 @@
 import { authFetch, handleResponse, toQueryString } from "@/lib/api";
 import { apiBaseUrl } from "@/lib/config";
 import {
+  createCustomerSchema,
+  updateCustomerSchema,
   customerAddressListSchema,
   customerAddressSchema,
   customerSchema,
@@ -41,7 +43,7 @@ export async function createCustomerApi(
 ): Promise<Customer> {
   const response = await authFetch(BASE_URL, {
     method: "POST",
-    body: JSON.stringify(stripBlanks(input)),
+    body: JSON.stringify(stripBlanks(createCustomerSchema.parse(input))),
   });
   return customerSchema.parse(await handleResponse<unknown>(response));
 }
@@ -52,7 +54,7 @@ export async function updateCustomerApi(
 ): Promise<Customer> {
   const response = await authFetch(`${BASE_URL}/${id}`, {
     method: "PATCH",
-    body: JSON.stringify(stripBlanks(input)),
+    body: JSON.stringify(stripBlanks(updateCustomerSchema.parse(input))),
   });
   return customerSchema.parse(await handleResponse<unknown>(response));
 }

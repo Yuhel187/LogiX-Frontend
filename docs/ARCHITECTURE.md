@@ -19,8 +19,7 @@ enforced boundary.
 src/
   app/
     (auth)/                  authentication experience routes
-    (workspace)/             authenticated operations and management routes
-    (driver)/                responsive assigned-trip experience
+    (workspace)/             authenticated operations, management, and driver routes
     **/page.tsx              thin route entry
     **/layout.tsx            route composition and providers
     **/{loading,error,not-found}.tsx
@@ -73,10 +72,18 @@ catch-alls. Shared code must still have a single named responsibility.
 
 ### App Router
 
+- Workspace navigation uses distinct icons for each destination. The former
+  General Settings placeholder (`#config`) is removed; account and organization
+  settings remain available through their existing entry points. The user menu
+  includes account settings and sign-out, without a Help & Shortcuts placeholder.
 - Pages and layouts compose features and route-private UI.
 - Pages are Server Components by default.
 - Route files do not contain reusable domain logic or backend response types.
 - Route groups organize experiences and layouts without changing URLs.
+- The Driver assigned-trip experience lives at `/driver/trips` inside the
+  authenticated workspace route group. It shares the verified tenant context,
+  workspace guard, and tenant-switch behavior rather than introducing a
+  separate Driver layout or authentication boundary.
 - `loading`, `error`, and `not-found` states belong at the narrowest route
   segment that owns the experience.
 

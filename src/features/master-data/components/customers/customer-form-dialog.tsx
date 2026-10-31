@@ -73,9 +73,11 @@ export function CustomerFormDialog({
       uniqueField: "code",
       uniqueMessage: t("masterData.customer.duplicateCode"),
       successMessage: t("masterData.saveSuccess"),
+      resolveValidationMessage: (message) => t(message),
       submit: async (values) => {
         if (isEdit) {
           return updateCustomerApi(customer.id, {
+            code: values.code.trim(),
             name: values.name,
             taxCode: values.taxCode || undefined,
             phone: values.phone || undefined,
@@ -83,7 +85,7 @@ export function CustomerFormDialog({
           });
         }
         return createCustomerApi({
-          code: values.code,
+          code: values.code.trim() || undefined,
           name: values.name,
           taxCode: values.taxCode || undefined,
           phone: values.phone || undefined,
@@ -127,9 +129,9 @@ export function CustomerFormDialog({
             <FormField
               id="customer-code"
               label={t("masterData.customer.code")}
-              required
-              disabled={isEdit}
-              hint={isEdit ? t("masterData.customer.codeImmutable") : undefined}
+              required={isEdit}
+              disabled={form.isSubmitting}
+              hint={t(isEdit ? "masterData.codeEditable" : "masterData.codeAutoGenerate")}
               value={form.values.code}
               error={form.errors.code}
               onChange={(e) => form.setValue("code", e.target.value)}

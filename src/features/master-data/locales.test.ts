@@ -150,6 +150,19 @@ function expectPlaceholderParity(left: unknown, right: unknown) {
 }
 
 describe("Driver locale contract", () => {
+  it("keeps automatic and editable metadata-code copy aligned in all four dictionaries", () => {
+    for (const [source, runtime] of [[rootVi, runtimeVi], [rootEn, runtimeEn]]) {
+      expect(source.masterData.codeAutoGenerate).toBe(runtime.masterData.codeAutoGenerate);
+      expect(source.masterData.codeEditable).toBe(runtime.masterData.codeEditable);
+      expect(source.masterData.codeValidation).toEqual(runtime.masterData.codeValidation);
+    }
+    for (const locale of ["vi", "en"]) {
+      for (const key of ["codeAutoGenerate", "codeEditable", "codeValidation.required", "codeValidation.max50", "codeValidation.max100"]) {
+        const path = `masterData.${key}`;
+        expect(resolveLocaleMessage(locale, path)).not.toBe(path);
+      }
+    }
+  });
   it("keeps VI/EN source dictionaries and runtime dictionaries aligned", () => {
     expect(
       ((rootVi as Dictionary).masterData as Dictionary).driver
