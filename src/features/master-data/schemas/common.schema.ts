@@ -34,6 +34,19 @@ export type Paginated<T> = {
 // =======================================================
 // SHARED INPUT FRAGMENTS
 // =======================================================
+export function metadataCodeSchema(maxLength: 50 | 100) {
+  return z.string().trim()
+    .min(1, "masterData.codeValidation.required")
+    .max(maxLength, `masterData.codeValidation.max${maxLength}`);
+}
+
+export function optionalGeneratedCodeSchema(maxLength: 50 | 100) {
+  return z.preprocess(
+    (value) => typeof value === "string" && !value.trim() ? undefined : value,
+    metadataCodeSchema(maxLength).optional()
+  );
+}
+
 const latitude = z
   .string()
   .refine((v) => {

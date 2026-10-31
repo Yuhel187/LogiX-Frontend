@@ -23,6 +23,42 @@ const translationsMap: Record<string, Record<string, unknown>> = {
   en: enTranslations,
 };
 
+export function resolveLocaleMessage(
+  locale: LocaleCode,
+  path: string,
+  params?: Record<string, string | number>
+): string {
+  const currentDict = translationsMap[locale] || translationsMap[defaultLocale];
+  const fallbackDict = translationsMap[defaultLocale];
+
+  const resolveValue = (
+    dict: Record<string, unknown>,
+    keyPath: string
+  ): unknown => {
+    let current: unknown = dict;
+    for (const segment of keyPath.split(".")) {
+      if (current && typeof current === "object" && segment in current) {
+        current = (current as Record<string, unknown>)[segment];
+      } else {
+        return undefined;
+      }
+    }
+    return current;
+  };
+
+  let resolved = resolveValue(currentDict, path);
+  if (resolved === undefined && currentDict !== fallbackDict) {
+    resolved = resolveValue(fallbackDict, path);
+  }
+
+  if (typeof resolved !== "string") return path;
+  if (!params) return resolved;
+
+  return Object.entries(params).reduce((message, [key, value]) => {
+    return message.replaceAll(`{${key}}`, String(value));
+  }, resolved);
+}
+
 interface I18nContextType {
   locale: LocaleCode;
   setLocale: (locale: LocaleCode) => void;
@@ -85,39 +121,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const t = React.useCallback(
     (path: string, params?: Record<string, string | number>): string => {
-      const currentDict =
-        translationsMap[locale] || translationsMap[defaultLocale];
-      const fallbackDict = translationsMap[defaultLocale];
-
-      const resolveValue = (dict: Record<string, unknown>, keyPath: string): unknown => {
-        const segments = keyPath.split(".");
-        let current: unknown = dict;
-        for (const segment of segments) {
-          if (current && typeof current === "object" && segment in current) {
-            current = (current as Record<string, unknown>)[segment];
-          } else {
-            return undefined;
-          }
-        }
-        return current;
-      };
-
-      let resolved = resolveValue(currentDict, path);
-      if (resolved === undefined && currentDict !== fallbackDict) {
-        resolved = resolveValue(fallbackDict, path);
-      }
-
-      if (typeof resolved !== "string") {
-        return path;
-      }
-
-      if (params) {
-        return Object.entries(params).reduce((acc, [key, val]) => {
-          return acc.replaceAll(`{${key}}`, String(val));
-        }, resolved);
-      }
-
-      return resolved;
+      return resolveLocaleMessage(locale, path, params);
     },
     [locale]
   );

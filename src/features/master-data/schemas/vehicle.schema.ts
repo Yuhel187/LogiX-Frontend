@@ -4,6 +4,8 @@ import {
   POSITIVE_WEIGHT,
   auditResponseFields,
   paginatedSchema,
+  metadataCodeSchema,
+  optionalGeneratedCodeSchema,
 } from "./common.schema";
 
 export const vehicleSchema = z.object({
@@ -18,10 +20,7 @@ export const vehicleSchema = z.object({
 export const paginatedVehiclesSchema = paginatedSchema(vehicleSchema);
 
 export const createVehicleSchema = z.object({
-  code: z
-    .string()
-    .min(1, "Mã phương tiện không được để trống")
-    .max(50, "Mã phương tiện tối đa 50 ký tự"),
+  code: optionalGeneratedCodeSchema(50),
   licensePlate: z
     .string()
     .min(1, "Biển số không được để trống")
@@ -41,8 +40,8 @@ export const createVehicleSchema = z.object({
 });
 
 export const updateVehicleSchema = createVehicleSchema
-  .omit({ code: true })
-  .partial();
+  .partial()
+  .extend({ code: metadataCodeSchema(50).optional() });
 
 export type Vehicle = z.infer<typeof vehicleSchema>;
 export type CreateVehicleInput = z.infer<typeof createVehicleSchema>;

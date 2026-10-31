@@ -1,6 +1,8 @@
 import { authFetch, handleResponse, toQueryString } from "@/lib/api";
 import { apiBaseUrl } from "@/lib/config";
 import {
+  createProductSchema,
+  updateProductSchema,
   paginatedProductsSchema,
   productSchema,
   type CreateProductInput,
@@ -36,7 +38,7 @@ export async function createProductApi(
 ): Promise<Product> {
   const response = await authFetch(BASE_URL, {
     method: "POST",
-    body: JSON.stringify(stripBlanks(input)),
+    body: JSON.stringify(stripBlanks(createProductSchema.parse(input))),
   });
   return productSchema.parse(await handleResponse<unknown>(response));
 }
@@ -47,7 +49,7 @@ export async function updateProductApi(
 ): Promise<Product> {
   const response = await authFetch(`${BASE_URL}/${id}`, {
     method: "PATCH",
-    body: JSON.stringify(stripBlanks(input)),
+    body: JSON.stringify(stripBlanks(updateProductSchema.parse(input))),
   });
   return productSchema.parse(await handleResponse<unknown>(response));
 }

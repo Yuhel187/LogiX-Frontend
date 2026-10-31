@@ -8,6 +8,11 @@ import { useAuth } from "@/lib/auth";
 import { useTranslation } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { SHIPMENT_PERMISSIONS } from "@/features/shipments";
+import {
+  canAccessDriverExperience,
+  isDriverTripRoute,
+  requiredTransportRoutePermission,
+} from "@/features/transport";
 
 interface RoutePermissionRule {
   pattern: RegExp;
@@ -43,10 +48,6 @@ const ROUTE_PERMISSIONS: RoutePermissionRule[] = [
     pattern: /\/orders/,
     anyPermissions: ["order:sales-order:read", "order:sales-order:create"],
   },
-  {
-    pattern: /\/transport/,
-    anyPermissions: ["transport:trip:read", "transport:trip:create"],
-  },
 ];
 
 export function WorkspaceGuard({ children }: { children: React.ReactNode }) {
@@ -56,12 +57,15 @@ export function WorkspaceGuard({ children }: { children: React.ReactNode }) {
     hasPermission,
     hasAnyPermission,
     isSuperAdmin,
+    permissions,
     tenantTransition,
     recoverTenantContext,
   } = useAuth();
   const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
+  const transportPermission = requiredTransportRoutePermission(pathname);
+  const driverRoute = isDriverTripRoute(pathname);
 
   useEffect(() => {
     if (
@@ -140,8 +144,8 @@ export function WorkspaceGuard({ children }: { children: React.ReactNode }) {
   const matchedRule = ROUTE_PERMISSIONS.find((rule) =>
     rule.pattern.test(pathname),
   );
+  let isBlocked = false;
   if (matchedRule) {
-    let isBlocked = false;
     if (matchedRule.superAdminOnly && !isSuperAdmin) {
       isBlocked = true;
     } else if (
@@ -156,35 +160,37 @@ export function WorkspaceGuard({ children }: { children: React.ReactNode }) {
     ) {
       isBlocked = true;
     }
-
-    if (isBlocked) {
-      return (
-        <div className="flex min-h-screen w-full flex-col items-center justify-center bg-background px-4 text-center">
-          <div className="mx-auto flex max-w-md flex-col items-center justify-center rounded-2xl border border-border/60 bg-card/60 p-8 shadow-sm backdrop-blur-md">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-destructive/10 text-destructive ring-8 ring-destructive/5 mb-6">
-              <ShieldAlert className="h-8 w-8" />
-            </div>
-
-            <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl mb-2">
-              {t("accessDenied.title")}
-            </h1>
-
-            <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-              {t("accessDenied.description")}
-            </p>
-
-            <Button
-              onClick={() => router.push("/")}
-              variant="default"
-              className="h-9 gap-2 px-4 text-sm font-medium"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              {t("accessDenied.backHome")}
-            </Button>
+  }
+  if (transportPermission && !hasPermission(transportPermission)) {
+    isBlocked = true;
+  }
+  if (driverRoute && !canAccessDriverExperience(permissions, isSuperAdmin)) {
+    isBlocked = true;
+  }
+  if (isBlocked) {
+    return (
+      <div className="flex min-h-screen w-full flex-col items-center justify-center bg-background px-4 text-center">
+        <div className="mx-auto flex max-w-md flex-col items-center justify-center rounded-2xl border border-border/60 bg-card/60 p-8 shadow-sm backdrop-blur-md">
+          <div className="mb-6 flex size-16 items-center justify-center rounded-2xl bg-destructive/10 text-destructive ring-8 ring-destructive/5">
+            <ShieldAlert className="h-8 w-8" />
           </div>
+          <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl mb-2">
+            {t("accessDenied.title")}
+          </h1>
+          <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+            {t("accessDenied.description")}
+          </p>
+          <Button
+            onClick={() => router.push("/")}
+            variant="default"
+            className="h-9 gap-2 px-4 text-sm font-medium"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            {t("accessDenied.backHome")}
+          </Button>
         </div>
-      );
-    }
+      </div>
+    );
   }
 
   return <>{children}</>;

@@ -10,6 +10,8 @@ interface StatusToggleDialogProps<T extends { id: string; status: RecordStatus }
   onConfirm: (row: T, action: "disable" | "enable") => Promise<unknown>;
   disableDescription: string;
   enableDescription: string;
+  resolveErrorMessage?: (error: unknown) => string;
+  onError?: (error: unknown) => void;
   onDone: () => void;
 }
 
@@ -22,6 +24,8 @@ export function StatusToggleDialog<
   onConfirm,
   disableDescription,
   enableDescription,
+  resolveErrorMessage,
+  onError,
   onDone,
 }: StatusToggleDialogProps<T>) {
   const { t } = useTranslation();
@@ -43,6 +47,8 @@ export function StatusToggleDialog<
         isDisabling ? t("masterData.disable") : t("masterData.enable")
       }
       destructive={isDisabling}
+      resolveErrorMessage={resolveErrorMessage}
+      onError={onError}
       onConfirm={async () => {
         if (!target) return;
         await onConfirm(target, isDisabling ? "disable" : "enable");

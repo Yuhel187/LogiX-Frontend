@@ -6,6 +6,8 @@ import {
   optionalLatitude,
   optionalLongitude,
   paginatedSchema,
+  metadataCodeSchema,
+  optionalGeneratedCodeSchema,
 } from "./common.schema";
 
 export const warehouseSchema = z.object({
@@ -24,10 +26,7 @@ export const warehouseSchema = z.object({
 export const paginatedWarehousesSchema = paginatedSchema(warehouseSchema);
 
 export const createWarehouseSchema = z.object({
-  code: z
-    .string()
-    .min(1, "Mã kho không được để trống")
-    .max(50, "Mã kho tối đa 50 ký tự"),
+  code: optionalGeneratedCodeSchema(50),
   name: z
     .string()
     .min(1, "Tên kho không được để trống")
@@ -37,10 +36,9 @@ export const createWarehouseSchema = z.object({
   longitude: optionalLongitude,
 });
 
-/** `code` is omitted: the backend treats it as the immutable per-tenant key. */
 export const updateWarehouseSchema = createWarehouseSchema
-  .omit({ code: true })
-  .partial();
+  .partial()
+  .extend({ code: metadataCodeSchema(50).optional() });
 
 export type Warehouse = z.infer<typeof warehouseSchema>;
 export type CreateWarehouseInput = z.infer<typeof createWarehouseSchema>;

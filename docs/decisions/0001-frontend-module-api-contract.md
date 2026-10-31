@@ -43,6 +43,9 @@ app -> features -> components/shared -> components/ui
   their consumers; there is no global `src/types` dumping ground.
 - Server Components are the default. Client Components form small interactive
   boundaries and cannot import server-only modules.
+- The assigned-Driver experience is composed at `/driver/trips` within the
+  authenticated workspace route group, sharing its tenant context and route
+  guard rather than creating a separate authentication or tenant boundary.
 - Feature-to-feature access cannot reach another feature's internals. App-level
   composition is preferred; an explicit root `index`, `client`, or `server`
   entrypoint is required when cross-feature access is accepted.

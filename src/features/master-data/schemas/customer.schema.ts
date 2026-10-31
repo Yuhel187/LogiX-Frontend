@@ -6,6 +6,8 @@ import {
   optionalLatitude,
   optionalLongitude,
   paginatedSchema,
+  metadataCodeSchema,
+  optionalGeneratedCodeSchema,
 } from "./common.schema";
 
 export const customerSchema = z.object({
@@ -23,10 +25,7 @@ export const customerSchema = z.object({
 export const paginatedCustomersSchema = paginatedSchema(customerSchema);
 
 export const createCustomerSchema = z.object({
-  code: z
-    .string()
-    .min(1, "Mã khách hàng không được để trống")
-    .max(50, "Mã khách hàng tối đa 50 ký tự"),
+  code: optionalGeneratedCodeSchema(50),
   name: z
     .string()
     .min(1, "Tên khách hàng không được để trống")
@@ -39,8 +38,8 @@ export const createCustomerSchema = z.object({
 });
 
 export const updateCustomerSchema = createCustomerSchema
-  .omit({ code: true })
-  .partial();
+  .partial()
+  .extend({ code: metadataCodeSchema(50).optional() });
 
 export const CUSTOMER_ADDRESS_TYPES = ["SHIPPING", "BILLING"] as const;
 export const customerAddressTypeSchema = z.enum(CUSTOMER_ADDRESS_TYPES);

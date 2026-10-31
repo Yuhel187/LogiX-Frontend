@@ -1,4 +1,4 @@
 export * from "./types";
-export * from "./api/route-api";
-export * from "./components/route-map-wrapper";
 export * from "./components/route-summary-panel";
+export { DeliveryRouteMapWrapper } from "./components/delivery-route-map-wrapper";
+export type { DeliveryMapPoint, DeliveryRouteMapProps } from "./components/delivery-route-map";
