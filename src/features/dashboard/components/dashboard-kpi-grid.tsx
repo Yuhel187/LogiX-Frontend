@@ -25,8 +25,8 @@ export function DashboardKpiGrid({ kpis }: DashboardKpiGridProps) {
           title={t("dashboard.kpis.ordersToday.title")}
           value={kpis.ordersToday.total}
           trend={{
-            value: "+12.5%",
-            isPositive: true,
+            value: `${kpis.ordersToday.percentChangeVsYesterday >= 0 ? "+" : ""}${kpis.ordersToday.percentChangeVsYesterday}%`,
+            isPositive: kpis.ordersToday.percentChangeVsYesterday >= 0,
             label: t("dashboard.kpis.ordersToday.vsYesterday"),
           }}
           description={t("dashboard.kpis.ordersToday.confirmed", {

@@ -4,10 +4,13 @@ import { listShipmentsApi } from "@/features/shipments/api/shipments.api";
 import { listTripsApi } from "@/features/transport/api/trips.api";
 import { listWarehousesApi } from "@/features/master-data/api/warehouses.api";
 import { listProductsApi } from "@/features/master-data/api/products.api";
+import { authFetch } from "@/lib/api";
+import { apiBaseUrl } from "@/lib/config";
 import type {
   ActiveTripItem,
   DashboardScope,
   DashboardSummary,
+  ForecastPoint,
   LowStockItem,
   OrderFlowPoint,
   SkuForecastData,
@@ -28,13 +31,63 @@ function getDayLabel(date: Date): string {
   return `${dayName} (${d}/${m})`;
 }
 
+interface ForecastPointResponse {
+  forecast_date: string;
+  predicted_quantity: number;
+  lower_bound: number;
+  upper_bound: number;
+  baseline_naive?: number;
+  baseline_moving_average_7?: number;
+  baseline_seasonal_naive_7?: number;
+}
+
+interface ForecastRunResponse {
+  forecast_run_id?: string;
+  warehouse_id?: string;
+  warehouse_name?: string;
+  product_id?: string;
+  sku_code?: string;
+  product_name?: string;
+  status?: string;
+  model_name?: string;
+  forecast_points?: ForecastPointResponse[];
+}
+
+async function fetchSkuForecastApi(
+  warehouseId?: string,
+  productId?: string,
+  signal?: AbortSignal
+): Promise<ForecastRunResponse | null> {
+  try {
+    const params = new URLSearchParams({ horizon_days: "7" });
+    if (warehouseId && warehouseId !== "all") {
+      params.set("warehouse_id", warehouseId);
+    }
+    if (productId) {
+      params.set("product_id", productId);
+    }
+    const response = await authFetch(
+      `${apiBaseUrl}/forecast/results?${params.toString()}`,
+      {
+        method: "GET",
+        signal,
+      }
+    );
+    if (!response.ok) return null;
+    return (await response.json()) as ForecastRunResponse;
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchDashboardSummaryApi(
   scope: DashboardScope,
   signal?: AbortSignal
 ): Promise<DashboardSummary> {
-  const warehouseFilter = scope.warehouseId === "all" ? undefined : scope.warehouseId;
+  const warehouseFilter =
+    scope.warehouseId === "all" ? undefined : scope.warehouseId;
 
-  // Concurrently fetch domain resources
+  // 1. Concurrently fetch core domain resources from backend databases
   const [
     ordersResult,
     pendingStockResult,
@@ -101,7 +154,7 @@ export async function fetchDashboardSummaryApi(
   const productMap = new Map(products.map((p) => [p.id, p]));
   const warehouseMap = new Map(warehouses.map((w) => [w.id, w]));
 
-  // 1. Triage Metrics
+  // 2. Real Triage Metrics
   const pendingStockCount =
     pendingStockResult.status === "fulfilled"
       ? pendingStockResult.value.total
@@ -128,45 +181,66 @@ export async function fetchDashboardSummaryApi(
     pendingAgentActionsCount: 0,
   };
 
-  // 2. Orders Metrics
-  const todayStr = getDayKey(new Date());
+  // 3. Real Orders Metrics with Actual Percent Change vs Yesterday
+  const today = new Date();
+  const todayStr = getDayKey(today);
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = getDayKey(yesterday);
+
   const ordersToday = orders.filter((o) => o.createdAt.startsWith(todayStr));
+  const ordersYesterday = orders.filter((o) => o.createdAt.startsWith(yesterdayStr));
+
   const confirmedToday = ordersToday.filter((o) => o.status === "CONFIRMED").length;
   const processingToday = ordersToday.filter(
     (o) => o.status === "PICKING" || o.status === "READY_TO_SHIP"
   ).length;
   const completedToday = ordersToday.filter((o) => o.status === "COMPLETED").length;
 
-  // 3. Shipment Pool
+  let percentChangeVsYesterday = 0;
+  if (ordersYesterday.length > 0) {
+    percentChangeVsYesterday =
+      Math.round(((ordersToday.length - ordersYesterday.length) / ordersYesterday.length) * 1000) / 10;
+  } else if (ordersToday.length > 0) {
+    percentChangeVsYesterday = 100;
+  }
+
+  // 4. Shipment Pool
   const readyToShipCount = shipments.length;
 
-  // 4. Transport Metrics
+  // 5. Real Transport Metrics with Driver/Vehicle Snapshots & Exact Stops
   const activeTripsList = trips.filter(
     (t) => t.status === "IN_PROGRESS" || t.status === "APPROVED"
   );
   const completedTrips = trips.filter((t) => t.status === "COMPLETED");
-  const totalFinishedTrips = completedTrips.length + trips.filter((t) => t.status === "CANCELED").length;
+  const canceledTrips = trips.filter((t) => t.status === "CANCELED");
+  const finishedTripsCount = completedTrips.length + canceledTrips.length;
   const deliverySuccessRate =
-    totalFinishedTrips > 0
-      ? Math.round((completedTrips.length / totalFinishedTrips) * 1000) / 10
-      : 96.5;
+    finishedTripsCount > 0
+      ? Math.round((completedTrips.length / finishedTripsCount) * 1000) / 10
+      : 100;
 
-  const activeTripItems: ActiveTripItem[] = activeTripsList.slice(0, 5).map((t, idx) => {
-    const isCompleted = t.status === "COMPLETED";
-    const totalStops = 5;
-    const completedStops = isCompleted ? 5 : Math.min(3 + idx, 4);
+  const activeTripItems: ActiveTripItem[] = activeTripsList.slice(0, 5).map((t) => {
+    const driverSnap = t.driverSnapshot as { displayName?: string; code?: string } | null;
+    const vehicleSnap = t.vehicleSnapshot as { licensePlate?: string; code?: string } | null;
+    const tripTotalStops = (t as { totalStops?: number }).totalStops ?? 0;
+    const tripCompletedStops = (t as { completedStops?: number }).completedStops ?? 0;
+
     return {
       id: t.id,
       tripCode: t.tripNumber,
-      driverName: t.driverId ? `Tài xế ${t.tripNumber.slice(-3)}` : "Đang gán tài xế",
-      vehiclePlate: t.vehicleId ? `59C-${t.tripNumber.slice(-4)}` : "Chờ xếp xe",
-      totalStops,
-      completedStops,
+      driverName: driverSnap?.displayName || (t.driverId ? "Tài xế đã gán" : "Chưa gán tài xế"),
+      vehiclePlate: vehicleSnap?.licensePlate || (t.vehicleId ? "Xe đã gán" : "Chờ xếp xe"),
+      totalStops: tripTotalStops,
+      completedStops: tripCompletedStops,
       status: t.status === "IN_PROGRESS" ? "IN_TRANSIT" : "DISPATCHED",
     };
   });
 
-  // 5. Inventory Metrics
+  const totalStopsOverall = activeTripItems.reduce((acc, t) => acc + t.totalStops, 0);
+  const completedStopsOverall = activeTripItems.reduce((acc, t) => acc + t.completedStops, 0);
+
+  // 6. Real Inventory Metrics
   const lowStockSkuCount = balances.length;
 
   const lowStockItems: LowStockItem[] = balances.slice(0, 5).map((b) => {
@@ -183,11 +257,10 @@ export async function fetchDashboardSummaryApi(
     };
   });
 
-  // 6. Order Throughput for last 7 days
-  const now = new Date();
+  // 7. Real Order Flow Points for Last 7 Days
   const orderThroughput: OrderFlowPoint[] = [];
   for (let i = 6; i >= 0; i--) {
-    const d = new Date(now);
+    const d = new Date(today);
     d.setDate(d.getDate() - i);
     const dateKey = getDayKey(d);
     const dayOrders = orders.filter((o) => o.createdAt.startsWith(dateKey));
@@ -201,31 +274,93 @@ export async function fetchDashboardSummaryApi(
     });
   }
 
-  // 7. Prophet Demand Forecast Model
+  // 8. Meta Prophet Forecast via forecast-service & Live Observations
   const topProduct = products[0];
+  const forecastRun = await fetchSkuForecastApi(
+    warehouseFilter,
+    topProduct?.id,
+    signal
+  );
+
+  const forecastPoints: ForecastPoint[] = [];
+
+  // Historical 7 days (D-6 to D-0) calculated from actual sales orders
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dateKey = getDayKey(d);
+    const dayOrders = orders.filter((o) => o.createdAt.startsWith(dateKey));
+
+    // Actual volume count from today/past orders
+    const actualOrdersCount = dayOrders.length;
+    const isToday = i === 0;
+
+    let todayForecastVal: number | null = null;
+    let todayLowerVal: number | null = null;
+    let todayUpperVal: number | null = null;
+
+    if (isToday && forecastRun?.forecast_points?.[0]) {
+      const p0 = forecastRun.forecast_points[0];
+      todayForecastVal = Math.round(p0.predicted_quantity * 10) / 10;
+      todayLowerVal = Math.round(p0.lower_bound * 10) / 10;
+      todayUpperVal = Math.round(p0.upper_bound * 10) / 10;
+    }
+
+    forecastPoints.push({
+      ds: `D-${i}`,
+      label: isToday ? "Hôm nay" : i === 1 ? "Hôm qua" : `${i} ngày trước`,
+      actual: actualOrdersCount,
+      forecast: todayForecastVal,
+      lowerBound: todayLowerVal,
+      upperBound: todayUpperVal,
+    });
+  }
+
+  // Future 7 days (D+1 to D+7) from Meta Prophet Forecast Engine
+  if (forecastRun?.forecast_points && forecastRun.forecast_points.length > 0) {
+    const futurePoints = forecastRun.forecast_points.slice(1, 8);
+    futurePoints.forEach((pt, idx) => {
+      const step = idx + 1;
+      forecastPoints.push({
+        ds: `D+${step}`,
+        label: step === 1 ? "Ngày mai" : `+${step} ngày`,
+        actual: null,
+        forecast: Math.round(pt.predicted_quantity * 10) / 10,
+        lowerBound: Math.round(pt.lower_bound * 10) / 10,
+        upperBound: Math.round(pt.upper_bound * 10) / 10,
+      });
+    });
+  } else {
+    // If forecast service is initializing or has 0 future points, project dynamic moving average from real orders
+    const recentActuals = forecastPoints.map((p) => p.actual ?? 0);
+    const avgRecent =
+      recentActuals.length > 0
+        ? Math.round((recentActuals.reduce((a, b) => a + b, 0) / recentActuals.length) * 10) / 10
+        : 0;
+
+    for (let step = 1; step <= 7; step++) {
+      forecastPoints.push({
+        ds: `D+${step}`,
+        label: step === 1 ? "Ngày mai" : `+${step} ngày`,
+        actual: null,
+        forecast: avgRecent,
+        lowerBound: Math.max(0, Math.round((avgRecent * 0.85) * 10) / 10),
+        upperBound: Math.round((avgRecent * 1.15) * 10) / 10,
+      });
+    }
+  }
+
+  const forecastStatus: "ACTIVE" | "TRAINING" | "INSUFFICIENT_DATA" =
+    forecastRun?.status === "TRAINING" || forecastRun?.status === "INSUFFICIENT_DATA"
+      ? forecastRun.status
+      : "ACTIVE";
+
   const forecast: SkuForecastData = {
-    skuCode: topProduct ? topProduct.sku : "SKU-MILK-01",
-    productName: topProduct ? topProduct.name : "Sữa tươi tiệt trùng 1L",
-    unit: topProduct ? topProduct.baseUnit : "hộp",
-    status: "ACTIVE",
-    points: [
-      // 7 days historical observations
-      { ds: "D-6", label: "6 ngày trước", actual: 82, forecast: null, lowerBound: null, upperBound: null },
-      { ds: "D-5", label: "5 ngày trước", actual: 95, forecast: null, lowerBound: null, upperBound: null },
-      { ds: "D-4", label: "4 ngày trước", actual: 78, forecast: null, lowerBound: null, upperBound: null },
-      { ds: "D-3", label: "3 ngày trước", actual: 110, forecast: null, lowerBound: null, upperBound: null },
-      { ds: "D-2", label: "2 ngày trước", actual: 104, forecast: null, lowerBound: null, upperBound: null },
-      { ds: "D-1", label: "Hôm qua", actual: 118, forecast: null, lowerBound: null, upperBound: null },
-      { ds: "D-0", label: "Hôm nay", actual: 125, forecast: 125, lowerBound: 115, upperBound: 135 },
-      // 7 days future predicted demand with 80% confidence band
-      { ds: "D+1", label: "Ngày mai", actual: null, forecast: 132, lowerBound: 120, upperBound: 144 },
-      { ds: "D+2", label: "+2 ngày", actual: null, forecast: 140, lowerBound: 126, upperBound: 154 },
-      { ds: "D+3", label: "+3 ngày", actual: null, forecast: 135, lowerBound: 118, upperBound: 152 },
-      { ds: "D+4", label: "+4 ngày", actual: null, forecast: 150, lowerBound: 130, upperBound: 170 },
-      { ds: "D+5", label: "+5 ngày", actual: null, forecast: 162, lowerBound: 142, upperBound: 182 },
-      { ds: "D+6", label: "+6 ngày", actual: null, forecast: 175, lowerBound: 150, upperBound: 200 },
-      { ds: "D+7", label: "+7 ngày", actual: null, forecast: 168, lowerBound: 145, upperBound: 191 },
-    ],
+    skuCode: topProduct ? topProduct.sku : forecastRun?.sku_code ?? "SKU-PROD-01",
+    productName: topProduct ? topProduct.name : forecastRun?.product_name ?? "Sản phẩm kinh doanh",
+    unit: topProduct ? topProduct.baseUnit : "đơn vị",
+    status: forecastStatus,
+    points: forecastPoints,
   };
 
   return {
@@ -238,7 +373,7 @@ export async function fetchDashboardSummaryApi(
         confirmed: confirmedToday,
         processing: processingToday,
         completed: completedToday,
-        percentChangeVsYesterday: 12.5,
+        percentChangeVsYesterday,
       },
       shipmentPool: {
         readyToShipCount,
@@ -246,8 +381,8 @@ export async function fetchDashboardSummaryApi(
       transport: {
         activeTripsCount: activeTripsList.length,
         deliverySuccessRate,
-        totalStops: activeTripsList.length * 5,
-        completedStops: activeTripItems.reduce((acc, t) => acc + t.completedStops, 0),
+        totalStops: totalStopsOverall,
+        completedStops: completedStopsOverall,
       },
       inventory: {
         lowStockSkuCount,
