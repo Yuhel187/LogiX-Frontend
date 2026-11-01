@@ -3,8 +3,8 @@ export interface DailyForecastPoint {
   predicted_quantity: number;
   lower_bound: number;
   upper_bound: number;
-  trend_component: number;
-  weekly_component: number;
+  trend_component?: number;
+  weekly_component?: number;
 }
 
 export interface MethodMetrics {

@@ -12,6 +12,7 @@ import {
   YAxis,
 } from "recharts";
 import type { DailyForecastPoint } from "../types";
+import { useTranslation } from "@/lib/i18n";
 
 interface ForecastChartProps {
   points: DailyForecastPoint[];
@@ -33,18 +34,31 @@ function formatShortDate(dateStr: string): string {
   return `${parts[2]}/${parts[1]}`;
 }
 
+function safeNumber(val: unknown, decimals = 1, fallback = 0): number {
+  if (val === null || val === undefined || val === "") return fallback;
+  const num = Number(val);
+  return Number.isFinite(num) ? Number(num.toFixed(decimals)) : fallback;
+}
+
+function safeFormat(val: unknown, decimals = 1, fallback = "0.0"): string {
+  if (val === null || val === undefined || val === "") return fallback;
+  const num = Number(val);
+  return Number.isFinite(num) ? num.toFixed(decimals) : fallback;
+}
+
 export function ForecastChart({ points }: ForecastChartProps) {
+  const { t } = useTranslation();
   const data = React.useMemo<ChartDatum[]>(() => {
     return points.map((pt) => ({
       dateLabel: formatShortDate(pt.forecast_date),
       fullDate: pt.forecast_date,
-      predicted: Number(pt.predicted_quantity.toFixed(1)),
-      trend: Number(pt.trend_component.toFixed(1)),
-      lower: Number(pt.lower_bound.toFixed(1)),
-      upper: Number(pt.upper_bound.toFixed(1)),
+      predicted: safeNumber(pt.predicted_quantity),
+      trend: safeNumber(pt.trend_component ?? pt.predicted_quantity),
+      lower: safeNumber(pt.lower_bound),
+      upper: safeNumber(pt.upper_bound),
       confidenceBand: [
-        Number(pt.lower_bound.toFixed(1)),
-        Number(pt.upper_bound.toFixed(1)),
+        safeNumber(pt.lower_bound),
+        safeNumber(pt.upper_bound),
       ],
     }));
   }, [points]);
@@ -87,21 +101,21 @@ export function ForecastChart({ points }: ForecastChartProps) {
                   </div>
                   <div className="space-y-1">
                     <div className="flex items-center justify-between gap-6">
-                      <span className="text-muted-foreground">Dự báo</span>
+                      <span className="text-muted-foreground">{t("forecast.chartForecast")}</span>
                       <span className="font-mono font-semibold text-primary tabular-nums">
-                        {row.predicted.toFixed(1)}
+                        {safeFormat(row.predicted)}
                       </span>
                     </div>
                     <div className="flex items-center justify-between gap-6">
-                      <span className="text-muted-foreground">Khoảng P80</span>
+                      <span className="text-muted-foreground">{t("forecast.chartP80")}</span>
                       <span className="font-mono text-foreground tabular-nums">
-                        {row.lower.toFixed(1)} – {row.upper.toFixed(1)}
+                        {safeFormat(row.lower)} – {safeFormat(row.upper)}
                       </span>
                     </div>
                     <div className="flex items-center justify-between gap-6">
-                      <span className="text-muted-foreground">Xu hướng</span>
+                      <span className="text-muted-foreground">{t("forecast.chartTrend")}</span>
                       <span className="font-mono text-muted-foreground tabular-nums">
-                        {row.trend.toFixed(1)}
+                        {safeFormat(row.trend)}
                       </span>
                     </div>
                   </div>

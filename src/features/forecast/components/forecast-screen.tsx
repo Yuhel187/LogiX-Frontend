@@ -30,8 +30,16 @@ import {
   type StockoutRisksResponse,
 } from "../types";
 import { ForecastChart } from "./forecast-chart";
+import { useTranslation } from "@/lib/i18n";
+
+function safeFormat(val: unknown, decimals = 1, fallback = "-"): string {
+  if (val === null || val === undefined || val === "") return fallback;
+  const num = Number(val);
+  return Number.isFinite(num) ? num.toFixed(decimals) : fallback;
+}
 
 export function ForecastScreen() {
+  const { t } = useTranslation();
   const [warehouseId, setWarehouseId] = React.useState<string>(
     FORECAST_WAREHOUSES[0].id
   );
@@ -82,7 +90,7 @@ export function ForecastScreen() {
           const message =
             err instanceof Error
               ? err.message
-              : "Không thể kết nối đến forecast-service.";
+              : t("forecast.failedConnect");
           setResult({
             key: requestKey,
             forecast: null,
@@ -107,17 +115,17 @@ export function ForecastScreen() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-xl font-semibold text-foreground">
-            Dự báo nhu cầu tồn kho
+            {t("forecast.title")}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Phân tích chuỗi thời gian theo kho và mặt hàng, đối chiếu sai số thực nghiệm và cảnh báo lượng hàng thiếu hụt.
+            {t("forecast.description")}
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <Select value={warehouseId} onValueChange={setWarehouseId}>
             <SelectTrigger className="h-8 w-[220px] bg-background">
-              <SelectValue placeholder="Chọn kho hàng" />
+              <SelectValue placeholder={t("forecast.selectWarehouse")} />
             </SelectTrigger>
             <SelectContent position="popper">
               {FORECAST_WAREHOUSES.map((wh) => (
@@ -130,7 +138,7 @@ export function ForecastScreen() {
 
           <Select value={productId} onValueChange={setProductId}>
             <SelectTrigger className="h-8 w-[240px] bg-background">
-              <SelectValue placeholder="Chọn mặt hàng" />
+              <SelectValue placeholder={t("forecast.selectProduct")} />
             </SelectTrigger>
             <SelectContent position="popper">
               {FORECAST_PRODUCTS.map((prod) => (
@@ -149,8 +157,8 @@ export function ForecastScreen() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent position="popper">
-              <SelectItem value="7">7 ngày</SelectItem>
-              <SelectItem value="14">14 ngày</SelectItem>
+              <SelectItem value="7">{t("forecast.horizonDays", { days: 7 })}</SelectItem>
+              <SelectItem value="14">{t("forecast.horizonDays", { days: 14 })}</SelectItem>
             </SelectContent>
           </Select>
 
@@ -161,7 +169,7 @@ export function ForecastScreen() {
             onClick={handleRecalculate}
             disabled={isLoading}
           >
-            {isLoading ? "Đang tính..." : "Tính toán lại"}
+            {isLoading ? t("forecast.calculating") : t("forecast.recalculate")}
           </Button>
         </div>
       </div>
@@ -177,7 +185,7 @@ export function ForecastScreen() {
               onClick={handleRecalculate}
               disabled={isLoading}
             >
-              Thử lại
+              {t("forecast.retry")}
             </Button>
           </AlertDescription>
         </Alert>
@@ -187,44 +195,44 @@ export function ForecastScreen() {
       <div className="grid grid-cols-2 divide-y divide-border rounded-lg border border-border bg-card sm:grid-cols-4 sm:divide-x sm:divide-y-0">
         <div className="p-4">
           <div className="text-xs text-muted-foreground">
-            Tổng cầu dự báo ({horizonDays} ngày)
+            {t("forecast.totalDemand", { days: horizonDays })}
           </div>
           {isLoading ? (
             <Skeleton className="mt-2 h-6 w-24" />
           ) : (
             <div className="mt-1 font-mono text-xl font-semibold text-foreground tabular-nums">
-              {forecast ? forecast.total_predicted_7d.toFixed(1) : "-"}
+              {forecast ? safeFormat(forecast.total_predicted_7d) : "-"}
             </div>
           )}
         </div>
 
         <div className="p-4">
           <div className="text-xs text-muted-foreground">
-            Biên trên nhu cầu (P80)
+            {t("forecast.upperDemandP80")}
           </div>
           {isLoading ? (
             <Skeleton className="mt-2 h-6 w-24" />
           ) : (
             <div className="mt-1 font-mono text-xl font-semibold text-foreground tabular-nums">
-              {forecast ? forecast.total_upper_bound_7d.toFixed(1) : "-"}
+              {forecast ? safeFormat(forecast.total_upper_bound_7d) : "-"}
             </div>
           )}
         </div>
 
         <div className="p-4">
-          <div className="text-xs text-muted-foreground">Tồn kho khả dụng</div>
+          <div className="text-xs text-muted-foreground">{t("forecast.availableStock")}</div>
           {isLoading ? (
             <Skeleton className="mt-2 h-6 w-24" />
           ) : (
             <div className="mt-1 font-mono text-xl font-semibold text-foreground tabular-nums">
-              {forecast ? forecast.available_stock.toFixed(1) : "-"}
+              {forecast ? safeFormat(forecast.available_stock) : "-"}
             </div>
           )}
         </div>
 
         <div className="p-4">
           <div className="text-xs text-muted-foreground">
-            Lượng thiếu hụt dự kiến
+            {t("forecast.expectedShortfall")}
           </div>
           {isLoading ? (
             <Skeleton className="mt-2 h-6 w-24" />
@@ -238,7 +246,7 @@ export function ForecastScreen() {
                     : "text-muted-foreground"
               }`}
             >
-              {forecast ? forecast.shortfall_quantity.toFixed(1) : "-"}
+              {forecast ? safeFormat(forecast.shortfall_quantity) : "-"}
             </div>
           )}
         </div>
@@ -251,20 +259,22 @@ export function ForecastScreen() {
           <div className="mb-4 flex flex-col justify-between gap-2 border-b border-border/60 pb-3 sm:flex-row sm:items-center">
             <div>
               <h2 className="text-sm font-medium text-foreground">
-                Biểu đồ dự báo nhu cầu theo ngày
+                {t("forecast.chartTitle")}
               </h2>
               <p className="text-xs text-muted-foreground">
                 {forecast
                   ? `${forecast.sku_code} · ${forecast.product_name} (${forecast.warehouse_name})`
                   : isLoading
-                    ? "Đang tải chuỗi thời gian..."
-                    : "Không có dữ liệu dự báo"}
+                    ? t("forecast.loadingTimeSeries")
+                    : t("forecast.noForecastData")}
               </p>
             </div>
             {forecast ? (
               <div className="font-mono text-xs text-muted-foreground">
-                Mô hình: {forecast.model_name} · Mẫu huấn luyện:{" "}
-                {forecast.observation_count} ngày
+                {t("forecast.modelMeta", {
+                  model: forecast.model_name,
+                  count: forecast.observation_count,
+                })}
               </div>
             ) : null}
           </div>
@@ -275,7 +285,7 @@ export function ForecastScreen() {
             <ForecastChart points={forecast.forecast_points} />
           ) : (
             <div className="flex h-[300px] items-center justify-center text-xs text-muted-foreground">
-              Chưa tải được dữ liệu biểu đồ từ dịch vụ dự báo.
+              {t("forecast.chartLoadError")}
             </div>
           )}
         </div>
@@ -285,19 +295,19 @@ export function ForecastScreen() {
           <div className="rounded-lg border border-border bg-card">
             <div className="border-b border-border/60 px-4 py-3">
               <h2 className="text-sm font-medium text-foreground">
-                Đối chiếu sai số mô hình
+                {t("forecast.errorComparisonTitle")}
               </h2>
               <p className="text-xs text-muted-foreground">
-                Đánh giá trên tập kiểm thử (Rolling Origin Holdout)
+                {t("forecast.errorComparisonDesc")}
               </p>
             </div>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Phương pháp</TableHead>
-                  <TableHead className="text-right">RMSE</TableHead>
-                  <TableHead className="text-right">MAE</TableHead>
-                  <TableHead className="text-right">MAPE</TableHead>
+                  <TableHead>{t("forecast.colMethod")}</TableHead>
+                  <TableHead className="text-right">{t("forecast.colRmse")}</TableHead>
+                  <TableHead className="text-right">{t("forecast.colMae")}</TableHead>
+                  <TableHead className="text-right">{t("forecast.colMape")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -324,7 +334,7 @@ export function ForecastScreen() {
                       colSpan={4}
                       className="py-6 text-center text-xs text-muted-foreground"
                     >
-                      Không có dữ liệu đánh giá sai số.
+                      {t("forecast.noErrorData")}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -342,13 +352,13 @@ export function ForecastScreen() {
                           {m.method_name}
                         </TableCell>
                         <TableCell className="text-right font-mono text-xs tabular-nums">
-                          {m.rmse.toFixed(2)}
+                          {safeFormat(m.rmse, 2)}
                         </TableCell>
                         <TableCell className="text-right font-mono text-xs tabular-nums">
-                          {m.mae.toFixed(2)}
+                          {safeFormat(m.mae, 2)}
                         </TableCell>
                         <TableCell className="text-right font-mono text-xs tabular-nums">
-                          {m.mape !== null ? `${m.mape.toFixed(2)}%` : "-"}
+                          {m.mape != null ? `${safeFormat(m.mape, 2)}%` : "-"}
                         </TableCell>
                       </TableRow>
                     );
@@ -360,7 +370,7 @@ export function ForecastScreen() {
 
           <div className="flex-1 rounded-lg border border-border bg-card p-4">
             <h2 className="text-sm font-medium text-foreground">
-              Thông số chuỗi & Khuyến nghị
+              {t("forecast.paramsAndAdvisory")}
             </h2>
             {isLoading ? (
               <div className="mt-3 space-y-2">
@@ -369,23 +379,27 @@ export function ForecastScreen() {
               </div>
             ) : !forecast ? (
               <p className="mt-3 text-xs text-muted-foreground">
-                Không có thông tin khuyến nghị.
+                {t("forecast.noAdvisory")}
               </p>
             ) : (
               <div className="mt-3 space-y-3 text-xs">
                 <div className="grid grid-cols-2 gap-2 border-b border-border/60 pb-3">
                   <div>
-                    <span className="text-muted-foreground">Giai đoạn mẫu</span>
+                    <span className="text-muted-foreground">{t("forecast.samplePeriod")}</span>
                     <div className="mt-0.5 font-mono text-foreground">
                       {forecast.training_start_date} –{" "}
                       {forecast.training_end_date}
                     </div>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Độ tin cậy</span>
+                    <span className="text-muted-foreground">{t("forecast.confidenceLevel")}</span>
                     <div className="mt-0.5 font-mono text-foreground">
-                      {Math.round(forecast.confidence_level * 100)}% (Chế độ:{" "}
-                      {forecast.used_fallback ? "Dự phòng" : "Tiêu chuẩn"})
+                      {t("forecast.confidenceMeta", {
+                        percent: Math.round(forecast.confidence_level * 100),
+                        mode: forecast.used_fallback
+                          ? t("forecast.modeFallback")
+                          : t("forecast.modeStandard"),
+                      })}
                     </div>
                   </div>
                 </div>
@@ -404,17 +418,17 @@ export function ForecastScreen() {
         <div className="rounded-lg border border-border bg-card lg:col-span-6">
           <div className="border-b border-border/60 px-4 py-3">
             <h2 className="text-sm font-medium text-foreground">
-              Bảng chi tiết dự báo theo ngày
+              {t("forecast.dailyScheduleTitle")}
             </h2>
           </div>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Ngày</TableHead>
-                <TableHead className="text-right">Dự báo</TableHead>
-                <TableHead className="text-right">Biên dưới</TableHead>
-                <TableHead className="text-right">Biên trên</TableHead>
-                <TableHead className="text-right">Xu hướng</TableHead>
+                <TableHead>{t("forecast.colDate")}</TableHead>
+                <TableHead className="text-right">{t("forecast.colForecast")}</TableHead>
+                <TableHead className="text-right">{t("forecast.colLowerBound")}</TableHead>
+                <TableHead className="text-right">{t("forecast.colUpperBound")}</TableHead>
+                <TableHead className="text-right">{t("forecast.colTrend")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -444,7 +458,7 @@ export function ForecastScreen() {
                     colSpan={5}
                     className="py-6 text-center text-xs text-muted-foreground"
                   >
-                    Không có dữ liệu dự báo theo ngày.
+                    {t("forecast.noDailyData")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -454,16 +468,16 @@ export function ForecastScreen() {
                       {pt.forecast_date}
                     </TableCell>
                     <TableCell className="text-right font-mono text-xs font-medium text-foreground tabular-nums">
-                      {pt.predicted_quantity.toFixed(1)}
+                      {safeFormat(pt.predicted_quantity)}
                     </TableCell>
                     <TableCell className="text-right font-mono text-xs text-muted-foreground tabular-nums">
-                      {pt.lower_bound.toFixed(1)}
+                      {safeFormat(pt.lower_bound)}
                     </TableCell>
                     <TableCell className="text-right font-mono text-xs text-muted-foreground tabular-nums">
-                      {pt.upper_bound.toFixed(1)}
+                      {safeFormat(pt.upper_bound)}
                     </TableCell>
                     <TableCell className="text-right font-mono text-xs text-muted-foreground tabular-nums">
-                      {pt.trend_component.toFixed(1)}
+                      {safeFormat(pt.trend_component ?? pt.predicted_quantity)}
                     </TableCell>
                   </TableRow>
                 ))
@@ -476,19 +490,19 @@ export function ForecastScreen() {
         <div className="rounded-lg border border-border bg-card lg:col-span-6">
           <div className="border-b border-border/60 px-4 py-3">
             <h2 className="text-sm font-medium text-foreground">
-              Đối chiếu nhu cầu và tồn kho toàn kho
+              {t("forecast.warehouseStockoutTitle")}
             </h2>
           </div>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Mặt hàng</TableHead>
-                <TableHead className="text-right">Khả dụng</TableHead>
+                <TableHead>{t("forecast.colProduct")}</TableHead>
+                <TableHead className="text-right">{t("forecast.colAvailable")}</TableHead>
                 <TableHead className="text-right">
-                  Cầu ({horizonDays}N)
+                  {t("forecast.colDemandDays", { days: horizonDays })}
                 </TableHead>
-                <TableHead className="text-right">Biên trên</TableHead>
-                <TableHead className="text-right">Cần nhập thêm</TableHead>
+                <TableHead className="text-right">{t("forecast.colUpperBound")}</TableHead>
+                <TableHead className="text-right">{t("forecast.colReplenishment")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -518,7 +532,7 @@ export function ForecastScreen() {
                     colSpan={5}
                     className="py-6 text-center text-xs text-muted-foreground"
                   >
-                    Không có dữ liệu đối chiếu tồn kho.
+                    {t("forecast.noStockoutData")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -541,13 +555,13 @@ export function ForecastScreen() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right font-mono text-xs tabular-nums">
-                        {item.available_stock.toFixed(1)}
+                        {safeFormat(item.available_stock)}
                       </TableCell>
                       <TableCell className="text-right font-mono text-xs tabular-nums">
-                        {item.total_predicted_demand.toFixed(1)}
+                        {safeFormat(item.total_predicted_demand)}
                       </TableCell>
                       <TableCell className="text-right font-mono text-xs text-muted-foreground tabular-nums">
-                        {item.total_upper_bound_demand.toFixed(1)}
+                        {safeFormat(item.total_upper_bound_demand)}
                       </TableCell>
                       <TableCell
                         className={`text-right font-mono text-xs font-medium tabular-nums ${
@@ -557,7 +571,7 @@ export function ForecastScreen() {
                         }`}
                       >
                         {item.recommended_replenishment > 0
-                          ? `+${item.recommended_replenishment.toFixed(1)}`
+                          ? `+${safeFormat(item.recommended_replenishment)}`
                           : "0.0"}
                       </TableCell>
                     </TableRow>

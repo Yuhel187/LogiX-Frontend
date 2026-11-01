@@ -166,7 +166,7 @@ export function AppSidebar() {
             icon: Boxes,
           },
           {
-            title: "Dự báo nhu cầu",
+            title: t("forecast.navTitle"),
             href: "/forecast",
             icon: TrendingUp,
           },
