@@ -207,6 +207,7 @@ export async function authFetch(
   const headers = buildHeaders(initialToken);
 
   let response = await fetch(url, {
+    cache: restOptions.cache ?? "no-store",
     ...restOptions,
     headers,
     credentials: "include",
@@ -217,6 +218,7 @@ export async function authFetch(
       const newToken = await requestNewAccessToken();
       const retryHeaders = buildHeaders(newToken);
       response = await fetch(url, {
+        cache: restOptions.cache ?? "no-store",
         ...restOptions,
         headers: retryHeaders,
         credentials: "include",

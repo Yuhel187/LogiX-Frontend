@@ -1678,5 +1678,126 @@
     "chartForecast": "Dự báo",
     "chartP80": "Khoảng P80",
     "chartTrend": "Xu hướng"
+  "dashboard": {
+    "title": "Trung tâm Giám sát Vận hành",
+    "description": "Tổng quan trạng thái đơn hàng, năng lực kho bãi, luồng vận chuyển và dự báo AI theo thời gian thực",
+    "greeting": {
+      "morning": "Chào buổi sáng",
+      "afternoon": "Chào buổi chiều",
+      "evening": "Chào buổi tối",
+      "hello": "Xin chào, {name}!",
+      "subtitle": "Chúc bạn một ngày làm việc hiệu quả và quản lý chuỗi cung ứng suôn sẻ."
+    },
+    "filters": {
+      "warehouseLabel": "Kho hàng",
+      "allWarehouses": "Tất cả các kho",
+      "periodLabel": "Kỳ báo cáo",
+      "periods": {
+        "today": "Hôm nay",
+        "7d": "7 ngày qua",
+        "30d": "30 ngày qua"
+      },
+      "refresh": "Làm mới",
+      "refreshing": "Đang làm mới...",
+      "lastUpdated": "Cập nhật lúc {time}"
+    },
+    "triage": {
+      "title": "Cần chú ý xử lý ngay",
+      "pendingStockAlert": "Có {count} đơn hàng đang bị nghẽn do thiếu hàng tồn kho (PENDING_STOCK)",
+      "pendingStockDesc": "Cần thủ kho kiểm tra và nhập kho bổ sung để tiếp tục quy trình chuẩn bị hàng.",
+      "viewPendingOrders": "Xem đơn nghẽn",
+      "deliveryFailedAlert": "Có {count} đơn hàng giao không thành công (DELIVERY_FAILED) cần xử lý lại",
+      "deliveryFailedDesc": "Điểm giao nhận hàng bị hủy hoặc giao thất bại trên tuyến vận chuyển.",
+      "viewFailedOrders": "Xem đơn thất bại",
+      "outOfStockAlert": "Có {count} mặt hàng trong kho đã cạn kiệt hoàn toàn (0 tồn khả dụng)",
+      "viewInventory": "Quản lý tồn kho",
+      "delayedTripsAlert": "Có {count} chuyến xe có sự cố hoặc bị hủy bỏ trên đường",
+      "viewTrips": "Xem chuyến xe",
+      "agentActionsAlert": "Có {count} tác vụ tối ưu hóa từ AI đang chờ người quản lý phê duyệt",
+      "viewAgent": "Xem đề xuất AI"
+    },
+    "kpis": {
+      "ordersToday": {
+        "title": "Đơn hàng hôm nay",
+        "vsYesterday": "so với hôm qua",
+        "confirmed": "{count} đã xác nhận",
+        "processing": "{count} đang xử lý"
+      },
+      "readyToShip": {
+        "title": "Kiện hàng chờ gom chuyến",
+        "description": "Đã đóng gói xong (READY_TO_SHIP)",
+        "poolCount": "{count} kiện trong nhóm gom"
+      },
+      "activeTrips": {
+        "title": "Chuyến xe đang giao",
+        "successRate": "tỷ lệ giao đạt chuẩn",
+        "inTransit": "{count} chuyến trên đường",
+        "stopsCompleted": "Đã giao {completed}/{total} điểm"
+      },
+      "lowStock": {
+        "title": "Cảnh báo tồn kho an toàn",
+        "description": "SKU dưới mức an toàn (Safety Stock)",
+        "outOfStock": "{count} SKU đã hết hàng"
+      }
+    },
+    "charts": {
+      "orderTrend": {
+        "title": "Xu hướng Thông lượng Đơn hàng (7 ngày)",
+        "description": "Khối lượng đơn tạo mới, hoàn tất và đơn hủy theo từng ngày",
+        "created": "Đơn tạo mới",
+        "completed": "Đơn hoàn tất",
+        "cancelled": "Đơn hủy",
+        "empty": "Chưa có dữ liệu đơn hàng trong kỳ được chọn"
+      },
+      "forecast": {
+        "title": "Dự báo Nhu cầu Xuất kho (AI Prophet)",
+        "description": "Mô hình chuỗi thời gian Meta Prophet phân tích 7 ngày tới",
+        "badge": "Prophet v1.1",
+        "selectSku": "Chọn sản phẩm",
+        "actual": "Thực tế xuất kho",
+        "forecast": "Dự báo nhu cầu",
+        "confidenceBand": "Dải tin cậy 80%",
+        "unit": "đơn vị",
+        "degradedTitle": "Mô hình AI đang huấn luyện",
+        "degradedDesc": "Cần tối thiểu 14 ngày dữ liệu phát sinh đơn hàng để thuật toán Meta Prophet xuất chuỗi dự báo chuẩn xác.",
+        "accuracyLabel": "Độ chuẩn xác mô hình"
+      }
+    },
+    "grids": {
+      "activeTrips": {
+        "title": "Giám sát Chuyến xe đang chạy",
+        "description": "Theo dõi tiến độ giao hàng và các điểm dừng theo thời gian thực",
+        "viewAll": "Xem tất cả chuyến xe",
+        "tripCode": "Mã chuyến",
+        "driverVehicle": "Tài xế / Xe",
+        "progress": "Tiến độ điểm dừng",
+        "status": "Trạng thái",
+        "empty": "Hiện không có chuyến xe nào đang giao trên đường."
+      },
+      "lowStock": {
+        "title": "Cảnh báo Hàng tồn kho Thấp",
+        "description": "Các SKU chạm hoặc dưới ngưỡng an toàn cần lập kế hoạch nhập hàng",
+        "viewInventory": "Quản lý tồn kho",
+        "skuCode": "Mã SKU",
+        "productName": "Sản phẩm",
+        "availableSafety": "Khả dụng / An toàn",
+        "warehouse": "Kho lưu trữ",
+        "action": "Thao tác",
+        "reorder": "Nhập kho",
+        "empty": "Tất cả SKU hiện đều ở ngưỡng an toàn khả dụng."
+      }
+    },
+    "actions": {
+      "title": "Thao tác nhanh",
+      "createOrder": "Tạo đơn hàng mới",
+      "dispatchTrip": "Tạo chuyến xe gom hàng",
+      "askAi": "Hỏi AI Copilot",
+      "viewAudit": "Xem nhật ký kiểm toán"
+    },
+    "messages": {
+      "refreshSuccess": "Đã làm mới dữ liệu vận hành thành công.",
+      "fetchError": "Không thể tải dữ liệu bảng điều khiển. Vui lòng thử lại sau.",
+      "retry": "Thử lại"
+    }
   }
 }

@@ -1435,7 +1435,7 @@
       "emptyDescription": "Create your first order to get started.",
       "emptyFilteredTitle": "No matching orders",
       "emptyFilteredDescription": "Try changing or clearing the filters.",
-      "pageInfo": "Page {page}/{totalPages} ? {total} orders",
+      "pageInfo": "Page {page}/{totalPages} · {total} orders",
       "previous": "Previous",
       "next": "Next"
     },
@@ -1678,5 +1678,126 @@
     "chartForecast": "Forecast",
     "chartP80": "P80 Interval",
     "chartTrend": "Trend"
+  "dashboard": {
+    "title": "Operations Monitoring Console",
+    "description": "Real-time overview of order velocity, inventory health, transport dispatch, and AI forecasts",
+    "greeting": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening",
+      "hello": "Welcome back, {name}!",
+      "subtitle": "Here is what is happening across your supply chain today."
+    },
+    "filters": {
+      "warehouseLabel": "Warehouse",
+      "allWarehouses": "All Warehouses",
+      "periodLabel": "Period",
+      "periods": {
+        "today": "Today",
+        "7d": "Last 7 Days",
+        "30d": "Last 30 Days"
+      },
+      "refresh": "Refresh",
+      "refreshing": "Refreshing...",
+      "lastUpdated": "Updated at {time}"
+    },
+    "triage": {
+      "title": "Action Required",
+      "pendingStockAlert": "{count} orders are bottlenecked due to stock shortage (PENDING_STOCK)",
+      "pendingStockDesc": "Warehouse staff must review and restock to proceed with fulfillment.",
+      "viewPendingOrders": "View Pending Orders",
+      "deliveryFailedAlert": "{count} orders failed delivery (DELIVERY_FAILED) and need resolution",
+      "deliveryFailedDesc": "Delivery stop was cancelled or failed during transit.",
+      "viewFailedOrders": "View Failed Orders",
+      "outOfStockAlert": "{count} SKUs are completely out of stock in warehouses",
+      "viewInventory": "Manage Inventory",
+      "delayedTripsAlert": "{count} delivery trips have issues or were cancelled on the road",
+      "viewTrips": "View Trips",
+      "agentActionsAlert": "{count} AI optimization proposals are waiting for manager confirmation",
+      "viewAgent": "View AI Proposals"
+    },
+    "kpis": {
+      "ordersToday": {
+        "title": "Orders Today",
+        "vsYesterday": "vs yesterday",
+        "confirmed": "{count} confirmed",
+        "processing": "{count} processing"
+      },
+      "readyToShip": {
+        "title": "Shipment Pool",
+        "description": "Packed & Ready to Ship",
+        "poolCount": "{count} parcels in pool"
+      },
+      "activeTrips": {
+        "title": "Active Delivery Trips",
+        "successRate": "delivery success rate",
+        "inTransit": "{count} trips on road",
+        "stopsCompleted": "Delivered {completed}/{total} stops"
+      },
+      "lowStock": {
+        "title": "Safety Stock Alerts",
+        "description": "SKUs below safety stock",
+        "outOfStock": "{count} SKUs out of stock"
+      }
+    },
+    "charts": {
+      "orderTrend": {
+        "title": "Order Throughput Trend (7 Days)",
+        "description": "Daily volume of created, delivered, and cancelled orders",
+        "created": "Created",
+        "completed": "Delivered",
+        "cancelled": "Cancelled",
+        "empty": "No order activity found for the selected period"
+      },
+      "forecast": {
+        "title": "Demand Forecast (AI Prophet)",
+        "description": "Meta Prophet time-series model analyzing next 7 days",
+        "badge": "Prophet v1.1",
+        "selectSku": "Select SKU",
+        "actual": "Actual Outflow",
+        "forecast": "Forecast Demand",
+        "confidenceBand": "80% Confidence Interval",
+        "unit": "units",
+        "degradedTitle": "AI Model Training in Progress",
+        "degradedDesc": "Meta Prophet requires at least 14 days of historical order observations to output high-confidence predictions.",
+        "accuracyLabel": "Model Accuracy"
+      }
+    },
+    "grids": {
+      "activeTrips": {
+        "title": "Active Delivery Trips",
+        "description": "Live monitoring of delivery progress and route stops",
+        "viewAll": "View all trips",
+        "tripCode": "Trip Code",
+        "driverVehicle": "Driver / Plate",
+        "progress": "Stop Progress",
+        "status": "Status",
+        "empty": "No active trips are currently on the road."
+      },
+      "lowStock": {
+        "title": "Low Stock SKU Alerts",
+        "description": "Items below safety stock threshold needing replenishment",
+        "viewInventory": "Manage inventory",
+        "skuCode": "SKU Code",
+        "productName": "Product Name",
+        "availableSafety": "Available / Safety",
+        "warehouse": "Warehouse",
+        "action": "Action",
+        "reorder": "Restock",
+        "empty": "All SKUs are currently within safe stock levels."
+      }
+    },
+    "actions": {
+      "title": "Quick Actions",
+      "createOrder": "Create Sales Order",
+      "dispatchTrip": "Create Delivery Trip",
+      "askAi": "Ask AI Copilot",
+      "viewAudit": "View Audit Log"
+    },
+    "messages": {
+      "refreshSuccess": "Operations data refreshed successfully.",
+      "fetchError": "Unable to load operations dashboard. Please try again.",
+      "retry": "Retry"
+    }
   }
 }
