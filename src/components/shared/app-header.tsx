@@ -53,6 +53,7 @@ export function AppHeader() {
     )
       return t("tenant.pageTitle");
     if (pathname.startsWith("/settings/account")) return t("account.pageTitle");
+    if (pathname.startsWith("/forecast")) return t("forecast.title");
     return "";
   };
   const pageTitle = getPageTitle();
