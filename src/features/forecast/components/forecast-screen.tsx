@@ -23,6 +23,9 @@ import {
   fetchStockoutRisks,
   triggerForecastRun,
 } from "../api/forecast.api";
+import { listWarehousesApi } from "@/features/master-data/api/warehouses.api";
+import { listProductsApi } from "@/features/master-data/api/products.api";
+import { getBalanceApi } from "@/features/inventory/api/inventory.api";
 import {
   FORECAST_PRODUCTS,
   FORECAST_WAREHOUSES,
@@ -40,6 +43,14 @@ function safeFormat(val: unknown, decimals = 1, fallback = "-"): string {
 
 export function ForecastScreen() {
   const { t } = useTranslation();
+  const [warehouses, setWarehouses] = React.useState<
+    Array<{ id: string; code: string; name: string }>
+  >(FORECAST_WAREHOUSES);
+  const [products, setProducts] = React.useState<
+    Array<{ id: string; sku: string; name: string; defaultAvailableStock?: number }>
+  >(FORECAST_PRODUCTS);
+  const [isLoadingCatalog, setIsLoadingCatalog] = React.useState<boolean>(true);
+
   const [warehouseId, setWarehouseId] = React.useState<string>(
     FORECAST_WAREHOUSES[0].id
   );
@@ -48,6 +59,55 @@ export function ForecastScreen() {
   );
   const [horizonDays, setHorizonDays] = React.useState<number>(7);
   const [reloadCount, setReloadCount] = React.useState<number>(0);
+
+  // Load actual warehouses and products from backend Master Data
+  React.useEffect(() => {
+    let cancelled = false;
+
+    async function loadCatalog() {
+      setIsLoadingCatalog(true);
+      try {
+        const [whRes, prodRes] = await Promise.allSettled([
+          listWarehousesApi({ pageSize: 100 }),
+          listProductsApi({ pageSize: 100 }),
+        ]);
+
+        if (cancelled) return;
+
+        if (whRes.status === "fulfilled" && whRes.value.items && whRes.value.items.length > 0) {
+          const loadedWh = whRes.value.items.map((w) => ({
+            id: w.id,
+            code: w.code,
+            name: w.name,
+          }));
+          setWarehouses(loadedWh);
+          setWarehouseId(loadedWh[0].id);
+        }
+
+        if (prodRes.status === "fulfilled" && prodRes.value.items && prodRes.value.items.length > 0) {
+          const loadedProds = prodRes.value.items.map((p) => ({
+            id: p.id,
+            sku: p.sku,
+            name: p.name,
+          }));
+          setProducts(loadedProds);
+          setProductId(loadedProds[0].id);
+        }
+      } catch (err) {
+        console.warn("Could not load catalog for forecast, using default catalog:", err);
+      } finally {
+        if (!cancelled) {
+          setIsLoadingCatalog(false);
+        }
+      }
+    }
+
+    void loadCatalog();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const requestKey = `${warehouseId}|${productId}|${horizonDays}|${reloadCount}`;
 
@@ -67,14 +127,35 @@ export function ForecastScreen() {
   React.useEffect(() => {
     let cancelled = false;
 
-    Promise.all([
-      triggerForecastRun({
-        warehouseId,
-        productId,
-        horizonDays,
-      }),
-      fetchStockoutRisks(warehouseId, horizonDays),
-    ])
+    const currentWarehouse = warehouses.find((w) => w.id === warehouseId);
+    const currentProduct = products.find((p) => p.id === productId);
+
+    async function executeForecast() {
+      let availableStock: number | undefined;
+      try {
+        const balance = await getBalanceApi(warehouseId, productId);
+        if (balance && balance.availableQuantity !== undefined) {
+          availableStock = Number(balance.availableQuantity);
+        }
+      } catch {
+        // Fall back to product default
+      }
+
+      return Promise.all([
+        triggerForecastRun({
+          warehouseId,
+          productId,
+          horizonDays,
+          warehouseName: currentWarehouse?.name,
+          skuCode: currentProduct?.sku,
+          productName: currentProduct?.name,
+          availableStock,
+        }),
+        fetchStockoutRisks(warehouseId, horizonDays),
+      ]);
+    }
+
+    executeForecast()
       .then(([runRes, riskRes]) => {
         if (!cancelled) {
           setResult({
@@ -103,7 +184,7 @@ export function ForecastScreen() {
     return () => {
       cancelled = true;
     };
-  }, [requestKey, warehouseId, productId, horizonDays]);
+  }, [requestKey, warehouseId, productId, horizonDays, warehouses, products, t]);
 
   const handleRecalculate = () => {
     setReloadCount((n) => n + 1);
@@ -123,12 +204,12 @@ export function ForecastScreen() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Select value={warehouseId} onValueChange={setWarehouseId}>
+          <Select value={warehouseId} onValueChange={setWarehouseId} disabled={isLoadingCatalog || isLoading}>
             <SelectTrigger className="h-8 w-[220px] bg-background">
               <SelectValue placeholder={t("forecast.selectWarehouse")} />
             </SelectTrigger>
             <SelectContent position="popper">
-              {FORECAST_WAREHOUSES.map((wh) => (
+              {warehouses.map((wh) => (
                 <SelectItem key={wh.id} value={wh.id}>
                   {wh.code} · {wh.name}
                 </SelectItem>
@@ -136,12 +217,12 @@ export function ForecastScreen() {
             </SelectContent>
           </Select>
 
-          <Select value={productId} onValueChange={setProductId}>
+          <Select value={productId} onValueChange={setProductId} disabled={isLoadingCatalog || isLoading}>
             <SelectTrigger className="h-8 w-[240px] bg-background">
               <SelectValue placeholder={t("forecast.selectProduct")} />
             </SelectTrigger>
             <SelectContent position="popper">
-              {FORECAST_PRODUCTS.map((prod) => (
+              {products.map((prod) => (
                 <SelectItem key={prod.id} value={prod.id}>
                   {prod.sku} · {prod.name}
                 </SelectItem>

@@ -1678,6 +1678,7 @@
     "chartForecast": "Forecast",
     "chartP80": "P80 Interval",
     "chartTrend": "Trend"
+  },
   "dashboard": {
     "title": "Operations Monitoring Console",
     "description": "Real-time overview of order velocity, inventory health, transport dispatch, and AI forecasts",

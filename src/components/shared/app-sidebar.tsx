@@ -13,7 +13,6 @@ import {
   Package,
   PackageOpen,
   Route,
-  Settings,
   TrendingUp,
   Truck,
   Warehouse,

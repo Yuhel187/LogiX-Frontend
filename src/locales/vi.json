@@ -1678,6 +1678,7 @@
     "chartForecast": "Dự báo",
     "chartP80": "Khoảng P80",
     "chartTrend": "Xu hướng"
+  },
   "dashboard": {
     "title": "Trung tâm Giám sát Vận hành",
     "description": "Tổng quan trạng thái đơn hàng, năng lực kho bãi, luồng vận chuyển và dự báo AI theo thời gian thực",
