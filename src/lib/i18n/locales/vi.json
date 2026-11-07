@@ -278,7 +278,17 @@
       "getPreview": "Tạo bản xem trước",
       "reviewAction": "Xem lại và xác nhận",
       "confirmAction": "Xác nhận kết quả",
-      "submitting": "Đang gửi kết quả…"
+      "submitting": "Đang gửi kết quả…",
+      "filters": "Bộ lọc quản trị viên",
+      "selectedDriver": "Tài xế đã chọn",
+      "tripHeading": "Chuyến xe {tripNumber}",
+      "totalStopsBadge": "Tổng cộng {count} điểm dừng",
+      "stopShipmentLabel": "Lô hàng #{shipmentNumber}",
+      "stopRecipientLabel": "Đơn giao cho: {recipient}",
+      "stopSequenceLabel": "Điểm giao hàng số {sequence}",
+      "deliveryNoteLabel": "Ghi chú: ",
+      "stopDeliveredNote": "Điểm giao hàng này đã hoàn tất thành công.",
+      "stopFailedNote": "Điểm giao hàng này đã ghi nhận thất bại."
     },
     "context": {
       "transitioning": "Đang chuyển tổ chức. Dữ liệu chuyến và thao tác chưa gửi đang được xóa.",
@@ -395,6 +405,7 @@
     },
     "actions": {
       "create": "Tạo bản nháp",
+      "back": "Quay lại",
       "backToList": "Quay lại danh sách chuyến",
       "refresh": "Tải lại chuyến",
       "retry": "Thử tải lại",
