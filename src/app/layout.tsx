@@ -1,25 +1,12 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "@copilotkit/react-core/v2/styles.css";
-import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/shared/theme-provider";
 import { LanguageProvider } from "@/lib/i18n";
 import { AuthProvider } from "@/lib/auth";
 import { DynamicTenantHead } from "@/components/shared/dynamic-tenant-head";
-
-const inter = Inter({
-  subsets: ["latin", "vietnamese"],
-  variable: "--font-sans",
-  display: "swap",
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   description:
@@ -39,17 +26,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html
       lang="vi"
       suppressHydrationWarning
-      className={cn(
-        "h-full antialiased font-sans",
-        geistMono.variable,
-        inter.variable
-      )}
+      className="h-full antialiased font-sans"
     >
       <body
-        className={cn(
-          "min-h-full flex flex-col bg-background text-foreground font-sans",
-          inter.className
-        )}
+        className="min-h-full flex flex-col bg-background text-foreground font-sans"
         suppressHydrationWarning
       >
         <ThemeProvider
