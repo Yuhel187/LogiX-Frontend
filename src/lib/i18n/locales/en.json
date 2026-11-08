@@ -278,7 +278,17 @@
       "getPreview": "Create preview",
       "reviewAction": "Review and confirm",
       "confirmAction": "Confirm result",
-      "submitting": "Submitting result…"
+      "submitting": "Submitting result…",
+      "filters": "Administrator filters",
+      "selectedDriver": "Selected Driver",
+      "tripHeading": "Trip {tripNumber}",
+      "totalStopsBadge": "Total {count} stops",
+      "stopShipmentLabel": "Shipment #{shipmentNumber}",
+      "stopRecipientLabel": "Delivery for: {recipient}",
+      "stopSequenceLabel": "Delivery stop #{sequence}",
+      "deliveryNoteLabel": "Note: ",
+      "stopDeliveredNote": "This delivery stop has been completed.",
+      "stopFailedNote": "This delivery stop was recorded as failed."
     },
     "context": {
       "transitioning": "Changing organization. Trip data and unsent work are being cleared.",
@@ -395,6 +405,7 @@
     },
     "actions": {
       "create": "Create draft",
+      "back": "Back",
       "backToList": "Back to trips",
       "refresh": "Reload trip",
       "retry": "Retry loading",

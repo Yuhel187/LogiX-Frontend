@@ -9,7 +9,6 @@ import {
   ClipboardList,
   LayoutDashboard,
   MapPinned,
-  Navigation,
   Package,
   PackageOpen,
   Route,
@@ -137,14 +136,8 @@ export function AppSidebar() {
             permission: SHIPMENT_PERMISSIONS.read,
           },
           {
-            title: t("transport.navTitle"),
+            title: t("routes.navTitle"),
             href: "/transport",
-            icon: Navigation,
-            permission: TRANSPORT_PERMISSIONS.tripRead,
-          },
-          {
-            title: t("routes.navTitle", { defaultValue: "Lộ trình & Chuyến xe" }),
-            href: "/routes",
             icon: Route,
             permission: TRANSPORT_PERMISSIONS.tripRead,
           },

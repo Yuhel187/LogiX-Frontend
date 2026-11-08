@@ -2,7 +2,23 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, MapPin, Phone, RefreshCw, Truck } from "lucide-react";
+import {
+  ArrowLeft,
+  Calendar,
+  CheckCircle2,
+  ChevronRight,
+  Clock,
+  History,
+  Info,
+  MapPin,
+  Phone,
+  RefreshCw,
+  ShieldAlert,
+  Truck,
+  User,
+  Warehouse,
+  XCircle,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +28,6 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import {
   Dialog,
@@ -31,6 +46,7 @@ import { listDriversApi, type Driver } from "@/features/master-data";
 import { useAuth } from "@/lib/auth";
 import { formatDateTime } from "@/lib/format";
 import { useTranslation } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 import { z } from "zod";
 import {
   deliverDriverTripStopApi,
@@ -72,11 +88,53 @@ function snapshotValue(
   return null;
 }
 
+function isUuid(val: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
+}
+
+function getStopDisplayLabel(
+  stop: DriverTripStop,
+  t: ReturnType<typeof useTranslation>["t"],
+): string {
+  if (stop.shipmentNumber) {
+    const stripped = stop.shipmentNumber.replace(/^SHP-?/i, "");
+    if (!isUuid(stripped) && !isUuid(stop.shipmentNumber)) {
+      return t("transport.driver.stopShipmentLabel", {
+        shipmentNumber: stop.shipmentNumber,
+      });
+    }
+  }
+  if (stop.contact.recipientName) {
+    return t("transport.driver.stopRecipientLabel", {
+      recipient: stop.contact.recipientName,
+    });
+  }
+  return t("transport.driver.stopSequenceLabel", {
+    sequence: stop.approvedSequence,
+  });
+}
+
 function StatusBadge({ status }: { status: string }) {
   const { t } = useTranslation();
-  const destructive = status === "FAILED" || status === "CANCELED";
+  const variantClasses = useMemo(() => {
+    switch (status) {
+      case "IN_PROGRESS":
+        return "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-medium";
+      case "COMPLETED":
+      case "DELIVERED":
+        return "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium";
+      case "PENDING":
+        return "border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400 font-medium";
+      case "FAILED":
+      case "CANCELED":
+        return "border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400 font-medium";
+      default:
+        return "border-muted bg-muted text-muted-foreground";
+    }
+  }, [status]);
+
   return (
-    <Badge variant={destructive ? "destructive" : "secondary"}>
+    <Badge variant="outline" className={variantClasses}>
       {t(`transport.driver.status.${status}`)}
     </Badge>
   );
@@ -155,95 +213,165 @@ export function DriverTripListScreen() {
   }, [driverPage, driverSearch, isSuperAdmin, retry]);
 
   return (
-    <div className="min-w-0 space-y-5">
-      <header className="flex flex-wrap items-start justify-between gap-3">
+    <div className="w-full max-w-7xl mx-auto space-y-6 min-w-0">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-semibold">{t("transport.driver.title")}</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("transport.driver.title")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {t("transport.driver.listDescription")}
           </p>
         </div>
-        {isSuperAdmin ? (
-          <Badge variant="outline">
+        {isSuperAdmin && activeTenant?.name ? (
+          <Badge variant="outline" className="self-start sm:self-auto py-1 px-3 text-xs font-normal">
             {t("transport.driver.adminTenant", {
-              tenant: activeTenant?.name ?? "",
+              tenant: activeTenant.name,
             })}
           </Badge>
         ) : null}
       </header>
 
-      <div className="flex flex-wrap items-end gap-3">
-        <div className="space-y-2">
-          <Label htmlFor="driver-trip-scope">{t("transport.driver.tripScope")}</Label>
-          <Select
-            value={scope}
-            onValueChange={(value: "current" | "history") => {
-              setScope(value);
-              setPage(1);
-            }}
+      {/* Scope and Filters */}
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          {/* Touch-friendly Scope switcher for Mobile / Tablet / Desktop */}
+          <div
+            role="tablist"
+            aria-label={t("transport.driver.tripScope")}
+            className="inline-flex items-center rounded-xl border border-border/70 bg-muted/60 p-1 shadow-2xs"
           >
-            <SelectTrigger id="driver-trip-scope" className="w-48">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="current">{t("transport.driver.currentTrips")}</SelectItem>
-              <SelectItem value="history">{t("transport.driver.tripHistory")}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        {isSuperAdmin ? (
-          <div className="min-w-56 space-y-2">
-            <Label htmlFor="driver-trip-filter">{t("transport.driver.assignedDriver")}</Label>
-            <Input
-              aria-label={t("masterData.driver.searchPlaceholder")}
-              placeholder={t("masterData.driver.searchPlaceholder")}
-              value={driverSearch}
-              onChange={(event) => {
-                setDriverSearch(event.target.value);
-                setDriverPage(1);
-                setDriversLoading(true);
-              }}
-            />
-            <Select
-              value={driverId || "all"}
-              onValueChange={(value) => {
-                setDriverId(value === "all" ? "" : value);
-                setSelectedDriver(drivers?.find((driver) => driver.id === value) ?? null);
+            <button
+              type="button"
+              role="tab"
+              aria-selected={scope === "current"}
+              onClick={() => {
+                setScope("current");
                 setPage(1);
               }}
-              disabled={!drivers || driversLoading}
+              className={cn(
+                "inline-flex min-h-[42px] items-center gap-2 rounded-lg px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer",
+                scope === "current"
+                  ? "bg-background text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
             >
-              <SelectTrigger id="driver-trip-filter" className="w-full">
-                <SelectValue placeholder={t("transport.driver.allDrivers")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t("transport.driver.allDrivers")}</SelectItem>
-                {selectedDriver && !drivers?.some((driver) => driver.id === selectedDriver.id) ? (
-                  <SelectItem value={selectedDriver.id}>
-                    {selectedDriver.displayName} · {selectedDriver.code}
-                  </SelectItem>
-                ) : null}
-                {drivers?.map((driver) => (
-                  <SelectItem key={driver.id} value={driver.id}>
-                    {driver.displayName} · {driver.code}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <nav className="flex items-center gap-2" aria-label={t("transport.driver.driverPagination")}>
-              <Button variant="outline" disabled={driversLoading || driverPage <= 1}
-                onClick={() => { setDriversLoading(true); setDriverPage((value) => value - 1); }}>
-                {t("transport.actions.previous")}
-              </Button>
-              <span className="text-sm text-muted-foreground">
-                {t("transport.driver.driverPageSummary", { page: driverPage, pages: driverPages })}
-              </span>
-              <Button variant="outline" disabled={driversLoading || driversError !== null || driverPage >= driverPages}
-                onClick={() => { setDriversLoading(true); setDriverPage((value) => value + 1); }}>
-                {t("transport.actions.next")}
-              </Button>
-            </nav>
+              <Clock aria-hidden="true" className="size-4" />
+              <span>{t("transport.driver.currentTrips")}</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={scope === "history"}
+              onClick={() => {
+                setScope("history");
+                setPage(1);
+              }}
+              className={cn(
+                "inline-flex min-h-[42px] items-center gap-2 rounded-lg px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer",
+                scope === "history"
+                  ? "bg-background text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <History aria-hidden="true" className="size-4" />
+              <span>{t("transport.driver.tripHistory")}</span>
+            </button>
           </div>
+        </div>
+
+        {/* Super Admin Driver Search and Filter - Only visible to Super Admin */}
+        {isSuperAdmin ? (
+          <section
+            aria-label={t("transport.driver.filters")}
+            className="grid min-w-0 grid-cols-1 gap-4 rounded-xl border bg-card/60 p-4 shadow-xs sm:grid-cols-2"
+          >
+            <div className="min-w-0 space-y-1.5">
+              <Label htmlFor="driver-search-input" className="text-xs font-medium text-muted-foreground">
+                {t("masterData.driver.searchPlaceholder")}
+              </Label>
+              <Input
+                id="driver-search-input"
+                aria-label={t("masterData.driver.searchPlaceholder")}
+                placeholder={t("masterData.driver.searchPlaceholder")}
+                value={driverSearch}
+                onChange={(event) => {
+                  setDriverSearch(event.target.value);
+                  setDriverPage(1);
+                  setDriversLoading(true);
+                }}
+              />
+            </div>
+
+            <div className="min-w-0 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="driver-trip-filter" className="text-xs font-medium text-muted-foreground">
+                  {t("transport.driver.assignedDriver")}
+                </Label>
+                {driverPages > 1 ? (
+                  <span className="text-xs text-muted-foreground">
+                    {t("transport.driver.driverPageSummary", { page: driverPage, pages: driverPages })}
+                  </span>
+                ) : null}
+              </div>
+              <div className="flex items-center gap-2">
+                <Select
+                  value={driverId || "all"}
+                  onValueChange={(value) => {
+                    setDriverId(value === "all" ? "" : value);
+                    setSelectedDriver(drivers?.find((driver) => driver.id === value) ?? null);
+                    setPage(1);
+                  }}
+                  disabled={!drivers || driversLoading}
+                >
+                  <SelectTrigger id="driver-trip-filter" className="w-full">
+                    <SelectValue placeholder={t("transport.driver.allDrivers")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t("transport.driver.allDrivers")}</SelectItem>
+                    {selectedDriver && !drivers?.some((driver) => driver.id === selectedDriver.id) ? (
+                      <SelectItem value={selectedDriver.id}>
+                        {selectedDriver.displayName} · {selectedDriver.code}
+                      </SelectItem>
+                    ) : null}
+                    {drivers?.map((driver) => (
+                      <SelectItem key={driver.id} value={driver.id}>
+                        {driver.displayName} · {driver.code}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {driverPages > 1 ? (
+                  <div className="flex shrink-0 gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-9 w-9 p-0"
+                      disabled={driversLoading || driverPage <= 1}
+                      onClick={() => {
+                        setDriversLoading(true);
+                        setDriverPage((value) => value - 1);
+                      }}
+                      title={t("transport.actions.previous")}
+                    >
+                      ←
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-9 w-9 p-0"
+                      disabled={driversLoading || driversError !== null || driverPage >= driverPages}
+                      onClick={() => {
+                        setDriversLoading(true);
+                        setDriverPage((value) => value + 1);
+                      }}
+                      title={t("transport.actions.next")}
+                    >
+                      →
+                    </Button>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </section>
         ) : null}
       </div>
 
@@ -265,7 +393,7 @@ export function DriverTripListScreen() {
           {t("transport.driver.filteredDriver", {
             driver:
               selectedDriver?.displayName ??
-              driverId,
+              t("transport.driver.selectedDriver"),
           })}
         </p>
       ) : null}
@@ -283,12 +411,12 @@ export function DriverTripListScreen() {
       ) : null}
 
       {!current && error === null ? (
-        <div className="space-y-3" role="status" aria-label={t("transport.driver.loading")}>
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-24 w-full" />
+        <div className="space-y-4" role="status" aria-label={t("transport.driver.loading")}>
+          <Skeleton className="h-28 w-full rounded-xl" />
+          <Skeleton className="h-28 w-full rounded-xl" />
         </div>
       ) : current?.items.length ? (
-        <div className="grid min-w-0 grid-cols-1 gap-3 xl:grid-cols-2">
+        <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {current.items.map((trip) => (
             <DriverTripCard
               key={trip.tripId}
@@ -354,41 +482,81 @@ function DriverTripCard({
     "code",
     "name",
   ]);
+  const driver = snapshotValue(trip.driverSnapshot, [
+    "displayName",
+    "name",
+    "code",
+  ]);
+
+  const progressPercent =
+    trip.stopCount > 0
+      ? Math.round((trip.completedStopCount / trip.stopCount) * 100)
+      : 0;
+
   return (
-    <Card>
-      <CardHeader className="gap-2">
+    <Card className="flex flex-col justify-between rounded-xl border bg-card shadow-xs transition-all hover:border-primary/40 hover:shadow-md">
+      <CardHeader className="gap-2 pb-3">
         <div className="flex flex-wrap items-start justify-between gap-2">
-          <div>
-            <CardTitle>{trip.tripNumber}</CardTitle>
-            <CardDescription>
-              {t("transport.driver.plannedStart", {
-                date: formatDateTime(trip.plannedStartAt, locale),
-              })}
+          <div className="space-y-1">
+            <span className="font-mono text-base font-semibold tracking-tight text-foreground">
+              {trip.tripNumber}
+            </span>
+            <CardDescription className="flex items-center gap-1.5 text-xs">
+              <Calendar aria-hidden="true" className="size-3.5 text-muted-foreground" />
+              <span>
+                {t("transport.driver.plannedStart", {
+                  date: formatDateTime(trip.plannedStartAt, locale),
+                })}
+              </span>
             </CardDescription>
           </div>
           <StatusBadge status={trip.status} />
         </div>
       </CardHeader>
-      <CardContent className="flex flex-wrap items-center justify-between gap-3">
-        <div className="space-y-1 text-sm text-muted-foreground">
-          <p>
-            {t("transport.driver.progress", {
-              completed: trip.completedStopCount,
-              total: trip.stopCount,
-            })}
-          </p>
-          {vehicle ? (
-            <p className="inline-flex items-center gap-1">
-              <Truck aria-hidden="true" className="size-4" />
-              {vehicle}
-            </p>
-          ) : null}
+      <CardContent className="space-y-4 pt-1">
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className="flex items-center gap-2 rounded-lg bg-muted/40 p-2.5">
+            <Truck aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
+            <div className="min-w-0">
+              <p className="text-[11px] text-muted-foreground">{t("transport.driver.vehicle")}</p>
+              <p className="truncate font-medium text-foreground">{vehicle || t("transport.driver.notAvailable")}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 rounded-lg bg-muted/40 p-2.5">
+            <User aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
+            <div className="min-w-0">
+              <p className="text-[11px] text-muted-foreground">{t("transport.driver.assignedDriver")}</p>
+              <p className="truncate font-medium text-foreground">{driver || t("transport.driver.notAvailable")}</p>
+            </div>
+          </div>
         </div>
-        <Button asChild>
-          <Link href={`/driver/trips/${encodeURIComponent(trip.tripId)}`}>
-            {t("transport.driver.openTrip")}
-          </Link>
-        </Button>
+
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">
+              {t("transport.driver.progress", {
+                completed: trip.completedStopCount,
+                total: trip.stopCount,
+              })}
+            </span>
+            <span className="font-semibold text-foreground">{progressPercent}%</span>
+          </div>
+          <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-primary transition-all duration-300"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="pt-2">
+          <Button asChild className="w-full gap-2 font-medium">
+            <Link href={`/driver/trips/${encodeURIComponent(trip.tripId)}`}>
+              <span>{t("transport.driver.openTrip")}</span>
+              <ChevronRight aria-hidden="true" className="size-4" />
+            </Link>
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
@@ -430,28 +598,40 @@ export function DriverTripDetailScreen({ tripId }: { tripId: string }) {
 
   const reload = () => setRetry((value) => value + 1);
 
+  const completedCount = trip ? trip.stops.filter((s) => s.status === "DELIVERED").length : 0;
+  const totalCount = trip ? trip.stops.length : 0;
+  const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
   return (
-    <div className="min-w-0 space-y-5">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex items-start gap-3">
-          <Button asChild variant="outline" size="icon" aria-label={t("transport.driver.backToTrips")}>
+    <div className="w-full max-w-5xl mx-auto space-y-6 min-w-0">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <Button asChild variant="outline" size="sm" className="gap-1.5 min-h-[38px]" aria-label={t("transport.actions.backToList")}>
             <Link href="/driver/trips">
               <ArrowLeft aria-hidden="true" className="size-4" />
+              <span>{t("transport.actions.back")}</span>
             </Link>
           </Button>
           <div>
-            <h1 className="text-xl font-semibold">
-              {trip?.tripNumber ?? t("transport.driver.tripDetail")}
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {t("transport.driver.detailDescription")}
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                {trip?.tripNumber
+                  ? t("transport.driver.tripHeading", { tripNumber: trip.tripNumber })
+                  : t("transport.driver.tripDetail")}
+              </h1>
+              {trip ? <StatusBadge status={trip.status} /> : null}
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {trip?.plannedStartAt
+                ? `${t("transport.driver.plannedStart", { date: formatDateTime(trip.plannedStartAt, locale) })} · ${t("transport.driver.detailDescription")}`
+                : t("transport.driver.detailDescription")}
             </p>
           </div>
         </div>
-        {isSuperAdmin ? (
-          <Badge variant="outline">
+        {isSuperAdmin && activeTenant?.name ? (
+          <Badge variant="outline" className="self-start sm:self-auto py-1 px-3 text-xs font-normal">
             {t("transport.driver.adminTenant", {
-              tenant: activeTenant?.name ?? "",
+              tenant: activeTenant.name,
             })}
           </Badge>
         ) : null}
@@ -470,60 +650,95 @@ export function DriverTripDetailScreen({ tripId }: { tripId: string }) {
       ) : null}
 
       {!trip && loadError === null ? (
-        <div className="space-y-3" role="status" aria-label={t("transport.driver.loading")}>
-          <Skeleton className="h-28 w-full" />
-          <Skeleton className="h-48 w-full" />
+        <div className="space-y-4" role="status" aria-label={t("transport.driver.loading")}>
+          <Skeleton className="h-28 w-full rounded-xl" />
+          <Skeleton className="h-48 w-full rounded-xl" />
         </div>
       ) : trip ? (
         <>
-          <Card>
-            <CardHeader>
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <CardTitle>{t("transport.driver.tripSummary")}</CardTitle>
-                <StatusBadge status={trip.status} />
+          {/* Summary KPI Tiles */}
+          <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Card className="rounded-xl border bg-card p-4 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Warehouse aria-hidden="true" className="size-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-muted-foreground">{t("transport.driver.warehouse")}</p>
+                  <p className="truncate text-sm font-semibold text-foreground">
+                    {snapshotValue(trip.depotSnapshot, ["name", "code"]) || t("transport.driver.notAvailable")}
+                  </p>
+                </div>
               </div>
-              <CardDescription>
-                {t("transport.driver.plannedStart", {
-                  date: formatDateTime(trip.plannedStartAt, locale),
-                })}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              <SnapshotField
-                label={t("transport.driver.warehouse")}
-                value={snapshotValue(trip.depotSnapshot, ["name", "code"])}
-              />
-              <SnapshotField
-                label={t("transport.driver.vehicle")}
-                value={snapshotValue(trip.vehicleSnapshot, [
-                  "licensePlate",
-                  "plateNumber",
-                  "registrationNumber",
-                  "code",
-                  "name",
-                ])}
-              />
-              <SnapshotField
-                label={t("transport.driver.assignedDriver")}
-                value={snapshotValue(trip.driverSnapshot, [
-                  "displayName",
-                  "name",
-                  "code",
-                ])}
-              />
-              {isSuperAdmin ? (
-                <SnapshotField
-                  label={t("transport.driver.targetTenant")}
-                  value={activeTenant?.name ?? null}
-                />
-              ) : null}
-            </CardContent>
-          </Card>
+            </Card>
+
+            <Card className="rounded-xl border bg-card p-4 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                  <Truck aria-hidden="true" className="size-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-muted-foreground">{t("transport.driver.vehicle")}</p>
+                  <p className="truncate text-sm font-semibold text-foreground">
+                    {snapshotValue(trip.vehicleSnapshot, [
+                      "licensePlate",
+                      "plateNumber",
+                      "registrationNumber",
+                      "code",
+                      "name",
+                    ]) || t("transport.driver.notAvailable")}
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="rounded-xl border bg-card p-4 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                  <User aria-hidden="true" className="size-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-muted-foreground">{t("transport.driver.assignedDriver")}</p>
+                  <p className="truncate text-sm font-semibold text-foreground">
+                    {snapshotValue(trip.driverSnapshot, [
+                      "displayName",
+                      "name",
+                      "code",
+                    ]) || t("transport.driver.notAvailable")}
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="rounded-xl border bg-card p-4 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                  <CheckCircle2 aria-hidden="true" className="size-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-medium text-muted-foreground">{t("transport.driver.progress", {
+                      completed: completedCount,
+                      total: totalCount,
+                    })}</p>
+                    <span className="text-xs font-bold text-foreground">{progressPercent}%</span>
+                  </div>
+                  <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-emerald-500 transition-all duration-300"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
 
           {isSuperAdmin ? (
-            <Alert>
-              <AlertTitle>{t("transport.driver.adminModeTitle")}</AlertTitle>
-              <AlertDescription>
+            <Alert className="border-blue-500/20 bg-blue-500/5">
+              <ShieldAlert className="size-4 text-blue-600 dark:text-blue-400" />
+              <AlertTitle className="text-blue-900 dark:text-blue-200 font-semibold">{t("transport.driver.adminModeTitle")}</AlertTitle>
+              <AlertDescription className="text-xs text-blue-800 dark:text-blue-300">
                 {t("transport.driver.adminModeDescription", {
                   actor: user?.displayName ?? user?.email ?? "",
                 })}
@@ -533,16 +748,22 @@ export function DriverTripDetailScreen({ tripId }: { tripId: string }) {
 
           {!canAct ? (
             <Alert>
-              <AlertDescription>{t("transport.driver.readOnly")}</AlertDescription>
+              <Info className="size-4" />
+              <AlertDescription className="text-xs">{t("transport.driver.readOnly")}</AlertDescription>
             </Alert>
           ) : null}
 
-          <section className="space-y-3" aria-label={t("transport.driver.stopsTitle")}>
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-lg font-semibold">{t("transport.driver.stopsTitle")}</h2>
-              <p className="text-sm text-muted-foreground">
-                {t("transport.driver.nextStopRule")}
-              </p>
+          <section className="space-y-4" aria-label={t("transport.driver.stopsTitle")}>
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between border-b pb-3">
+              <div>
+                <h2 className="text-lg font-bold tracking-tight text-foreground">{t("transport.driver.stopsTitle")}</h2>
+                <p className="text-xs text-muted-foreground">
+                  {t("transport.driver.nextStopRule")}
+                </p>
+              </div>
+              <Badge variant="secondary" className="self-start sm:self-auto text-xs">
+                {t("transport.driver.totalStopsBadge", { count: trip.stops.length })}
+              </Badge>
             </div>
             {trip.stops.map((stop) => (
               <DriverStopCard
@@ -562,15 +783,6 @@ export function DriverTripDetailScreen({ tripId }: { tripId: string }) {
   );
 }
 
-function SnapshotField({ label, value }: { label: string; value: string | null }) {
-  const { t } = useTranslation();
-  return (
-    <div className="min-w-0 space-y-1">
-      <p className="text-xs font-medium text-muted-foreground">{label}</p>
-      <p className="break-words text-sm">{value || t("transport.driver.notAvailable")}</p>
-    </div>
-  );
-}
 
 function DriverStopCard({
   trip,
@@ -723,33 +935,72 @@ function DriverStopCard({
     ? savedDriverCommandSchema.safeParse(intent.intent.payload)
     : null;
 
+  const isPending = stop.status === "PENDING";
+  const isDelivered = stop.status === "DELIVERED";
+  const isFailed = stop.status === "FAILED";
+
+  const cardBorderClass = isDelivered
+    ? "border-emerald-500/30 bg-emerald-500/[0.015]"
+    : isFailed
+    ? "border-rose-500/30 bg-rose-500/[0.015]"
+    : stop.isNext && isPending
+    ? "border-primary ring-1 ring-primary/20 shadow-sm bg-primary/[0.01]"
+    : "border-border";
+
+  const stopLabel = getStopDisplayLabel(stop, t);
+
   return (
-    <Card className={stop.isNext ? "border-primary/50" : ""}>
-      <CardHeader>
-        <div className="flex flex-wrap items-start justify-between gap-2">
-          <div>
-            <CardTitle className="flex flex-wrap items-center gap-2">
-              {t("transport.driver.stopTitle", {
-                sequence: stop.approvedSequence,
-              })}
-              {stop.isNext ? (
-                <Badge>{t("transport.driver.nextStop")}</Badge>
+    <Card className={`rounded-xl transition-all ${cardBorderClass}`}>
+      <CardHeader className="pb-3">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="flex size-7 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                {stop.approvedSequence}
+              </span>
+              <span className="font-semibold text-foreground text-base">
+                {t("transport.driver.stopTitle", {
+                  sequence: stop.approvedSequence,
+                })}
+              </span>
+              {stop.isNext && isPending ? (
+                <Badge className="bg-primary text-primary-foreground text-xs font-medium animate-pulse">
+                  {t("transport.driver.nextStop")}
+                </Badge>
               ) : null}
-            </CardTitle>
-            <CardDescription>
-              {stop.shipmentNumber ??
-                t("transport.driver.shipmentRef", { shipmentId: stop.shipmentId })}
-            </CardDescription>
+            </div>
+            <p className="text-sm font-medium text-foreground/80">
+              {stopLabel}
+            </p>
           </div>
           <StatusBadge status={stop.status} />
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2 text-sm">
-          <p className="font-medium">{stop.contact.recipientName || t("transport.driver.recipientUnavailable")}</p>
-          <p className="inline-flex items-start gap-2 text-muted-foreground">
-            <MapPin aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
-            <span>
+        <div className="rounded-xl border bg-muted/20 p-4 space-y-3">
+          {/* Recipient info & Phone */}
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 pb-2.5">
+            <div className="flex items-center gap-2">
+              <User aria-hidden="true" className="size-4 text-muted-foreground" />
+              <span className="font-semibold text-sm text-foreground">
+                {stop.contact.recipientName || t("transport.driver.recipientUnavailable")}
+              </span>
+            </div>
+            {stop.contact.phone ? (
+              <a
+                className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20 transition-colors min-h-[36px]"
+                href={`tel:${stop.contact.phone}`}
+              >
+                <Phone aria-hidden="true" className="size-3.5" />
+                <span>{stop.contact.phone}</span>
+              </a>
+            ) : null}
+          </div>
+
+          {/* Address */}
+          <div className="flex items-start gap-2 text-xs text-muted-foreground">
+            <MapPin aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-primary" />
+            <span className="leading-relaxed text-foreground/90">
               {[
                 stop.contact.addressLine,
                 stop.contact.ward,
@@ -760,20 +1011,17 @@ function DriverStopCard({
                 .filter(Boolean)
                 .join(", ") || t("transport.driver.addressUnavailable")}
             </span>
-          </p>
-          {stop.contact.phone ? (
-            <a
-              className="inline-flex items-center gap-2 text-primary underline-offset-4 hover:underline"
-              href={`tel:${stop.contact.phone}`}
-            >
-              <Phone aria-hidden="true" className="size-4" />
-              {stop.contact.phone}
-            </a>
-          ) : null}
+          </div>
+
+          {/* Delivery Note */}
           {stop.contact.deliveryNote ? (
-            <p className="rounded-md bg-muted/50 p-3 text-muted-foreground">
-              {stop.contact.deliveryNote}
-            </p>
+            <div className="flex items-start gap-2 rounded-lg bg-amber-500/10 p-2.5 text-xs text-amber-700 dark:text-amber-400 border border-amber-500/20">
+              <Info aria-hidden="true" className="size-4 shrink-0 mt-0.5" />
+              <div>
+                <span className="font-semibold">{t("transport.driver.deliveryNoteLabel")}</span>
+                <span>{stop.contact.deliveryNote}</span>
+              </div>
+            </div>
           ) : null}
         </div>
 
@@ -814,27 +1062,54 @@ function DriverStopCard({
           </Alert>
         ) : null}
 
-        {stop.isNext && stop.status === "PENDING" && trip.status !== "IN_PROGRESS" ? (
-          <p className="text-sm text-muted-foreground">
-            {t("transport.driver.tripNotInProgress")}
-          </p>
+        {stop.isNext && isPending && trip.status !== "IN_PROGRESS" ? (
+          <div className="flex items-center gap-2 rounded-lg bg-muted/60 p-3 text-xs text-muted-foreground border border-border/50">
+            <Info aria-hidden="true" className="size-4 shrink-0" />
+            <span>{t("transport.driver.tripNotInProgress")}</span>
+          </div>
         ) : null}
-        {stop.status === "PENDING" && !stop.isNext ? (
-          <p className="text-sm text-muted-foreground">
-            {t("transport.driver.nextStopOnly")}
-          </p>
+
+        {isPending && !stop.isNext ? (
+          <div className="flex items-center gap-2 rounded-lg bg-muted/60 p-3 text-xs text-muted-foreground border border-border/50">
+            <Info aria-hidden="true" className="size-4 shrink-0" />
+            <span>{t("transport.driver.nextStopOnly")}</span>
+          </div>
         ) : null}
+
+        {isDelivered ? (
+          <div className="flex items-center gap-2 rounded-lg bg-emerald-500/10 p-3 text-xs font-medium text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+            <CheckCircle2 aria-hidden="true" className="size-4 shrink-0" />
+            <span>{t("transport.driver.stopDeliveredNote")}</span>
+          </div>
+        ) : null}
+
+        {isFailed ? (
+          <div className="flex items-center gap-2 rounded-lg bg-rose-500/10 p-3 text-xs font-medium text-rose-700 dark:text-rose-400 border border-rose-500/20">
+            <XCircle aria-hidden="true" className="size-4 shrink-0" />
+            <span>{t("transport.driver.stopFailedNote")}</span>
+          </div>
+        ) : null}
+
         {canSubmit && !unknown ? (
-          <div className="flex flex-wrap gap-2">
-            <Button disabled={!intent.ready || intent.storageFailed} onClick={() => startAction("DELIVER")}>
-              {t("transport.driver.markDelivered")}
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <Button
+              size="lg"
+              className="flex-1 h-12 min-h-[48px] text-sm sm:text-base gap-2 bg-emerald-600 text-white hover:bg-emerald-700 font-semibold shadow-xs cursor-pointer"
+              disabled={!intent.ready || intent.storageFailed}
+              onClick={() => startAction("DELIVER")}
+            >
+              <CheckCircle2 aria-hidden="true" className="size-5 shrink-0" />
+              <span>{t("transport.driver.markDelivered")}</span>
             </Button>
             <Button
               variant="outline"
+              size="lg"
+              className="flex-1 h-12 min-h-[48px] text-sm sm:text-base gap-2 border-rose-400 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 font-semibold cursor-pointer"
               disabled={!intent.ready || intent.storageFailed}
               onClick={() => startAction("FAIL")}
             >
-              {t("transport.driver.markFailed")}
+              <XCircle aria-hidden="true" className="size-5 shrink-0" />
+              <span>{t("transport.driver.markFailed")}</span>
             </Button>
           </div>
         ) : null}
@@ -859,7 +1134,7 @@ function DriverStopCard({
             <DialogDescription>
               {t("transport.driver.confirmActionDescription", {
                 action: t(`transport.driver.action.${action}`),
-                shipment: stop.shipmentNumber ?? stop.shipmentId,
+                shipment: stopLabel,
               })}
             </DialogDescription>
           </DialogHeader>
