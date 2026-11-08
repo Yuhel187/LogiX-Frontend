@@ -17,6 +17,7 @@ import {
   type DriverRelinkPreview,
 } from "../schemas/driver.schema";
 import type { MasterDataQueryParams } from "../types/master-data.types";
+import { invalidateMasterDataCache } from "../utils/master-data-cache";
 import { stripBlanks } from "./request";
 
 const BASE_URL = `${apiBaseUrl}/drivers`;
@@ -52,7 +53,9 @@ export async function relinkDriverUserApi(
       skipAuthRefresh: true,
     }
   );
-  return driverSchema.parse(await handleResponse<unknown>(response));
+  const updated = driverSchema.parse(await handleResponse<unknown>(response));
+  invalidateMasterDataCache();
+  return updated;
 }
 
 export async function listDriversApi(
@@ -82,7 +85,9 @@ export async function createDriverApi(
     method: "POST",
     body: JSON.stringify(stripBlanks(createDriverSchema.parse(input))),
   });
-  return driverSchema.parse(await handleResponse<unknown>(response));
+  const created = driverSchema.parse(await handleResponse<unknown>(response));
+  invalidateMasterDataCache();
+  return created;
 }
 
 export async function updateDriverApi(
@@ -95,7 +100,9 @@ export async function updateDriverApi(
     method: "PATCH",
     body: JSON.stringify(payload),
   });
-  return driverSchema.parse(await handleResponse<unknown>(response));
+  const updated = driverSchema.parse(await handleResponse<unknown>(response));
+  invalidateMasterDataCache();
+  return updated;
 }
 
 export async function setDriverStatusApi(
@@ -110,7 +117,9 @@ export async function setDriverStatusApi(
       body: JSON.stringify({ version }),
     }
   );
-  return driverSchema.parse(await handleResponse<unknown>(response));
+  const updated = driverSchema.parse(await handleResponse<unknown>(response));
+  invalidateMasterDataCache();
+  return updated;
 }
 
 export async function listEligibleDriverUsersApi(

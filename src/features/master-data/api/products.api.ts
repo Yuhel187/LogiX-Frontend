@@ -11,6 +11,7 @@ import {
 } from "../schemas/product.schema";
 import type { Paginated } from "../schemas/common.schema";
 import type { MasterDataQueryParams } from "../types/master-data.types";
+import { invalidateMasterDataCache } from "../utils/master-data-cache";
 import { stripBlanks } from "./request";
 
 const BASE_URL = `${apiBaseUrl}/products`;
@@ -40,7 +41,9 @@ export async function createProductApi(
     method: "POST",
     body: JSON.stringify(stripBlanks(createProductSchema.parse(input))),
   });
-  return productSchema.parse(await handleResponse<unknown>(response));
+  const created = productSchema.parse(await handleResponse<unknown>(response));
+  invalidateMasterDataCache();
+  return created;
 }
 
 export async function updateProductApi(
@@ -51,7 +54,9 @@ export async function updateProductApi(
     method: "PATCH",
     body: JSON.stringify(stripBlanks(updateProductSchema.parse(input))),
   });
-  return productSchema.parse(await handleResponse<unknown>(response));
+  const updated = productSchema.parse(await handleResponse<unknown>(response));
+  invalidateMasterDataCache();
+  return updated;
 }
 
 export async function setProductStatusApi(
@@ -61,5 +66,7 @@ export async function setProductStatusApi(
   const response = await authFetch(`${BASE_URL}/${id}/${action}`, {
     method: "POST",
   });
-  return productSchema.parse(await handleResponse<unknown>(response));
+  const updated = productSchema.parse(await handleResponse<unknown>(response));
+  invalidateMasterDataCache();
+  return updated;
 }

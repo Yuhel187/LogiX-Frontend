@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import {
-  getDriverApi,
-  getVehicleApi,
+  getCachedDriverById,
+  getCachedDrivers,
+  getCachedVehicleById,
+  getCachedVehicles,
   listDriversApi,
   listVehiclesApi,
 } from "@/features/master-data";
@@ -31,6 +33,8 @@ interface AssignmentFieldsProps {
   idPrefix: string;
 }
 
+const SEARCH_DEBOUNCE_MS = 250;
+
 export function AssignmentFields({
   vehicleId,
   driverId,
@@ -42,9 +46,15 @@ export function AssignmentFields({
   const { t } = useTranslation();
   const [vehicleQuery, setVehicleQuery] = useState("");
   const [driverQuery, setDriverQuery] = useState("");
-  const [optionResult, setOptionResult] = useState<{
+  const [debouncedVehicleQuery, setDebouncedVehicleQuery] = useState("");
+  const [debouncedDriverQuery, setDebouncedDriverQuery] = useState("");
+  const [vehicleListResult, setVehicleListResult] = useState<{
     key: string;
     vehicles: Vehicle[];
+    failed: boolean;
+  } | null>(null);
+  const [driverListResult, setDriverListResult] = useState<{
+    key: string;
     drivers: Driver[];
     failed: boolean;
   } | null>(null);
@@ -57,45 +67,111 @@ export function AssignmentFields({
     value: Driver | null;
   } | null>(null);
   const [retry, setRetry] = useState(0);
-  const optionsKey = JSON.stringify([vehicleQuery, driverQuery, retry]);
-  const optionData = optionResult?.key === optionsKey ? optionResult : null;
-  const vehicles = optionData?.vehicles ?? [];
-  const drivers = optionData?.drivers ?? [];
-  const loading = optionData === null;
+
+  useEffect(() => {
+    const trimmed = vehicleQuery.trim();
+    if (trimmed === debouncedVehicleQuery) return;
+    const timer = setTimeout(() => {
+      setDebouncedVehicleQuery(trimmed);
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [vehicleQuery, debouncedVehicleQuery]);
+
+  useEffect(() => {
+    const trimmed = driverQuery.trim();
+    if (trimmed === debouncedDriverQuery) return;
+    const timer = setTimeout(() => {
+      setDebouncedDriverQuery(trimmed);
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [driverQuery, debouncedDriverQuery]);
+
+  const vehicleKey = JSON.stringify([debouncedVehicleQuery, retry]);
+  const driverKey = JSON.stringify([debouncedDriverQuery, retry]);
+  const vehicleData =
+    vehicleListResult?.key === vehicleKey ? vehicleListResult : null;
+  const driverData =
+    driverListResult?.key === driverKey ? driverListResult : null;
+  const vehicles = vehicleData?.vehicles ?? [];
+  const drivers = driverData?.drivers ?? [];
+  const loading = vehicleData === null || driverData === null;
+  const vehicleInList = Boolean(
+    vehicleId && vehicles.some((item) => item.id === vehicleId)
+  );
+  const driverInList = Boolean(
+    driverId && drivers.some((item) => item.id === driverId)
+  );
   const currentVehicle =
     currentVehicleResult?.id === vehicleId ? currentVehicleResult.value : null;
   const currentDriver =
     currentDriverResult?.id === driverId ? currentDriverResult.value : null;
   const failed =
-    Boolean(optionData?.failed) ||
+    Boolean(vehicleData?.failed) ||
+    Boolean(driverData?.failed) ||
     (Boolean(vehicleId) &&
+      !vehicleInList &&
       currentVehicleResult?.id === vehicleId &&
       currentVehicleResult.value === null) ||
     (Boolean(driverId) &&
+      !driverInList &&
       currentDriverResult?.id === driverId &&
       currentDriverResult.value === null);
 
   useEffect(() => {
     let current = true;
-    Promise.all([
-      listVehiclesApi({
-        q: vehicleQuery.trim() || undefined,
-        status: "ACTIVE",
-        page: 1,
-        pageSize: 100,
-      }),
-      listDriversApi({
-        q: driverQuery.trim() || undefined,
-        status: "ACTIVE",
-        page: 1,
-        pageSize: 100,
-      }),
-    ])
-      .then(([vehiclePage, driverPage]) => {
+    const params = {
+      q: debouncedVehicleQuery || undefined,
+      status: "ACTIVE" as const,
+      page: 1,
+      pageSize: 100,
+    };
+    const request =
+      !debouncedVehicleQuery && retry === 0
+        ? getCachedVehicles(params)
+        : listVehiclesApi(params);
+
+    request
+      .then((vehiclePage) => {
         if (current) {
-          setOptionResult({
-            key: optionsKey,
+          setVehicleListResult({
+            key: vehicleKey,
             vehicles: vehiclePage.items,
+            failed: false,
+          });
+        }
+      })
+      .catch(() => {
+        if (current) {
+          setVehicleListResult({
+            key: vehicleKey,
+            vehicles: [],
+            failed: true,
+          });
+        }
+      });
+    return () => {
+      current = false;
+    };
+  }, [debouncedVehicleQuery, retry, vehicleKey]);
+
+  useEffect(() => {
+    let current = true;
+    const params = {
+      q: debouncedDriverQuery || undefined,
+      status: "ACTIVE" as const,
+      page: 1,
+      pageSize: 100,
+    };
+    const request =
+      !debouncedDriverQuery && retry === 0
+        ? getCachedDrivers(params)
+        : listDriversApi(params);
+
+    request
+      .then((driverPage) => {
+        if (current) {
+          setDriverListResult({
+            key: driverKey,
             drivers: driverPage.items,
             failed: false,
           });
@@ -103,9 +179,8 @@ export function AssignmentFields({
       })
       .catch(() => {
         if (current) {
-          setOptionResult({
-            key: optionsKey,
-            vehicles: [],
+          setDriverListResult({
+            key: driverKey,
             drivers: [],
             failed: true,
           });
@@ -114,12 +189,12 @@ export function AssignmentFields({
     return () => {
       current = false;
     };
-  }, [driverQuery, optionsKey, retry, vehicleQuery]);
+  }, [debouncedDriverQuery, driverKey, retry]);
 
   useEffect(() => {
     let current = true;
-    if (!vehicleId) return;
-    getVehicleApi(vehicleId)
+    if (!vehicleId || vehicleInList) return;
+    getCachedVehicleById(vehicleId, { forceRefresh: retry > 0 })
       .then((value) => {
         if (current) setCurrentVehicleResult({ id: vehicleId, value });
       })
@@ -129,12 +204,12 @@ export function AssignmentFields({
     return () => {
       current = false;
     };
-  }, [vehicleId, retry]);
+  }, [vehicleId, vehicleInList, retry]);
 
   useEffect(() => {
     let current = true;
-    if (!driverId) return;
-    getDriverApi(driverId)
+    if (!driverId || driverInList) return;
+    getCachedDriverById(driverId, { forceRefresh: retry > 0 })
       .then((value) => {
         if (current) setCurrentDriverResult({ id: driverId, value });
       })
@@ -144,7 +219,7 @@ export function AssignmentFields({
     return () => {
       current = false;
     };
-  }, [driverId, retry]);
+  }, [driverId, driverInList, retry]);
 
   const vehicleOptions = vehicles.some((item) => item.id === vehicleId)
     ? vehicles

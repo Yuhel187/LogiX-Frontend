@@ -72,6 +72,14 @@ export function TenantSwitcher({
 
   const activeName = activeTenant?.name || "LogiX";
   const activeLogo = activeTenant?.logoUrl;
+  const visibleTenants = React.useMemo(
+    () =>
+      tenants.filter(
+        (tItem) =>
+          tItem.role !== "SUPER_ADMIN" || tItem.id === activeTenant?.id,
+      ),
+    [tenants, activeTenant?.id],
+  );
 
   return (
     <>
@@ -135,7 +143,7 @@ export function TenantSwitcher({
 
           {/* Section 1: Tenant List */}
           <div className="space-y-0.5 max-h-56 overflow-y-auto pr-0.5 scrollbar-thin">
-            {tenants.map((tItem) => {
+            {visibleTenants.map((tItem) => {
               const isActive = tItem.id === activeTenant?.id;
               const isSwitching = switchingId === tItem.id;
 
@@ -164,6 +172,12 @@ export function TenantSwitcher({
                   {tItem.isDefault && (
                     <span className="rounded-md bg-emerald-950/70 text-emerald-400 border border-emerald-800/50 px-1.5 py-0.2 text-[9px] font-bold tracking-tight shrink-0">
                       {t("tenant.defaultBadge")}
+                    </span>
+                  )}
+
+                  {tItem.role === "SUPER_ADMIN" && (
+                    <span className="rounded-md bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 px-1.5 py-0.2 text-[9px] font-bold tracking-tight shrink-0">
+                      SUPER ADMIN
                     </span>
                   )}
 

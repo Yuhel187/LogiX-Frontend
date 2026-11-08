@@ -45,7 +45,6 @@ interface NavItem {
   permission?: string;        // Quyền bắt buộc để hiển thị
   anyPermissions?: string[];  // Một trong các quyền để hiển thị
   superAdminOnly?: boolean;   // Chỉ hiển thị cho Super Admin
-  driverExperience?: boolean;
 }
 
 interface NavGroup {
@@ -58,7 +57,7 @@ export function AppSidebar() {
   const { isCollapsed, isMobileOpen, closeMobile, setIsMobileOpen } =
     useSidebar();
   const { t } = useTranslation();
-  const { hasPermission, hasAnyPermission, isSuperAdmin, permissions } = useAuth();
+  const { hasPermission, hasAnyPermission, isSuperAdmin } = useAuth();
 
   const navGroups: NavGroup[] = React.useMemo(
     () => [
@@ -145,7 +144,7 @@ export function AppSidebar() {
             title: t("transport.driver.navTitle"),
             href: "/driver/trips",
             icon: MapPinned,
-            driverExperience: true,
+            permission: TRANSPORT_PERMISSIONS.driverRead,
           },
         ],
       },
@@ -156,6 +155,11 @@ export function AppSidebar() {
             title: t("inventory.navTitle"),
             href: "/inventory",
             icon: Boxes,
+            anyPermissions: [
+              "inventory:stock:read",
+              "inventory:stock:adjust",
+              "inventory:warehouse:read",
+            ],
           },
           {
             title: t("forecast.navTitle"),
@@ -173,13 +177,6 @@ export function AppSidebar() {
       .map((group) => {
         const visibleItems = group.items.filter((item) => {
           if (item.superAdminOnly && !isSuperAdmin) return false;
-          if (
-            item.driverExperience &&
-            !isSuperAdmin &&
-            !permissions.includes(TRANSPORT_PERMISSIONS.driverRead)
-          ) {
-            return false;
-          }
           if (item.permission && !hasPermission(item.permission)) return false;
           if (
             item.anyPermissions &&
@@ -197,7 +194,7 @@ export function AppSidebar() {
         };
       })
       .filter((group) => group.items.length > 0);
-  }, [navGroups, hasPermission, hasAnyPermission, isSuperAdmin, permissions]);
+  }, [navGroups, hasPermission, hasAnyPermission, isSuperAdmin]);
 
   const renderNavLinks = (collapsed: boolean) => (
     <div className="flex flex-col flex-1 py-4 overflow-y-auto overflow-x-hidden gap-3 px-3">

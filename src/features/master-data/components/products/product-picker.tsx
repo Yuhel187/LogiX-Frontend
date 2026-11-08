@@ -19,7 +19,11 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { getProductApi, listProductsApi } from "../../api/products.api";
+import { listProductsApi } from "../../api/products.api";
+import {
+  getCachedProducts,
+  resolveProductsByIds,
+} from "../../utils/master-data-cache";
 import type { Product } from "../../schemas/product.schema";
 
 export interface ProductPickerProps {
@@ -62,14 +66,18 @@ export function ProductPicker({
 
   // Fetch single product asynchronously when value provided and not found yet
   React.useEffect(() => {
-    if (!value) return;
+    if (!value || products.some((p) => p.id === value)) return;
     let active = true;
 
-    getProductApi(value)
-      .then((data) => {
-        if (active) {
+    resolveProductsByIds([value], { forceRefresh: retry > 0 })
+      .then((res) => {
+        if (!active) return;
+        const data = res.items[value];
+        if (data && !res.failed) {
           setFetchedProduct(data);
           setSelectedFailure(null);
+        } else {
+          setSelectedFailure(value);
         }
       })
       .catch(() => {
@@ -79,22 +87,29 @@ export function ProductPicker({
     return () => {
       active = false;
     };
-  }, [value, retry]);
+  }, [value, products, retry]);
 
   // Fetch products on search query or popover open
   React.useEffect(() => {
     if (!open) return;
 
     let active = true;
+    const trimmed = query.trim();
 
     const timer = setTimeout(() => {
       setLoading(true);
       setSearchFailure(false);
-      listProductsApi({
-        q: query.trim() || undefined,
-        status: "ACTIVE",
+      const params = {
+        q: trimmed || undefined,
+        status: "ACTIVE" as const,
         pageSize: 20,
-      })
+      };
+      const request =
+        !trimmed && retry === 0
+          ? getCachedProducts(params)
+          : listProductsApi(params);
+
+      request
         .then((res) => {
           if (active) {
             setProducts(res.items);

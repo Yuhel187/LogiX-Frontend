@@ -62,10 +62,11 @@ describe("transport permission boundaries", () => {
     });
   });
 
-  it("allows the authenticated Driver permission or Super Admin only", () => {
+  it("allows Driver read permission, wildcard/Owner grants, and Super Admin", () => {
     expect(canAccessDriverExperience(["transport:driver:read"], false)).toBe(true);
     expect(canAccessDriverExperience([], true)).toBe(true);
-    expect(canAccessDriverExperience(["*"], false)).toBe(false);
+    expect(canAccessDriverExperience(["*"], false)).toBe(true);
+    expect(canAccessDriverExperience([], false, true)).toBe(true);
     expect(canAccessDriverExperience(["transport:trip:read"], false)).toBe(false);
     expect(canAccessDriverExperience([], false)).toBe(false);
   });

@@ -18,7 +18,11 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { getWarehouseApi, listWarehousesApi } from "../../api/warehouses.api";
+import { listWarehousesApi } from "../../api/warehouses.api";
+import {
+  getCachedWarehouses,
+  resolveWarehousesByIds,
+} from "../../utils/master-data-cache";
 import type { Warehouse } from "../../schemas/warehouse.schema";
 
 export interface WarehousePickerProps {
@@ -62,14 +66,18 @@ export function WarehousePicker({
 
   // Fetch single warehouse metadata asynchronously if value provided and not found yet
   React.useEffect(() => {
-    if (!value) return;
+    if (!value || warehouses.some((w) => w.id === value)) return;
     let active = true;
 
-    getWarehouseApi(value)
-      .then((data) => {
-        if (active) {
+    resolveWarehousesByIds([value], { forceRefresh: retry > 0 })
+      .then((res) => {
+        if (!active) return;
+        const data = res.items[value];
+        if (data && !res.failed) {
           setFetchedWarehouse(data);
           setSelectedFailure(null);
+        } else {
+          setSelectedFailure(value);
         }
       })
       .catch(() => {
@@ -79,22 +87,29 @@ export function WarehousePicker({
     return () => {
       active = false;
     };
-  }, [value, retry]);
+  }, [value, warehouses, retry]);
 
   // Fetch warehouses on search query or popover open
   React.useEffect(() => {
     if (!open) return;
 
     let active = true;
+    const trimmed = query.trim();
 
     const timer = setTimeout(() => {
       setLoading(true);
       setSearchFailure(false);
-      listWarehousesApi({
-        q: query.trim() || undefined,
-        status: "ACTIVE",
+      const params = {
+        q: trimmed || undefined,
+        status: "ACTIVE" as const,
         pageSize: 20,
-      })
+      };
+      const request =
+        !trimmed && retry === 0
+          ? getCachedWarehouses(params)
+          : listWarehousesApi(params);
+
+      request
         .then((res) => {
           if (active) {
             setWarehouses(res.items);

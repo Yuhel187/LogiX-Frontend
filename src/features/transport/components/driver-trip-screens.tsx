@@ -42,7 +42,11 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { listDriversApi, type Driver } from "@/features/master-data";
+import {
+  getCachedDrivers,
+  listDriversApi,
+  type Driver,
+} from "@/features/master-data";
 import { useAuth } from "@/lib/auth";
 import { formatDateTime } from "@/lib/format";
 import { useTranslation } from "@/lib/i18n";
@@ -150,10 +154,20 @@ export function DriverTripListScreen() {
   const [drivers, setDrivers] = useState<Driver[] | null>(null);
   const [driverPage, setDriverPage] = useState(1);
   const [driverSearch, setDriverSearch] = useState("");
+  const [debouncedDriverSearch, setDebouncedDriverSearch] = useState("");
   const [driverPages, setDriverPages] = useState(1);
   const [driversLoading, setDriversLoading] = useState(true);
   const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
   const [driversError, setDriversError] = useState<unknown>(null);
+
+  useEffect(() => {
+    const trimmed = driverSearch.trim();
+    if (trimmed === debouncedDriverSearch) return;
+    const timer = setTimeout(() => {
+      setDebouncedDriverSearch(trimmed);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [driverSearch, debouncedDriverSearch]);
   const [result, setResult] = useState<{
     key: string;
     data: Awaited<ReturnType<typeof listDriverTripsApi>> | null;
@@ -194,7 +208,17 @@ export function DriverTripListScreen() {
   useEffect(() => {
     if (!isSuperAdmin) return;
     const controller = new AbortController();
-    listDriversApi({ page: driverPage, pageSize: PAGE_SIZE, q: driverSearch.trim() || undefined })
+    const params = {
+      page: driverPage,
+      pageSize: PAGE_SIZE,
+      q: debouncedDriverSearch || undefined,
+    };
+    const request =
+      !debouncedDriverSearch && driverPage === 1 && retry === 0
+        ? getCachedDrivers(params)
+        : listDriversApi(params);
+
+    request
       .then((resultPage) => {
         if (!controller.signal.aborted) {
           setDrivers(resultPage.items);
@@ -210,7 +234,7 @@ export function DriverTripListScreen() {
         }
       });
     return () => controller.abort();
-  }, [driverPage, driverSearch, isSuperAdmin, retry]);
+  }, [driverPage, debouncedDriverSearch, isSuperAdmin, retry]);
 
   return (
     <div className="w-full max-w-7xl mx-auto space-y-6 min-w-0">
@@ -598,7 +622,11 @@ export function DriverTripDetailScreen({ tripId }: { tripId: string }) {
 
   const reload = () => setRetry((value) => value + 1);
 
-  const completedCount = trip ? trip.stops.filter((s) => s.status === "DELIVERED").length : 0;
+  const completedCount = trip
+    ? trip.stops.filter(
+        (s) => s.status === "DELIVERED" || s.status === "FAILED",
+      ).length
+    : 0;
   const totalCount = trip ? trip.stops.length : 0;
   const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 

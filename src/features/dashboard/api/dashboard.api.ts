@@ -2,8 +2,10 @@ import { listOrdersApi } from "@/features/orders/api/orders.api";
 import { listBalancesApi } from "@/features/inventory/api/inventory.api";
 import { listShipmentsApi } from "@/features/shipments/api/shipments.api";
 import { listTripsApi } from "@/features/transport/api/trips.api";
-import { listWarehousesApi } from "@/features/master-data/api/warehouses.api";
-import { listProductsApi } from "@/features/master-data/api/products.api";
+import {
+  getCachedWarehouses,
+  getCachedProducts,
+} from "@/features/master-data";
 import { authFetch } from "@/lib/api";
 import { apiBaseUrl } from "@/lib/config";
 import type {
@@ -140,8 +142,8 @@ export async function fetchDashboardSummaryApi(
       lowStockOnly: true,
       pageSize: 50,
     }),
-    listWarehousesApi({ pageSize: 50 }),
-    listProductsApi({ pageSize: 50 }),
+    getCachedWarehouses({ page: 1, pageSize: 100 }),
+    getCachedProducts({ page: 1, pageSize: 100 }),
   ]);
 
   const orders = ordersResult.status === "fulfilled" ? ordersResult.value.items : [];

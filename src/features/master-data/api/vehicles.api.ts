@@ -11,6 +11,7 @@ import {
 } from "../schemas/vehicle.schema";
 import type { Paginated } from "../schemas/common.schema";
 import type { MasterDataQueryParams } from "../types/master-data.types";
+import { invalidateMasterDataCache } from "../utils/master-data-cache";
 import { stripBlanks } from "./request";
 
 const BASE_URL = `${apiBaseUrl}/vehicles`;
@@ -40,7 +41,9 @@ export async function createVehicleApi(
     method: "POST",
     body: JSON.stringify(stripBlanks(createVehicleSchema.parse(input))),
   });
-  return vehicleSchema.parse(await handleResponse<unknown>(response));
+  const created = vehicleSchema.parse(await handleResponse<unknown>(response));
+  invalidateMasterDataCache();
+  return created;
 }
 
 export async function updateVehicleApi(
@@ -51,7 +54,9 @@ export async function updateVehicleApi(
     method: "PATCH",
     body: JSON.stringify(stripBlanks(updateVehicleSchema.parse(input))),
   });
-  return vehicleSchema.parse(await handleResponse<unknown>(response));
+  const updated = vehicleSchema.parse(await handleResponse<unknown>(response));
+  invalidateMasterDataCache();
+  return updated;
 }
 
 export async function setVehicleStatusApi(
@@ -61,5 +66,7 @@ export async function setVehicleStatusApi(
   const response = await authFetch(`${BASE_URL}/${id}/${action}`, {
     method: "POST",
   });
-  return vehicleSchema.parse(await handleResponse<unknown>(response));
+  const updated = vehicleSchema.parse(await handleResponse<unknown>(response));
+  invalidateMasterDataCache();
+  return updated;
 }
