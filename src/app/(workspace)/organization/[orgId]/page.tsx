@@ -31,6 +31,7 @@ import {
 import { useAuth } from "@/lib/auth/auth-context";
 import { useTranslation } from "@/lib/i18n";
 import { OrgLogo } from "@/components/shared/org-fallback-icon";
+import { DetailPageSkeleton } from "@/components/shared/page-skeletons";
 import {
   LegalProfileForm,
   RoleListView,
@@ -676,7 +677,7 @@ export default function OrganizationPage({
   const resolvedParams = use(params);
 
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<DetailPageSkeleton />}>
       <OrganizationDetailContent orgId={resolvedParams.orgId} />
     </Suspense>
   );

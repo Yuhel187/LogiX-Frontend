@@ -207,7 +207,14 @@ export function AppSidebar() {
   }, [navGroups, hasPermission, hasAnyPermission, isSuperAdmin, permissions]);
 
   const renderNavLinks = (collapsed: boolean) => (
-    <div className="flex flex-col flex-1 py-4 overflow-y-auto overflow-x-hidden gap-3 px-3">
+    <div
+      className={cn(
+        "flex flex-col flex-1 py-4 overflow-y-auto overflow-x-hidden gap-3 px-3",
+        collapsed
+          ? "no-scrollbar scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          : "scrollbar-thin"
+      )}
+    >
       {visibleNavGroups.map((group, groupIdx) => (
         <div key={group.label || groupIdx} className="w-full space-y-1">
           {/* Subtle divider for collapsed mode when there are multiple groups */}

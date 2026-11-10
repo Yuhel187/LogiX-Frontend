@@ -1,11 +1,11 @@
 import { Suspense } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { TablePageSkeleton } from "@/components/shared/page-skeletons";
 import { WarehousesScreen } from "@/features/master-data";
 
 export default function WarehousesPage() {
   // Suspense boundary is required: the screen reads `useSearchParams`.
   return (
-    <Suspense fallback={<Skeleton className="h-96 w-full" />}>
+    <Suspense fallback={<TablePageSkeleton />}>
       <WarehousesScreen />
     </Suspense>
   );

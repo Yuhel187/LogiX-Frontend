@@ -1,10 +1,10 @@
 import { Suspense } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { TablePageSkeleton } from "@/components/shared/page-skeletons";
 import { TransportContextGuard, TripListScreen } from "@/features/transport";
 
 export default function TransportPage() {
   return (
-    <Suspense fallback={<Skeleton className="h-80 w-full" />}>
+    <Suspense fallback={<TablePageSkeleton />}>
       <TransportContextGuard>
         <TripListScreen />
       </TransportContextGuard>
