@@ -30,6 +30,7 @@ import { toast } from "sonner";
 import { useTranslation } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
 import { PermissionGuard } from "@/components/shared/permission-guard";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getRolesApi } from "../../api/roles.api";
 import type { RoleItem } from "../../schemas/role.schema";
 import { cn } from "@/lib/utils";
@@ -183,14 +184,28 @@ export function RoleListView({ tenantId }: RoleListViewProps) {
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableRow>
-                <TableCell
-                  colSpan={6}
-                  className="h-32 text-center text-xs text-muted-foreground"
-                >
-                  {t("common.loading")}...
-                </TableCell>
-              </TableRow>
+              Array.from({ length: 5 }).map((_, idx) => (
+                <TableRow key={`skeleton-${idx}`}>
+                  <TableCell>
+                    <Skeleton className="h-4 w-32 rounded" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-24 rounded" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-20 rounded-full" />
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Skeleton className="h-4 w-8 mx-auto rounded" />
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Skeleton className="h-4 w-12 mx-auto rounded" />
+                  </TableCell>
+                  <TableCell className="text-right pr-6">
+                    <Skeleton className="size-7 ml-auto rounded-md" />
+                  </TableCell>
+                </TableRow>
+              ))
             ) : loadFailed ? (
               <TableRow>
                 <TableCell

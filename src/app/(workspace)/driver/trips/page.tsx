@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { CardGridSkeleton } from "@/components/shared/page-skeletons";
 import {
   DriverTripListScreen,
   TransportContextGuard,
@@ -7,7 +7,7 @@ import {
 
 export default function DriverTripsPage() {
   return (
-    <Suspense fallback={<Skeleton className="h-80 w-full" />}>
+    <Suspense fallback={<CardGridSkeleton />}>
       <TransportContextGuard>
         <DriverTripListScreen />
       </TransportContextGuard>

@@ -1,9 +1,10 @@
 import { Suspense } from "react";
 import { ShipmentPoolScreen } from "@/features/shipments";
-import { Skeleton } from "@/components/ui/skeleton";
+import { TablePageSkeleton } from "@/components/shared/page-skeletons";
+
 export default function ShipmentsPage() {
   return (
-    <Suspense fallback={<Skeleton className="h-80 w-full" />}>
+    <Suspense fallback={<TablePageSkeleton />}>
       <ShipmentPoolScreen />
     </Suspense>
   );
