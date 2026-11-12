@@ -4,7 +4,8 @@ import * as React from "react";
 import Image from "next/image";
 import { Maximize2, Minimize2, Plus, Sparkles } from "lucide-react";
 import { CopilotSidebar, useDefaultRenderTool, useInterrupt } from "@copilotkit/react-core/v2";
-import { ConfirmationInterruptCard, type PendingApprovalData } from "./confirmation-interrupt-card";
+import { UniversalApprovalCard } from "./universal-approval-card";
+import { normalizeApprovalData } from "@/features/chat/lib/parse-approval-data";
 import { createNewThreadId, getInitialThreadId } from "@/features/chat/lib/session";
 import { useTranslation } from "@/lib/i18n";
 
@@ -50,12 +51,11 @@ function LogixCopilotSidebarContent({
         }
   );
 
-  useInterrupt<PendingApprovalData>({
+  useInterrupt({
     render: ({ event, interrupt, resolve, cancel }) => {
-      const interruptVal = (interrupt as { value?: unknown } | null | undefined)?.value;
-      const data = (event?.value ?? interruptVal ?? {}) as PendingApprovalData;
+      const data = normalizeApprovalData(interrupt, event);
       return (
-        <ConfirmationInterruptCard
+        <UniversalApprovalCard
           data={data}
           onResolve={(decision) => resolve(decision, interrupt?.id)}
           onCancel={() => cancel(interrupt?.id)}
