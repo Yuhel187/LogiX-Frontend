@@ -1811,5 +1811,271 @@
       "fetchError": "Unable to load operations dashboard. Please try again.",
       "retry": "Retry"
     }
+  },
+  "landing": {
+    "meta": {
+      "title": "LogiX — Enterprise Logistics & Supply Chain Operations Platform",
+      "description": "Multi-tenant B2B logistics operating system unifying order lifecycle, real-time inventory reservation, OR-Tools route optimization, Meta Prophet demand forecasting, and a human-approved AI Copilot."
+    },
+    "nav": {
+      "brandSubtitle": "Enterprise Logistics OS",
+      "capabilities": "Capabilities",
+      "platform": "Platform",
+      "architecture": "Architecture",
+      "faq": "FAQ",
+      "login": "Sign in",
+      "register": "Get started",
+      "workspace": "Open Workspace",
+      "openMenu": "Open navigation menu"
+    },
+    "hero": {
+      "eyebrow": "Enterprise Supply Chain & Logistics OS",
+      "title": "Unified Order, Inventory, and Transport Operations for Modern Enterprises",
+      "subtitle": "LogiX orchestrates the complete Order-to-Delivery lifecycle: real-time inventory reservation, wave fulfillment, Google OR-Tools route optimization, and Meta Prophet demand forecasting—augmented by a human-approved AI Copilot.",
+      "primaryCta": "Create organization",
+      "primaryCtaAuth": "Open Console",
+      "secondaryCta": "Explore platform",
+      "loginCta": "Console Sign In",
+      "preview": {
+        "orgBadge": "LogiX Enterprise · Multi-Tenant",
+        "envBadge": "Operations Console Specimen",
+        "kpis": {
+          "ordersLabel": "Orders Today",
+          "ordersValue": "142",
+          "ordersNote": "128 confirmed",
+          "shipmentsLabel": "Ready to Ship",
+          "shipmentsValue": "38",
+          "shipmentsNote": "Status READY_TO_SHIP",
+          "tripsLabel": "Active Trips",
+          "tripsValue": "12",
+          "tripsNote": "41/48 stops completed",
+          "stockLabel": "Safety Stock Alerts",
+          "stockValue": "3",
+          "stockNote": "SKUs below safety level"
+        },
+        "tableTitle": "Active Dispatch & Order Stream",
+        "colCode": "Operation Code",
+        "colRoute": "Warehouse / Distribution Route",
+        "colProgress": "Stops",
+        "colStatus": "Status",
+        "rows": {
+          "row1Code": "TRIP-2048",
+          "row1Route": "Thu Duc Hub → Binh Duong Cluster",
+          "row1Progress": "6 / 8 stops",
+          "row1Status": "In Transit",
+          "row2Code": "TRIP-2049",
+          "row2Route": "Bac Tu Liem Hub → Hanoi Metro",
+          "row2Progress": "4 / 4 stops",
+          "row2Status": "Delivered",
+          "row3Code": "ORD-8821",
+          "row3Route": "Da Nang Hub → Central Distributors",
+          "row3Progress": "Wave #W-19",
+          "row3Status": "Processing"
+        }
+      }
+    },
+    "pillars": {
+      "item1Title": "Multi-Tenant & RBAC",
+      "item1Desc": "Strict organization data isolation with dynamic permission matrices per role.",
+      "item2Title": "Event-Driven Outbox",
+      "item2Desc": "Reliable synchronization across 12 microservices via Apache Kafka and Transactional Outbox.",
+      "item3Title": "Google OR-Tools & OSRM",
+      "item3Desc": "Solves CVRP/VRPTW stop sequencing with explicit manager approval before dispatch.",
+      "item4Title": "Human-in-the-Loop AI",
+      "item4Desc": "Meta Prophet P80 demand forecasting and LangGraph Copilot gated by approval cards."
+    },
+    "capabilities": {
+      "eyebrow": "Core Capabilities",
+      "title": "Modular architecture for end-to-end B2B logistics",
+      "subtitle": "Each capability is isolated by business domain, connected through strict API contracts and fine-grained role permissions.",
+      "items": {
+        "orders": {
+          "tag": "Order & Fulfillment",
+          "title": "Order Lifecycle & Wave Fulfillment",
+          "desc": "Govern B2B/B2C orders end to end, automatically reserve available stock, and coordinate wave picking until packages are ready to ship."
+        },
+        "inventory": {
+          "tag": "Inventory Control",
+          "title": "Multi-Warehouse Stock & Safety Thresholds",
+          "desc": "Track available and reserved quantities per warehouse with periodic reconciliation and early alerts when SKUs hit safety stock."
+        },
+        "transport": {
+          "tag": "Transport & Routing",
+          "title": "Trip Dispatch & Route Optimization",
+          "desc": "Consolidate packed shipments into delivery trips, assign vehicles and drivers, and compute optimal stop sequences with Google OR-Tools."
+        },
+        "driver": {
+          "tag": "Driver Workspace",
+          "title": "Dedicated Driver Execution View",
+          "desc": "Focused mobile-ready workspace at /driver/trips enabling drivers to follow assigned stops and confirm delivery outcomes cleanly."
+        },
+        "forecast": {
+          "tag": "AI Forecasting",
+          "title": "Meta Prophet Demand Forecasting",
+          "desc": "Analyze outbound SKU demand per warehouse with 80% confidence intervals (P80) and prioritized stockout risk tables."
+        },
+        "governance": {
+          "tag": "IAM & Audit",
+          "title": "Enterprise Governance & Immutable Audit",
+          "desc": "Manage multi-tenant memberships, secure invite links, custom RBAC roles, and immutable audit trails via audit-service."
+        }
+      }
+    },
+    "showcase": {
+      "eyebrow": "Platform Showcase",
+      "title": "Built for operational clarity and zero guesswork",
+      "subtitle": "Explore the core modules below to see how LogiX structures state transitions, route validation, and AI governance.",
+      "tabs": {
+        "orders": "Orders & Stock",
+        "transport": "Route Optimization",
+        "forecast": "Prophet Forecast",
+        "copilot": "AI Copilot"
+      },
+      "ordersTab": {
+        "badge": "Order-to-Delivery",
+        "title": "Atomic stock reservation and deterministic wave packing",
+        "desc": "Confirmed orders immediately reserve inventory at the assigned warehouse, preventing overselling across concurrent dispatchers.",
+        "bullets": {
+          "b1": "Clear state progression from CONFIRMED to RESERVED and READY_TO_SHIP",
+          "b2": "Immediate dashboard triage for bottlenecked PENDING_STOCK orders",
+          "b3": "Separation of duties across order entry, stock adjustment, and packing"
+        },
+        "colOrder": "Order",
+        "colWarehouse": "Warehouse",
+        "colItems": "Volume",
+        "colStatus": "Status",
+        "r1Order": "SO-2026-104",
+        "r1Wh": "Thu Duc Hub (HCM)",
+        "r1Items": "24 pkgs · 4 SKUs",
+        "r1Status": "Confirmed",
+        "r2Order": "SO-2026-105",
+        "r2Wh": "Long Bien Hub (HN)",
+        "r2Items": "12 pkgs · 2 SKUs",
+        "r2Status": "Processing",
+        "r3Order": "SO-2026-106",
+        "r3Wh": "Lien Chieu Hub (DN)",
+        "r3Items": "8 pkgs · 3 SKUs",
+        "r3Status": "Pending"
+      },
+      "transportTab": {
+        "badge": "Google OR-Tools · OSRM",
+        "title": "Optimized stop sequencing with mandatory route approval",
+        "desc": "Dispatchers group READY_TO_SHIP packages into trips, compute capacity-aware stop orders, and lock an approved route plan version.",
+        "bullets": {
+          "b1": "Solves CVRP/VRPTW routing constraints with real road networks via OSRM",
+          "b2": "Explicit route preview and approval lock before trip departure",
+          "b3": "Syncs approved stop order directly to the assigned driver screen"
+        },
+        "cardTitle": "Route Plan #PLAN-V2",
+        "approvedBadge": "Approved Plan",
+        "distanceLabel": "Estimated Distance",
+        "distanceValue": "46.8 km",
+        "durationLabel": "Estimated Duration",
+        "durationValue": "1 hr 52 min",
+        "stop1": "Stop 1 · Thu Duc Central Hub (Departure)",
+        "stop2": "Stop 2 · VSIP I Industrial Park (14 pkgs)",
+        "stop3": "Stop 3 · Di An Distribution Center (10 pkgs)",
+        "progressLabel": "Trip Stop Completion"
+      },
+      "forecastTab": {
+        "badge": "Meta Prophet · P80 Band",
+        "title": "Proactive stockout risk detection across SKUs and warehouses",
+        "desc": "Aggregates at least 14 days of historical outbound volume to project 7-to-30-day demand horizons and support timely replenishment.",
+        "bullets": {
+          "b1": "Computes stockout risk from current available balance vs. forecasted demand",
+          "b2": "Displays 80% confidence bands alongside baseline trend curves",
+          "b3": "Gracefully surfaces insufficient-history states instead of guessing"
+        },
+        "colSku": "SKU Code",
+        "colWarehouse": "Warehouse",
+        "colDemand": "7-Day Forecast",
+        "colRisk": "Stock Status",
+        "s1Sku": "SKU-BOX-10",
+        "s1Wh": "Hanoi Hub",
+        "s1Demand": "184 units",
+        "s1Status": "Low Stock",
+        "s2Sku": "SKU-PALLET-04",
+        "s2Wh": "Thu Duc Hub",
+        "s2Demand": "96 units",
+        "s2Status": "In Stock",
+        "s3Sku": "SKU-TAPE-22",
+        "s3Wh": "Da Nang Hub",
+        "s3Demand": "62 units",
+        "s3Status": "In Stock"
+      },
+      "copilotTab": {
+        "badge": "LangGraph · Approval Gate",
+        "title": "Natural-language AI assistance gated by explicit human approval",
+        "desc": "LogiX Copilot queries live operational catalogs and drafts multi-step actions—never mutating business state without manager sign-off.",
+        "bullets": {
+          "b1": "LLMs never bypass business rules or write directly to service databases",
+          "b2": "Presents structured Universal Approval Cards for review before execution",
+          "b3": "Embedded as a collapsible, full-page-capable sidebar inside the workspace"
+        },
+        "promptLabel": "Dispatcher Prompt",
+        "promptText": "\"Approve dispatch for trip TRIP-2048 assigned to driver Tran Quoc Hung with route plan V2.\"",
+        "cardTitle": "Trip Dispatch Approval Required",
+        "cardSubtitle": "State-changing operation awaiting explicit confirmation",
+        "fieldTrip": "Trip Code",
+        "fieldTripVal": "TRIP-2048",
+        "fieldPlan": "Route Plan",
+        "fieldPlanVal": "PLAN-V2 (46.8 km · 3 stops)",
+        "approveBtn": "Approve action",
+        "rejectBtn": "Reject",
+        "resetBtn": "Reset preview",
+        "approvedNotice": "Simulated approval recorded — trip is cleared for dispatch.",
+        "rejectedNotice": "Simulated action rejected — trip state remains safely unchanged."
+      }
+    },
+    "workflow": {
+      "eyebrow": "Operational Architecture",
+      "title": "Consistent data flow across 12 specialized microservices",
+      "subtitle": "Every action passes through RBAC-enforced API Gateway boundaries, propagates reliably via Kafka Outbox events, and leaves an immutable audit trail.",
+      "steps": {
+        "s1Num": "01",
+        "s1Title": "Order Intake & Tenant Auth",
+        "s1Desc": "B2B/B2C orders are validated against active organization context and dynamic RBAC rules at the gateway.",
+        "s2Num": "02",
+        "s2Title": "Stock Reservation & Wave Packing",
+        "s2Desc": "Inventory Service reserves available stock while Fulfillment Service coordinates waves and READY_TO_SHIP packages.",
+        "s3Num": "03",
+        "s3Title": "Route Optimization & Approval",
+        "s3Desc": "Route Optimizer (OR-Tools & OSRM) sequences stops; dispatchers preview and lock the approved plan.",
+        "s4Num": "04",
+        "s4Title": "Delivery Execution & Audit",
+        "s4Desc": "Drivers execute stops while Notification and Audit services trigger alerts and persist immutable history."
+      }
+    },
+    "faq": {
+      "eyebrow": "Enterprise FAQ",
+      "title": "Technical and operational answers for B2B teams",
+      "items": {
+        "q1": "How does LogiX enforce multi-tenant isolation and role permissions?",
+        "a1": "Every enterprise operates in an isolated organization boundary. Users can belong to multiple organizations, switch context safely via Tenant Switcher, and are governed by dynamic RBAC permissions per action.",
+        "q2": "Can LogiX AI Copilot modify orders or inventory autonomously?",
+        "a2": "No. LogiX Copilot enforces a strict Human-in-the-Loop model. It reads catalogs and prepares an approval preview card; state changes only proceed when an authorized manager explicitly approves.",
+        "q3": "What data is required for Meta Prophet demand forecasting?",
+        "a3": "The time-series model requires at least 14 days of historical order observations per warehouse and SKU. When history is insufficient, the UI clearly states the requirement instead of fabricating forecasts.",
+        "q4": "Does the platform include a mobile-friendly experience for drivers?",
+        "a4": "Yes. The /driver/trips route runs inside the unified workspace with responsive layouts tailored for drivers to inspect assigned stops and record delivery progress.",
+        "q5": "Are bilingual localization and Light/Dark themes supported across all screens?",
+        "a5": "Yes. LogiX provides instant Vietnamese/English switching and full Light/Dark theme compatibility built on consistent semantic design tokens."
+      }
+    },
+    "cta": {
+      "title": "Standardize your enterprise logistics operations today",
+      "subtitle": "Create an organization or sign in to the Console to unify orders, inventory, route optimization, and AI Copilot.",
+      "primary": "Create free account",
+      "primaryAuth": "Open Workspace",
+      "secondary": "Console Sign In"
+    },
+    "footer": {
+      "description": "Multi-tenant enterprise platform for order orchestration, inventory control, transport dispatch, and AI forecasting.",
+      "colProduct": "Capabilities",
+      "colArchitecture": "Architecture",
+      "colAccess": "Access",
+      "forgotPassword": "Reset password",
+      "copyright": "© 2026 LogiX Vietnam. All rights reserved."
+    }
   }
 }

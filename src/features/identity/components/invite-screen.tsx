@@ -30,6 +30,7 @@ import {
 import { toast } from "sonner";
 import { useTranslation } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
+import { WORKSPACE_HOME_ROUTE } from "@/lib/config/routes";
 import { getPublicInvitationPreviewApi } from "../api/invitations.api";
 import type { InvitationPreview } from "../schemas/invitation.schema";
 
@@ -134,7 +135,7 @@ export function InviteScreenContent() {
       );
 
       // Phiên mới đã gắn với tổ chức vừa tham gia và được nạp vào AuthProvider
-      router.replace("/");
+      router.replace(WORKSPACE_HOME_ROUTE);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Chấp nhận lời mời thất bại";
       toast.error(msg);

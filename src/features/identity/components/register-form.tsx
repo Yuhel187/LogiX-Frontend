@@ -9,6 +9,7 @@ import { LocaleSwitcher } from "@/components/shared/locale-switcher";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { useAuth } from "@/lib/auth";
 import { useTranslation } from "@/lib/i18n";
+import { WORKSPACE_HOME_ROUTE } from "@/lib/config/routes";
 import { formatAuthError } from "../utils/error-formatter";
 
 interface RegisterFormProps {
@@ -54,7 +55,7 @@ export function RegisterForm({ onSubmitSuccess }: RegisterFormProps) {
         if (onSubmitSuccess) {
           onSubmitSuccess();
         } else {
-          router.push("/");
+          router.push(WORKSPACE_HOME_ROUTE);
         }
       }, 500);
     } catch (err: unknown) {

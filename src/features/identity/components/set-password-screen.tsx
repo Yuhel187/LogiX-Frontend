@@ -3,6 +3,7 @@
 import { useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
+import { WORKSPACE_HOME_ROUTE } from "@/lib/config/routes";
 import { BrandingPanel } from "./branding-panel";
 import { SetPasswordForm } from "./set-password-form";
 
@@ -12,7 +13,7 @@ export function SetPasswordScreen() {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.replace("/");
+      router.replace(WORKSPACE_HOME_ROUTE);
     }
   }, [isLoading, isAuthenticated, router]);
 

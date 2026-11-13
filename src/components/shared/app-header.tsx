@@ -34,6 +34,7 @@ import { LanguageToggle } from "@/components/shared/language-toggle";
 import { useSidebar } from "@/components/shared/sidebar-context";
 import { useTranslation } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
+import { WORKSPACE_HOME_ROUTE } from "@/lib/config/routes";
 
 export function AppHeader() {
   const pathname = usePathname();
@@ -43,7 +44,7 @@ export function AppHeader() {
   const [unreadCount, setUnreadCount] = React.useState(3);
 
   const getPageTitle = () => {
-    if (pathname === "/") return t("nav.overview");
+    if (pathname === WORKSPACE_HOME_ROUTE) return t("nav.overview");
     if (pathname.startsWith("/admin/organizations"))
       return t("admin.organizations.title");
     if (pathname.startsWith("/admin/users")) return t("admin.users.title");

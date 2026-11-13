@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useTranslation } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
+import { WORKSPACE_HOME_ROUTE } from "@/lib/config/routes";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +29,7 @@ export function AccountSettingsView() {
     <div className="w-full max-w-5xl mx-auto space-y-8 pb-16 animate-in fade-in duration-300">
       {/* Breadcrumb Navigation */}
       <nav className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-        <Link href="/" className="hover:text-foreground transition-colors">
+        <Link href={WORKSPACE_HOME_ROUTE} className="hover:text-foreground transition-colors">
           {t("nav.overview")}
         </Link>
         <ChevronRight className="size-3.5" />
