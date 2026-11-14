@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useAuth } from "@/lib/auth/auth-context";
 import { useTranslation } from "@/lib/i18n";
+import { WORKSPACE_HOME_ROUTE } from "@/lib/config/routes";
 import { OrgLogo } from "@/components/shared/org-fallback-icon";
 import { CreateOrgDialog } from "@/features/identity/components/create-org-dialog";
 
@@ -53,7 +54,7 @@ export function TenantSwitcher({
       toast.success(t("tenant.switchSuccess", { name: tenantName }));
       setOpen(false);
       // A full navigation discards tenant-scoped state and the App Router cache.
-      window.location.replace("/");
+      window.location.replace(WORKSPACE_HOME_ROUTE);
     } catch {
       toast.error(t("tenant.switchError"));
       switchingRef.current = false;

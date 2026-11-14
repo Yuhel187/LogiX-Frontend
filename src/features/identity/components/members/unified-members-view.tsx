@@ -25,6 +25,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -453,9 +454,30 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
 
         {/* Table Content */}
         {isLoading ? (
-          <div className="py-16 text-center text-sm text-muted-foreground flex flex-col items-center justify-center gap-2">
-            <Loader2 className="size-6 animate-spin text-emerald-600 dark:text-emerald-400" />
-            <span>{t("tenant.loadingMembers")}</span>
+          <div className="divide-y divide-border/40">
+            {Array.from({ length: 5 }).map((_, idx) => (
+              <div
+                key={`skeleton-${idx}`}
+                className="grid grid-cols-12 items-center px-6 py-4"
+              >
+                <div className="col-span-5 flex items-center gap-3.5 pr-2">
+                  <Skeleton className="size-10 rounded-full shrink-0" />
+                  <div className="space-y-1.5 flex-1">
+                    <Skeleton className="h-4 w-36 rounded" />
+                    <Skeleton className="h-3 w-48 rounded" />
+                  </div>
+                </div>
+                <div className="col-span-3">
+                  <Skeleton className="h-6 w-24 rounded-full" />
+                </div>
+                <div className="col-span-2 flex justify-center">
+                  <Skeleton className="h-6 w-20 rounded-full" />
+                </div>
+                <div className="col-span-2 flex justify-end">
+                  <Skeleton className="size-8 rounded-lg" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : loadError ? (
           <p role="alert" className="p-6 text-sm text-destructive">

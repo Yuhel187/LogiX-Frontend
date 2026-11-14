@@ -1811,5 +1811,271 @@
       "fetchError": "Không thể tải dữ liệu bảng điều khiển. Vui lòng thử lại sau.",
       "retry": "Thử lại"
     }
+  },
+  "landing": {
+    "meta": {
+      "title": "LogiX — Nền tảng Điều hành Logistics & Chuỗi cung ứng Enterprise",
+      "description": "Hệ thống quản trị vận hành chuỗi cung ứng đa tổ chức: quản lý đơn hàng B2B/B2C, tồn kho thời gian thực, điều phối vận tải tối ưu OR-Tools, dự báo nhu cầu Meta Prophet và trợ lý AI Copilot."
+    },
+    "nav": {
+      "brandSubtitle": "Enterprise Logistics OS",
+      "capabilities": "Giải pháp",
+      "platform": "Nền tảng",
+      "architecture": "Kiến trúc",
+      "faq": "Hỏi đáp",
+      "login": "Đăng nhập",
+      "register": "Bắt đầu ngay",
+      "workspace": "Vào Workspace",
+      "openMenu": "Mở menu điều hướng"
+    },
+    "hero": {
+      "eyebrow": "Enterprise Supply Chain & Logistics OS",
+      "title": "Điều hành Đơn hàng, Kho bãi và Vận tải trên một Hệ thống Thống nhất",
+      "subtitle": "LogiX hợp nhất toàn bộ vòng đời Order-to-Delivery: giữ chỗ tồn kho thời gian thực, đóng gói gom chuyến, tối ưu lộ trình đa điểm bằng Google OR-Tools và dự báo nhu cầu Meta Prophet — đi kèm AI Copilot kiểm soát phê duyệt.",
+      "primaryCta": "Khởi tạo tổ chức",
+      "primaryCtaAuth": "Mở Bảng điều khiển",
+      "secondaryCta": "Khám phá nền tảng",
+      "loginCta": "Đăng nhập Console",
+      "preview": {
+        "orgBadge": "LogiX Enterprise · Multi-Tenant",
+        "envBadge": "Mẫu Giao diện Vận hành",
+        "kpis": {
+          "ordersLabel": "Đơn hàng hôm nay",
+          "ordersValue": "142",
+          "ordersNote": "128 đã xác nhận",
+          "shipmentsLabel": "Kiện chờ gom chuyến",
+          "shipmentsValue": "38",
+          "shipmentsNote": "Trạng thái READY_TO_SHIP",
+          "tripsLabel": "Chuyến đang giao",
+          "tripsValue": "12",
+          "tripsNote": "Đã giao 41/48 điểm dừng",
+          "stockLabel": "Cảnh báo tồn an toàn",
+          "stockValue": "3",
+          "stockNote": "SKU dưới Safety Stock"
+        },
+        "tableTitle": "Luồng Điều phối Vận tải & Đơn hàng",
+        "colCode": "Mã vận hành",
+        "colRoute": "Kho / Tuyến phân phối",
+        "colProgress": "Điểm dừng",
+        "colStatus": "Trạng thái",
+        "rows": {
+          "row1Code": "TRIP-2048",
+          "row1Route": "Kho Tổng Thủ Đức → Cụm Bình Dương",
+          "row1Progress": "6 / 8 điểm",
+          "row1Status": "Đang vận chuyển",
+          "row2Code": "TRIP-2049",
+          "row2Route": "Kho Bắc Từ Liêm → Tuyến Nội thành HN",
+          "row2Progress": "4 / 4 điểm",
+          "row2Status": "Đã giao thành công",
+          "row3Code": "ORD-8821",
+          "row3Route": "Kho Đà Nẵng → Đại lý Miền Trung",
+          "row3Progress": "Wave #W-19",
+          "row3Status": "Đang đóng gói"
+        }
+      }
+    },
+    "pillars": {
+      "item1Title": "Multi-Tenant & RBAC",
+      "item1Desc": "Cô lập dữ liệu theo từng tổ chức, phân quyền động chi tiết đến từng thao tác.",
+      "item2Title": "Event-Driven Outbox",
+      "item2Desc": "Đồng bộ xuyên suốt 12 microservices qua Apache Kafka và Transactional Outbox.",
+      "item3Title": "Google OR-Tools & OSRM",
+      "item3Desc": "Giải bài toán lộ trình CVRP/VRPTW có kiểm duyệt trước khi xuất bến.",
+      "item4Title": "Human-in-the-Loop AI",
+      "item4Desc": "Meta Prophet dự báo P80 và LangGraph Copilot yêu cầu quản lý phê duyệt lệnh."
+    },
+    "capabilities": {
+      "eyebrow": "Phân hệ Nghiệp vụ",
+      "title": "Kiến trúc mô-đun cho toàn bộ chuỗi vận hành B2B",
+      "subtitle": "Mỗi năng lực cốt lõi được thiết kế độc lập theo miền nghiệp vụ, kết nối đồng bộ qua hợp đồng API và phân quyền theo vai trò thực tế.",
+      "items": {
+        "orders": {
+          "tag": "Order & Fulfillment",
+          "title": "Quản trị Đơn hàng & Đóng gói",
+          "desc": "Kiểm soát trọn vẹn vòng đời đơn hàng B2B/B2C, tự động giữ chỗ tồn kho và điều phối đợt gom hàng (Wave Picking) đến khi sẵn sàng xuất kho."
+        },
+        "inventory": {
+          "tag": "Inventory Control",
+          "title": "Tồn kho Đa kho & Ngưỡng An toàn",
+          "desc": "Theo dõi số lượng khả dụng, đang giữ chỗ và đối soát định kỳ theo từng kho hàng; phát hiện sớm SKU chạm ngưỡng Safety Stock."
+        },
+        "transport": {
+          "tag": "Transport & Routing",
+          "title": "Điều phối Chuyến xe & Tối ưu Lộ trình",
+          "desc": "Lập chuyến gom kiện, gán phương tiện/tài xế và tính toán thứ tự điểm dừng tối ưu bằng Google OR-Tools trước khi phê duyệt xuất bến."
+        },
+        "driver": {
+          "tag": "Driver Workspace",
+          "title": "Giao diện Thực thi cho Tài xế",
+          "desc": "Màn hình chuyên biệt trên thiết bị di động giúp tài xế theo dõi chuyến được phân công, thứ tự điểm dừng và cập nhật kết quả giao hàng chuẩn xác."
+        },
+        "forecast": {
+          "tag": "AI Forecasting",
+          "title": "Dự báo Nhu cầu Meta Prophet",
+          "desc": "Phân tích chuỗi thời gian xuất kho theo từng SKU và kho hàng với dải tin cậy 80% (P80) cùng bảng xếp hạng rủi ro đứt hàng."
+        },
+        "governance": {
+          "tag": "IAM & Audit",
+          "title": "Phân quyền Doanh nghiệp & Kiểm toán",
+          "desc": "Hỗ trợ đa tổ chức, mời thành viên qua liên kết bảo mật, ma trận quyền RBAC tùy chỉnh và lưu vết kiểm toán bất biến từ audit-service."
+        }
+      }
+    },
+    "showcase": {
+      "eyebrow": "Khám phá Hệ thống",
+      "title": "Thiết kế tập trung cho tính chính xác của đội ngũ vận hành",
+      "subtitle": "Chuyển đổi giữa các phân hệ dưới đây để xem cách LogiX tổ chức luồng dữ liệu, trực quan hóa rủi ro và bảo vệ các thao tác nhạy cảm.",
+      "tabs": {
+        "orders": "Đơn hàng & Kho",
+        "transport": "Lộ trình Vận tải",
+        "forecast": "Dự báo Prophet",
+        "copilot": "AI Copilot"
+      },
+      "ordersTab": {
+        "badge": "Order-to-Delivery",
+        "title": "Giữ chỗ tồn kho nguyên tử và điều phối đóng gói nhất quán",
+        "desc": "Mỗi đơn hàng xác nhận sẽ kích hoạt giữ chỗ tự động tại kho chỉ định, loại bỏ tình trạng bán vượt tồn khả dụng giữa nhiều điều phối viên.",
+        "bullets": {
+          "b1": "Tự động chuyển trạng thái từ CONFIRMED sang RESERVED và READY_TO_SHIP",
+          "b2": "Cảnh báo tức thì đơn nghẽn hàng (PENDING_STOCK) ngay trên bảng điều khiển",
+          "b3": "Tách bạch quyền tạo đơn, điều chỉnh kho và xác nhận đóng gói"
+        },
+        "colOrder": "Mã đơn",
+        "colWarehouse": "Kho xuất",
+        "colItems": "Khối lượng",
+        "colStatus": "Trạng thái",
+        "r1Order": "SO-2026-104",
+        "r1Wh": "Kho Thủ Đức (HCM)",
+        "r1Items": "24 kiện · 4 SKU",
+        "r1Status": "Đã xác nhận",
+        "r2Order": "SO-2026-105",
+        "r2Wh": "Kho Long Biên (HN)",
+        "r2Items": "12 kiện · 2 SKU",
+        "r2Status": "Đang đóng gói",
+        "r3Order": "SO-2026-106",
+        "r3Wh": "Kho Liên Chiểu (ĐN)",
+        "r3Items": "8 kiện · 3 SKU",
+        "r3Status": "Chờ xử lý"
+      },
+      "transportTab": {
+        "badge": "Google OR-Tools · OSRM",
+        "title": "Tính toán thứ tự điểm dừng tối ưu và kiểm duyệt tuyến trước khi chạy",
+        "desc": "Điều phối viên tạo chuyến từ nhóm kiện READY_TO_SHIP, chạy thuật toán tối ưu hóa tải trọng/khung giờ và khóa phương án tuyến đã duyệt.",
+        "bullets": {
+          "b1": "Hỗ trợ bài toán CVRP/VRPTW với khoảng cách thực tế qua OSRM",
+          "b2": "Quy trình xem trước (Preview) và phê duyệt phiên bản tuyến rõ ràng",
+          "b3": "Đồng bộ danh sách điểm dừng trực tiếp xuống giao diện tài xế"
+        },
+        "cardTitle": "Phương án Tuyến #PLAN-V2",
+        "approvedBadge": "Đã phê duyệt",
+        "distanceLabel": "Quãng đường ước tính",
+        "distanceValue": "46.8 km",
+        "durationLabel": "Thời gian dự kiến",
+        "durationValue": "1 giờ 52 phút",
+        "stop1": "Điểm 1 · Kho Tổng Thủ Đức (Xuất bến)",
+        "stop2": "Điểm 2 · KCN VSIP I, Thuận An (14 kiện)",
+        "stop3": "Điểm 3 · Trung tâm Phân phối Dĩ An (10 kiện)",
+        "progressLabel": "Tiến độ hoàn thành chuyến"
+      },
+      "forecastTab": {
+        "badge": "Meta Prophet · P80 Band",
+        "title": "Phát hiện sớm nguy cơ đứt hàng theo từng SKU và kho lưu trữ",
+        "desc": "Hệ thống tổng hợp lịch sử xuất kho tối thiểu 14 ngày để dựng chuỗi dự báo nhu cầu 7–30 ngày tới, hỗ trợ lập kế hoạch bổ sung hàng kịp thời.",
+        "bullets": {
+          "b1": "Đánh giá rủi ro đứt hàng (Stockout Risk) dựa trên tồn khả dụng và dự báo",
+          "b2": "Hiển thị dải tin cậy 80% và xu hướng cơ sở minh bạch",
+          "b3": "Tự động chuyển trạng thái thông báo rõ khi chưa đủ dữ liệu huấn luyện"
+        },
+        "colSku": "Mã SKU",
+        "colWarehouse": "Kho",
+        "colDemand": "Dự báo 7 ngày",
+        "colRisk": "Ngưỡng tồn",
+        "s1Sku": "SKU-BOX-10",
+        "s1Wh": "Kho Hà Nội",
+        "s1Demand": "184 đơn vị",
+        "s1Status": "Sắp hết hàng",
+        "s2Sku": "SKU-PALLET-04",
+        "s2Wh": "Kho Thủ Đức",
+        "s2Demand": "96 đơn vị",
+        "s2Status": "Đủ tồn kho",
+        "s3Sku": "SKU-TAPE-22",
+        "s3Wh": "Kho Đà Nẵng",
+        "s3Demand": "62 đơn vị",
+        "s3Status": "Đủ tồn kho"
+      },
+      "copilotTab": {
+        "badge": "LangGraph · Approval Gate",
+        "title": "Trợ lý AI thực thi nghiệp vụ an toàn dưới sự phê duyệt của con người",
+        "desc": "LogiX Copilot hiểu ngôn ngữ tự nhiên để tra cứu đơn hàng, tồn kho, chuyến xe và soạn sẵn đề xuất hành động — nhưng mọi thay đổi dữ liệu đều phải qua thẻ xác nhận.",
+        "bullets": {
+          "b1": "Không cho phép LLM tự ý thay đổi trạng thái nghiệp vụ trong cơ sở dữ liệu",
+          "b2": "Hiển thị đầy đủ thông số lệnh trước khi quản lý nhấn Phê duyệt hoặc Từ chối",
+          "b3": "Tích hợp trực tiếp dạng thanh bên trong không gian làm việc Workspace"
+        },
+        "promptLabel": "Yêu cầu từ điều phối viên",
+        "promptText": "\"Xác nhận điều phối chuyến TRIP-2048 cho tài xế Trần Quốc Hưng với phương án tuyến V2.\"",
+        "cardTitle": "Yêu cầu Phê duyệt Điều phối Chuyến",
+        "cardSubtitle": "Hành động thay đổi trạng thái vận hành cần xác nhận",
+        "fieldTrip": "Mã chuyến",
+        "fieldTripVal": "TRIP-2048",
+        "fieldPlan": "Tuyến áp dụng",
+        "fieldPlanVal": "PLAN-V2 (46.8 km · 3 điểm)",
+        "approveBtn": "Phê duyệt lệnh",
+        "rejectBtn": "Từ chối",
+        "resetBtn": "Đặt lại mô phỏng",
+        "approvedNotice": "Đã ghi nhận phê duyệt mô phỏng — hệ thống tiến hành xuất bến.",
+        "rejectedNotice": "Đã hủy thao tác mô phỏng — trạng thái chuyến giữ nguyên an toàn."
+      }
+    },
+    "workflow": {
+      "eyebrow": "Kiến trúc Vận hành",
+      "title": "Chuỗi dữ liệu nhất quán xuyên suốt 12 Microservices",
+      "subtitle": "Mọi thao tác trên LogiX đi qua API Gateway có kiểm soát RBAC, đồng bộ bất đồng bộ qua Apache Kafka Outbox và lưu vết kiểm toán đầy đủ.",
+      "steps": {
+        "s1Num": "01",
+        "s1Title": "Tiếp nhận & Xác thực Tổ chức",
+        "s1Desc": "Đơn hàng B2B/B2C được kiểm tra quyền hạn theo ngữ cảnh tổ chức (Tenant) tại API Gateway và Identity Service.",
+        "s2Num": "02",
+        "s2Title": "Giữ chỗ Tồn kho & Gom hàng",
+        "s2Desc": "Inventory Service giữ chỗ tồn khả dụng; Fulfillment Service tổ chức Wave Picking và đóng gói sẵn sàng giao.",
+        "s3Num": "03",
+        "s3Title": "Tối ưu & Phê duyệt Lộ trình",
+        "s3Desc": "Route Optimizer (OR-Tools & OSRM) tính thứ tự điểm dừng; quản lý xem trước và phê duyệt trước khi điều phối.",
+        "s4Num": "04",
+        "s4Title": "Thực thi Giao nhận & Kiểm toán",
+        "s4Desc": "Tài xế hoàn tất điểm dừng; Notification & Audit Service tự động cảnh báo và lưu nhật ký kiểm toán bất biến."
+      }
+    },
+    "faq": {
+      "eyebrow": "Câu hỏi Thường gặp",
+      "title": "Thông tin kỹ thuật và triển khai cho Doanh nghiệp",
+      "items": {
+        "q1": "LogiX quản lý dữ liệu đa tổ chức (Multi-Tenant) và phân quyền như thế nào?",
+        "a1": "Mỗi doanh nghiệp hoạt động trong một không gian tổ chức độc lập. Người dùng có thể tham gia nhiều tổ chức, chuyển đổi ngữ cảnh an toàn qua Tenant Switcher và chịu sự kiểm soát của hệ thống RBAC động theo từng quyền chi tiết.",
+        "q2": "Trợ lý AI Copilot có thể tự ý sửa dữ liệu đơn hàng hay tồn kho không?",
+        "a2": "Không. LogiX Copilot hoạt động theo cơ chế Human-in-the-Loop. AI chỉ tra cứu catalog và tạo bản xem trước hành động thông qua Universal Approval Card; mọi thao tác thay đổi trạng thái chỉ thực thi khi người quản lý có thẩm quyền nhấn phê duyệt.",
+        "q3": "Phân hệ Dự báo Nhu cầu Meta Prophet cần điều kiện dữ liệu gì?",
+        "a3": "Mô hình chuỗi thời gian cần tối thiểu 14 ngày dữ liệu phát sinh đơn hàng cho cặp Kho – SKU. Khi dữ liệu chưa đủ ngưỡng, giao diện hiển thị trạng thái thông báo rõ ràng thay vì đưa ra số liệu dự báo sai lệch.",
+        "q4": "Hệ thống có hỗ trợ tài xế sử dụng trên thiết bị di động không?",
+        "a4": "Có. Giao diện /driver/trips nằm trong workspace thống nhất, được tối ưu cho màn hình nhỏ để tài xế xem danh sách chuyến được giao và xác nhận từng điểm dừng.",
+        "q5": "Giao diện có hỗ trợ song ngữ và chế độ sáng/tối không?",
+        "a5": "Toàn bộ hệ thống hỗ trợ chuyển đổi tức thì giữa Tiếng Việt / Tiếng Anh và Light / Dark theme theo chuẩn token màu nhất quán."
+      }
+    },
+    "cta": {
+      "title": "Chuẩn hóa quy trình Logistics của doanh nghiệp ngay hôm nay",
+      "subtitle": "Khởi tạo tổ chức mới hoặc đăng nhập vào Console để vận hành đồng bộ đơn hàng, kho bãi, tuyến đường và AI Copilot.",
+      "primary": "Tạo tài khoản miễn phí",
+      "primaryAuth": "Vào Workspace",
+      "secondary": "Đăng nhập Console"
+    },
+    "footer": {
+      "description": "Nền tảng quản trị vận tải, đơn hàng, kho bãi và dự báo chuỗi cung ứng đa tổ chức tích hợp AI.",
+      "colProduct": "Phân hệ",
+      "colArchitecture": "Kiến trúc",
+      "colAccess": "Hệ thống",
+      "forgotPassword": "Khôi phục mật khẩu",
+      "copyright": "© 2026 LogiX Vietnam. All rights reserved."
+    }
   }
 }

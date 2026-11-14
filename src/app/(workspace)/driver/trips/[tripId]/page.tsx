@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { DetailPageSkeleton } from "@/components/shared/page-skeletons";
 import {
   DriverTripDetailScreen,
   TransportContextGuard,
@@ -12,7 +12,7 @@ export default async function DriverTripDetailPage({
 }) {
   const { tripId } = await params;
   return (
-    <Suspense fallback={<Skeleton className="h-80 w-full" />}>
+    <Suspense fallback={<DetailPageSkeleton />}>
       <TransportContextGuard>
         <DriverTripDetailScreen tripId={tripId} />
       </TransportContextGuard>

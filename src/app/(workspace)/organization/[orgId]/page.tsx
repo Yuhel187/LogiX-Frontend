@@ -30,7 +30,9 @@ import {
 } from "@/components/ui/dialog";
 import { useAuth } from "@/lib/auth/auth-context";
 import { useTranslation } from "@/lib/i18n";
+import { WORKSPACE_HOME_ROUTE } from "@/lib/config/routes";
 import { OrgLogo } from "@/components/shared/org-fallback-icon";
+import { DetailPageSkeleton } from "@/components/shared/page-skeletons";
 import {
   LegalProfileForm,
   RoleListView,
@@ -167,7 +169,7 @@ function GeneralSettingsForm({
       await deleteOrganization(tenant.id);
       toast.success(t("tenant.deleteSuccess"));
       setIsDeleteDialogOpen(false);
-      router.push("/");
+      router.push(WORKSPACE_HOME_ROUTE);
     } catch (err: unknown) {
       const msg = formatIdentityError(err, t, "tenant.deleteError");
       toast.error(msg);
@@ -184,7 +186,7 @@ function GeneralSettingsForm({
       await leaveOrganization(tenant.id);
       toast.success(t("tenant.leaveOrgSuccess", { name: tenant.name }));
       setIsLeaveDialogOpen(false);
-      router.push("/");
+      router.push(WORKSPACE_HOME_ROUTE);
     } catch (err: unknown) {
       const msg = formatIdentityError(err, t, "tenant.leaveOrgError");
       toast.error(msg);
@@ -676,7 +678,7 @@ export default function OrganizationPage({
   const resolvedParams = use(params);
 
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<DetailPageSkeleton />}>
       <OrganizationDetailContent orgId={resolvedParams.orgId} />
     </Suspense>
   );

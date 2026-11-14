@@ -1,10 +1,10 @@
 import { Suspense } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { TablePageSkeleton } from "@/components/shared/page-skeletons";
 import { CustomersScreen } from "@/features/master-data";
 
 export default function CustomersPage() {
   return (
-    <Suspense fallback={<Skeleton className="h-96 w-full" />}>
+    <Suspense fallback={<TablePageSkeleton />}>
       <CustomersScreen />
     </Suspense>
   );

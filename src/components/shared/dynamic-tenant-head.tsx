@@ -1,23 +1,29 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth";
+import { PUBLIC_LANDING_ROUTE } from "@/lib/config/routes";
 
 /**
  * Dynamically synchronizes browser tab title and favicon with active organization:
- * Tab title format: `LogiX - ${orgName}`
+ * Tab title format: `LogiX Platform - ${orgName}`
  * Favicon: active organization's logo or fallback icon.
  */
 export function DynamicTenantHead() {
+  const pathname = usePathname();
   const { activeTenant } = useAuth();
   const orgName = activeTenant?.name?.trim();
+  const isLandingRoute = pathname === PUBLIC_LANDING_ROUTE;
 
   const targetTitle = orgName
     ? `LogiX Platform - ${orgName}`
     : "LogiX Platform";
 
   useEffect(() => {
-    document.title = targetTitle;
+    if (!isLandingRoute) {
+      document.title = targetTitle;
+    }
 
     // Đồng bộ favicon của tổ chức
     const logoUrl = activeTenant?.logoUrl?.trim();
@@ -39,7 +45,11 @@ export function DynamicTenantHead() {
         document.head.appendChild(link);
       }
     });
-  }, [targetTitle, activeTenant?.logoUrl]);
+  }, [isLandingRoute, targetTitle, activeTenant?.logoUrl]);
+
+  if (isLandingRoute) {
+    return null;
+  }
 
   return (
     <>

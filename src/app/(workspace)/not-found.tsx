@@ -2,6 +2,7 @@ import Link from "next/link";
 import { FileQuestion, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageShell } from "@/components/shared/page-shell";
+import { WORKSPACE_HOME_ROUTE } from "@/lib/config/routes";
 
 export default function WorkspaceNotFound() {
   return (
@@ -26,7 +27,7 @@ export default function WorkspaceNotFound() {
 
         <div className="mt-6 flex items-center justify-center w-full">
           <Button asChild className="gap-2">
-            <Link href="/">
+            <Link href={WORKSPACE_HOME_ROUTE}>
               <Home className="h-4 w-4" />
               <span>Quay về Bảng điều khiển</span>
             </Link>

@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth/auth-context";
 import { useTranslation } from "@/lib/i18n";
 import { OrgLogo } from "@/components/shared/org-fallback-icon";
+import { DetailPageSkeleton } from "@/components/shared/page-skeletons";
 
 interface ActiveTenantProps {
   id: string;
@@ -295,7 +296,7 @@ function OrganizationSettingsContent() {
 
 export default function OrganizationSettingsPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-xs text-muted-foreground">Loading...</div>}>
+    <Suspense fallback={<DetailPageSkeleton />}>
       <OrganizationSettingsContent />
     </Suspense>
   );

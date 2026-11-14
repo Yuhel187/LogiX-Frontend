@@ -7,6 +7,7 @@ import { ShieldAlert, ArrowLeft, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useTranslation } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
+import { LOGIN_ROUTE, WORKSPACE_HOME_ROUTE } from "@/lib/config/routes";
 import { SHIPMENT_PERMISSIONS } from "@/features/shipments";
 import {
   canAccessDriverExperience,
@@ -75,7 +76,7 @@ export function WorkspaceGuard({ children }: { children: React.ReactNode }) {
       tenantTransition !== "unknown" &&
       tenantTransition !== "switching"
     ) {
-      router.replace("/login");
+      router.replace(LOGIN_ROUTE);
     }
   }, [isLoading, isAuthenticated, router, tenantTransition]);
 
@@ -185,7 +186,7 @@ export function WorkspaceGuard({ children }: { children: React.ReactNode }) {
             {t("accessDenied.description")}
           </p>
           <Button
-            onClick={() => router.push("/")}
+            onClick={() => router.push(WORKSPACE_HOME_ROUTE)}
             variant="default"
             className="h-9 gap-2 px-4 text-sm font-medium"
           >

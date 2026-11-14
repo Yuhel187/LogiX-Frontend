@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AlertTriangle, Home, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageShell } from "@/components/shared/page-shell";
+import { WORKSPACE_HOME_ROUTE } from "@/lib/config/routes";
 
 export default function WorkspaceError({
   error,
@@ -51,7 +52,7 @@ export default function WorkspaceError({
           </Button>
 
           <Button asChild className="flex-1 min-w-32 gap-2">
-            <Link href="/">
+            <Link href={WORKSPACE_HOME_ROUTE}>
               <Home className="h-4 w-4" />
               <span>Về Trang chủ</span>
             </Link>

@@ -31,6 +31,7 @@ import { useSidebar } from "@/components/shared/sidebar-context";
 import { useTranslation } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
 import { TenantSwitcher } from "@/components/shared/tenant-switcher";
+import { WORKSPACE_HOME_ROUTE } from "@/lib/config/routes";
 import { ORDER_PERMISSIONS } from "@/features/orders";
 import { SHIPMENT_PERMISSIONS } from "@/features/shipments";
 import { DRIVER_PERMISSIONS } from "@/features/master-data";
@@ -83,7 +84,7 @@ export function AppSidebar() {
         items: [
           {
             title: t("nav.overview"),
-            href: "/",
+            href: WORKSPACE_HOME_ROUTE,
             icon: LayoutDashboard,
           },
         ],
@@ -197,7 +198,14 @@ export function AppSidebar() {
   }, [navGroups, hasPermission, hasAnyPermission, isSuperAdmin]);
 
   const renderNavLinks = (collapsed: boolean) => (
-    <div className="flex flex-col flex-1 py-4 overflow-y-auto overflow-x-hidden gap-3 px-3">
+    <div
+      className={cn(
+        "flex flex-col flex-1 py-4 overflow-y-auto overflow-x-hidden gap-3 px-3",
+        collapsed
+          ? "no-scrollbar scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          : "scrollbar-thin"
+      )}
+    >
       {visibleNavGroups.map((group, groupIdx) => (
         <div key={group.label || groupIdx} className="w-full space-y-1">
           {/* Subtle divider for collapsed mode when there are multiple groups */}
@@ -331,7 +339,7 @@ export function AppSidebar() {
         {/* Brand Footer */}
         <div className="flex h-16 items-center border-t border-border/70 px-3 relative overflow-hidden shrink-0">
           <Link
-            href="/"
+            href={WORKSPACE_HOME_ROUTE}
             className="flex items-center min-w-0 overflow-hidden w-full"
           >
             {/* Fixed size-10 icon container to align with nav icons below */}
@@ -381,7 +389,7 @@ export function AppSidebar() {
           {/* Mobile Brand Footer */}
           <div className="flex h-16 items-center border-t border-border/70 px-4 shrink-0">
             <Link
-              href="/"
+              href={WORKSPACE_HOME_ROUTE}
               onClick={closeMobile}
               className="flex items-center min-w-0 overflow-hidden w-full"
             >
