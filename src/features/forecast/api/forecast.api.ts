@@ -1,11 +1,6 @@
 import { authFetch } from "@/lib/api";
 import { apiBaseUrl } from "@/lib/config";
-import {
-  FORECAST_PRODUCTS,
-  FORECAST_WAREHOUSES,
-  type ForecastRunResult,
-  type StockoutRisksResponse,
-} from "../types";
+import type { ForecastRunResult, StockoutRisksResponse } from "../types";
 
 const FORECAST_API_BASE =
   process.env.NEXT_PUBLIC_FORECAST_URL || `${apiBaseUrl}/forecast`;
@@ -24,17 +19,14 @@ export interface ForecastQueryParams {
 export async function triggerForecastRun(
   params: ForecastQueryParams
 ): Promise<ForecastRunResult> {
-  const fallbackWh =
-    FORECAST_WAREHOUSES.find((w) => w.id === params.warehouseId) ??
-    FORECAST_WAREHOUSES[0];
-  const fallbackProd =
-    FORECAST_PRODUCTS.find((p) => p.id === params.productId) ??
-    FORECAST_PRODUCTS[0];
+  if (!params.warehouseId || !params.productId) {
+    throw new Error("Missing warehouseId or productId for forecast run");
+  }
 
-  const warehouseName = params.warehouseName || fallbackWh?.name || "Kho hàng";
-  const skuCode = params.skuCode || fallbackProd?.sku || "SKU-UNKNOWN";
-  const productName = params.productName || fallbackProd?.name || "Sản phẩm";
-  const availableStock = params.availableStock ?? fallbackProd?.defaultAvailableStock ?? 100;
+  const warehouseName = params.warehouseName ?? "";
+  const skuCode = params.skuCode ?? "";
+  const productName = params.productName ?? "";
+  const availableStock = params.availableStock ?? 0;
 
   const endpoint = `${FORECAST_API_BASE}/runs`;
   const payload = {
@@ -101,6 +93,14 @@ export async function fetchStockoutRisks(
   warehouseId: string,
   horizonDays: number = 7
 ): Promise<StockoutRisksResponse> {
+  if (!warehouseId) {
+    return {
+      warehouse_id: "",
+      checked_sku_count: 0,
+      at_risk_count: 0,
+      items: [],
+    };
+  }
   const isAbsolute =
     FORECAST_API_BASE.startsWith("http://") || FORECAST_API_BASE.startsWith("https://");
   const baseOrigin =

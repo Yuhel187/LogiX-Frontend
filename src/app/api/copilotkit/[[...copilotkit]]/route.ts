@@ -5,6 +5,9 @@ import {
 } from "@copilotkit/runtime/v2";
 import type { AgentsConfig } from "@copilotkit/runtime/v2";
 
+process.env.COPILOTKIT_TELEMETRY_DISABLED = "true";
+process.env.DO_NOT_TRACK = "1";
+
 const AGENT_ID = "logix-copilot";
 
 // Agent runs go through the API gateway, which proxies /api/v1/agent to agent-service.
@@ -86,6 +89,9 @@ function handleCopilotKitRequest(request: Request) {
 
   const runtime = new CopilotRuntime({
     agents,
+    ɵtelemetry: {
+      capture: async () => {},
+    },
   } as unknown as ConstructorParameters<typeof CopilotRuntime>[0]);
 
   const normalized = normalizeCopilotKitRequest(request);

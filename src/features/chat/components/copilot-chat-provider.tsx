@@ -21,6 +21,15 @@ export function CopilotChatProvider({ children }: CopilotChatProviderProps) {
   );
   const runtimeUrl =
     process.env.NEXT_PUBLIC_COPILOTKIT_RUNTIME_URL ?? "/api/copilotkit";
+
+  React.useEffect(() => {
+    try {
+      window.localStorage.setItem("cpk:inspector:telemetry:opt_out", "true");
+    } catch {
+      // Ignore storage access errors in restricted browser contexts.
+    }
+  }, []);
+
   // Follows token refreshes so the agent never receives an expired token.
   const headers = React.useMemo(() => {
     const result: Record<string, string> = {};
@@ -37,6 +46,8 @@ export function CopilotChatProvider({ children }: CopilotChatProviderProps) {
       runtimeUrl={runtimeUrl}
       headers={headers}
       useSingleEndpoint={false}
+      enableInspector={false}
+      showDevConsole={false}
     >
       {children}
     </CopilotKit>

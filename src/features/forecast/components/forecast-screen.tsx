@@ -26,11 +26,11 @@ import {
 import { listWarehousesApi } from "@/features/master-data/api/warehouses.api";
 import { listProductsApi } from "@/features/master-data/api/products.api";
 import { getBalanceApi } from "@/features/inventory/api/inventory.api";
-import {
-  FORECAST_PRODUCTS,
-  FORECAST_WAREHOUSES,
-  type ForecastRunResult,
-  type StockoutRisksResponse,
+import type {
+  ForecastCatalogProduct,
+  ForecastCatalogWarehouse,
+  ForecastRunResult,
+  StockoutRisksResponse,
 } from "../types";
 import { ForecastChart } from "./forecast-chart";
 import { useTranslation } from "@/lib/i18n";
@@ -43,20 +43,12 @@ function safeFormat(val: unknown, decimals = 1, fallback = "-"): string {
 
 export function ForecastScreen() {
   const { t } = useTranslation();
-  const [warehouses, setWarehouses] = React.useState<
-    Array<{ id: string; code: string; name: string }>
-  >(FORECAST_WAREHOUSES);
-  const [products, setProducts] = React.useState<
-    Array<{ id: string; sku: string; name: string; defaultAvailableStock?: number }>
-  >(FORECAST_PRODUCTS);
+  const [warehouses, setWarehouses] = React.useState<ForecastCatalogWarehouse[]>([]);
+  const [products, setProducts] = React.useState<ForecastCatalogProduct[]>([]);
   const [isLoadingCatalog, setIsLoadingCatalog] = React.useState<boolean>(true);
 
-  const [warehouseId, setWarehouseId] = React.useState<string>(
-    FORECAST_WAREHOUSES[0].id
-  );
-  const [productId, setProductId] = React.useState<string>(
-    FORECAST_PRODUCTS[0].id
-  );
+  const [warehouseId, setWarehouseId] = React.useState<string>("");
+  const [productId, setProductId] = React.useState<string>("");
   const [horizonDays, setHorizonDays] = React.useState<number>(7);
   const [reloadCount, setReloadCount] = React.useState<number>(0);
 
@@ -94,7 +86,7 @@ export function ForecastScreen() {
           setProductId(loadedProds[0].id);
         }
       } catch (err) {
-        console.warn("Could not load catalog for forecast, using default catalog:", err);
+        console.warn("Could not load catalog for forecast:", err);
       } finally {
         if (!cancelled) {
           setIsLoadingCatalog(false);
@@ -119,26 +111,32 @@ export function ForecastScreen() {
     error: string | null;
   } | null>(null);
 
-  const isLoading = result?.key !== requestKey;
+  const isLoading =
+    isLoadingCatalog ||
+    (Boolean(warehouseId && productId) && result?.key !== requestKey);
   const forecast = result?.key === requestKey ? result.forecast : null;
   const risks = result?.key === requestKey ? result.risks : null;
   const error = result?.key === requestKey ? result.error : null;
 
   React.useEffect(() => {
+    if (isLoadingCatalog || !warehouseId || !productId) {
+      return;
+    }
+
     let cancelled = false;
 
     const currentWarehouse = warehouses.find((w) => w.id === warehouseId);
     const currentProduct = products.find((p) => p.id === productId);
 
     async function executeForecast() {
-      let availableStock: number | undefined;
+      let availableStock = 0;
       try {
         const balance = await getBalanceApi(warehouseId, productId);
         if (balance && balance.availableQuantity !== undefined) {
           availableStock = Number(balance.availableQuantity);
         }
       } catch {
-        // Fall back to product default
+        availableStock = 0;
       }
 
       return Promise.all([
@@ -184,7 +182,7 @@ export function ForecastScreen() {
     return () => {
       cancelled = true;
     };
-  }, [requestKey, warehouseId, productId, horizonDays, warehouses, products, t]);
+  }, [isLoadingCatalog, requestKey, warehouseId, productId, horizonDays, warehouses, products, t]);
 
   const handleRecalculate = () => {
     setReloadCount((n) => n + 1);
@@ -248,7 +246,7 @@ export function ForecastScreen() {
             size="sm"
             className="h-8"
             onClick={handleRecalculate}
-            disabled={isLoading}
+            disabled={isLoading || !warehouseId || !productId}
           >
             {isLoading ? t("forecast.calculating") : t("forecast.recalculate")}
           </Button>
@@ -362,11 +360,15 @@ export function ForecastScreen() {
 
           {isLoading ? (
             <Skeleton className="h-[300px] w-full" />
-          ) : forecast ? (
+          ) : forecast && forecast.status !== "INSUFFICIENT_DATA" ? (
             <ForecastChart points={forecast.forecast_points} />
           ) : (
-            <div className="flex h-[300px] items-center justify-center text-xs text-muted-foreground">
-              {t("forecast.chartLoadError")}
+            <div className="flex h-[300px] items-center justify-center px-4 text-center text-xs text-muted-foreground">
+              {forecast?.status === "INSUFFICIENT_DATA"
+                ? forecast.recommended_action || t("forecast.noForecastData")
+                : !warehouseId || !productId
+                  ? t("forecast.noForecastData")
+                  : t("forecast.chartLoadError")}
             </div>
           )}
         </div>

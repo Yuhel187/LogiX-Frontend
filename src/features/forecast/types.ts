@@ -77,33 +77,4 @@ export interface ForecastCatalogProduct {
   id: string;
   sku: string;
   name: string;
-  defaultAvailableStock: number;
 }
-
-export const FORECAST_WAREHOUSES: ForecastCatalogWarehouse[] = [
-  {
-    id: "00000000-0000-0000-0000-000000000101",
-    code: "WH-HCM-01",
-    name: "Kho Tổng Miền Nam (Tân Bình)",
-  },
-  {
-    id: "00000000-0000-0000-0000-000000000102",
-    code: "WH-BD-02",
-    name: "Kho Trung Chuyển Bình Dương",
-  },
-];
-
-export const FORECAST_PRODUCTS: ForecastCatalogProduct[] = [
-  {
-    id: "00000000-0000-0000-0000-000000000201",
-    sku: "SKU-FMCG-001",
-    name: "Thùng Nước Giải Khát 24 Lon",
-    defaultAvailableStock: 280,
-  },
-  {
-    id: "00000000-0000-0000-0000-000000000202",
-    sku: "SKU-PACK-002",
-    name: "Thùng Carton Đóng Hàng 5 Lớp",
-    defaultAvailableStock: 600,
-  },
-];

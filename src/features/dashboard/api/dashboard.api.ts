@@ -58,14 +58,15 @@ async function fetchSkuForecastApi(
   productId?: string,
   signal?: AbortSignal
 ): Promise<ForecastRunResponse | null> {
+  if (!warehouseId || warehouseId === "all" || !productId) {
+    return null;
+  }
   try {
-    const params = new URLSearchParams({ horizon_days: "7" });
-    if (warehouseId && warehouseId !== "all") {
-      params.set("warehouse_id", warehouseId);
-    }
-    if (productId) {
-      params.set("product_id", productId);
-    }
+    const params = new URLSearchParams({
+      warehouse_id: warehouseId,
+      product_id: productId,
+      horizon_days: "7",
+    });
     const response = await authFetch(
       `${apiBaseUrl}/forecast/results?${params.toString()}`,
       {
@@ -181,27 +182,39 @@ export async function fetchDashboardSummaryApi(
     pendingAgentActionsCount: 0,
   };
 
-  // 3. Real Orders Metrics with Actual Percent Change vs Yesterday
+  // 3. Real Orders Metrics respecting scope.period vs previous equivalent period
   const today = new Date();
-  const todayStr = getDayKey(today);
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStr = getDayKey(yesterday);
+  const periodDays = scope.period === "30d" ? 30 : scope.period === "7d" ? 7 : 1;
+  const currentDateKeys = new Set<string>();
+  const prevDateKeys = new Set<string>();
+  for (let i = 0; i < periodDays; i++) {
+    const curr = new Date(today);
+    curr.setDate(curr.getDate() - i);
+    currentDateKeys.add(getDayKey(curr));
 
-  const ordersToday = orders.filter((o) => o.createdAt.startsWith(todayStr));
-  const ordersYesterday = orders.filter((o) => o.createdAt.startsWith(yesterdayStr));
+    const prev = new Date(today);
+    prev.setDate(prev.getDate() - (periodDays + i));
+    prevDateKeys.add(getDayKey(prev));
+  }
 
-  const confirmedToday = ordersToday.filter((o) => o.status === "CONFIRMED").length;
-  const processingToday = ordersToday.filter(
+  const ordersInPeriod = orders.filter((o) =>
+    currentDateKeys.has(o.createdAt.slice(0, 10))
+  );
+  const ordersPrevPeriod = orders.filter((o) =>
+    prevDateKeys.has(o.createdAt.slice(0, 10))
+  );
+
+  const confirmedToday = ordersInPeriod.filter((o) => o.status === "CONFIRMED").length;
+  const processingToday = ordersInPeriod.filter(
     (o) => o.status === "PICKING" || o.status === "READY_TO_SHIP"
   ).length;
-  const completedToday = ordersToday.filter((o) => o.status === "COMPLETED").length;
+  const completedToday = ordersInPeriod.filter((o) => o.status === "COMPLETED").length;
 
   let percentChangeVsYesterday = 0;
-  if (ordersYesterday.length > 0) {
+  if (ordersPrevPeriod.length > 0) {
     percentChangeVsYesterday =
-      Math.round(((ordersToday.length - ordersYesterday.length) / ordersYesterday.length) * 1000) / 10;
-  } else if (ordersToday.length > 0) {
+      Math.round(((ordersInPeriod.length - ordersPrevPeriod.length) / ordersPrevPeriod.length) * 1000) / 10;
+  } else if (ordersInPeriod.length > 0) {
     percentChangeVsYesterday = 100;
   }
 
@@ -257,9 +270,10 @@ export async function fetchDashboardSummaryApi(
     };
   });
 
-  // 7. Real Order Flow Points for Last 7 Days
+  // 7. Real Order Flow Points for selected period (7d or 30d)
   const orderThroughput: OrderFlowPoint[] = [];
-  for (let i = 6; i >= 0; i--) {
+  const throughputDays = scope.period === "30d" ? 30 : 7;
+  for (let i = throughputDays - 1; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
     const dateKey = getDayKey(d);
@@ -276,8 +290,9 @@ export async function fetchDashboardSummaryApi(
 
   // 8. Meta Prophet Forecast via forecast-service & Live Observations
   const topProduct = products[0];
+  const targetWarehouseId = warehouseFilter ?? warehouses[0]?.id;
   const forecastRun = await fetchSkuForecastApi(
-    warehouseFilter,
+    targetWarehouseId,
     topProduct?.id,
     signal
   );
@@ -299,7 +314,12 @@ export async function fetchDashboardSummaryApi(
     let todayLowerVal: number | null = null;
     let todayUpperVal: number | null = null;
 
-    if (isToday && forecastRun?.forecast_points?.[0]) {
+    if (
+      isToday &&
+      forecastRun &&
+      forecastRun.status !== "INSUFFICIENT_DATA" &&
+      forecastRun.forecast_points?.[0]
+    ) {
       const p0 = forecastRun.forecast_points[0];
       todayForecastVal = Math.round(p0.predicted_quantity * 10) / 10;
       todayLowerVal = Math.round(p0.lower_bound * 10) / 10;
@@ -317,7 +337,12 @@ export async function fetchDashboardSummaryApi(
   }
 
   // Future 7 days (D+1 to D+7) from Meta Prophet Forecast Engine
-  if (forecastRun?.forecast_points && forecastRun.forecast_points.length > 0) {
+  if (
+    forecastRun &&
+    forecastRun.status !== "INSUFFICIENT_DATA" &&
+    forecastRun.forecast_points &&
+    forecastRun.forecast_points.length > 0
+  ) {
     const futurePoints = forecastRun.forecast_points.slice(1, 8);
     futurePoints.forEach((pt, idx) => {
       const step = idx + 1;
@@ -330,34 +355,18 @@ export async function fetchDashboardSummaryApi(
         upperBound: Math.round(pt.upper_bound * 10) / 10,
       });
     });
-  } else {
-    // If forecast service is initializing or has 0 future points, project dynamic moving average from real orders
-    const recentActuals = forecastPoints.map((p) => p.actual ?? 0);
-    const avgRecent =
-      recentActuals.length > 0
-        ? Math.round((recentActuals.reduce((a, b) => a + b, 0) / recentActuals.length) * 10) / 10
-        : 0;
-
-    for (let step = 1; step <= 7; step++) {
-      forecastPoints.push({
-        ds: `D+${step}`,
-        label: step === 1 ? "Ngày mai" : `+${step} ngày`,
-        actual: null,
-        forecast: avgRecent,
-        lowerBound: Math.max(0, Math.round((avgRecent * 0.85) * 10) / 10),
-        upperBound: Math.round((avgRecent * 1.15) * 10) / 10,
-      });
-    }
   }
 
   const forecastStatus: "ACTIVE" | "TRAINING" | "INSUFFICIENT_DATA" =
-    forecastRun?.status === "TRAINING" || forecastRun?.status === "INSUFFICIENT_DATA"
-      ? forecastRun.status
-      : "ACTIVE";
+    !forecastRun || forecastRun.status === "INSUFFICIENT_DATA"
+      ? "INSUFFICIENT_DATA"
+      : forecastRun.status === "TRAINING"
+        ? "TRAINING"
+        : "ACTIVE";
 
   const forecast: SkuForecastData = {
-    skuCode: topProduct ? topProduct.sku : forecastRun?.sku_code ?? "SKU-PROD-01",
-    productName: topProduct ? topProduct.name : forecastRun?.product_name ?? "Sản phẩm kinh doanh",
+    skuCode: topProduct ? topProduct.sku : forecastRun?.sku_code ?? "",
+    productName: topProduct ? topProduct.name : forecastRun?.product_name ?? "",
     unit: topProduct ? topProduct.baseUnit : "đơn vị",
     status: forecastStatus,
     points: forecastPoints,
@@ -369,7 +378,7 @@ export async function fetchDashboardSummaryApi(
     triage,
     kpis: {
       ordersToday: {
-        total: ordersToday.length,
+        total: ordersInPeriod.length,
         confirmed: confirmedToday,
         processing: processingToday,
         completed: completedToday,
