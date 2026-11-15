@@ -22,4 +22,5 @@ export * from "./api/products.api";
 export * from "./api/vehicles.api";
 export * from "./api/drivers.api";
 export * from "./api/customers.api";
+export * from "./utils/master-data-cache";
 export * from "./constants/driver-permissions";

@@ -31,10 +31,13 @@ export function canEditTransportTrip(
 
 export function canAccessDriverExperience(
   permissions: readonly string[],
-  isSuperAdmin: boolean
+  isSuperAdmin: boolean,
+  isOwner = false
 ): boolean {
   return (
     isSuperAdmin ||
+    isOwner ||
+    permissions.includes("*") ||
     permissions.includes(TRANSPORT_PERMISSIONS.driverRead)
   );
 }

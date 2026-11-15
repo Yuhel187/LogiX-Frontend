@@ -11,6 +11,7 @@ import {
 } from "../schemas/warehouse.schema";
 import type { Paginated } from "../schemas/common.schema";
 import type { MasterDataQueryParams } from "../types/master-data.types";
+import { invalidateMasterDataCache } from "../utils/master-data-cache";
 import { stripBlanks } from "./request";
 
 const BASE_URL = `${apiBaseUrl}/warehouses`;
@@ -40,7 +41,9 @@ export async function createWarehouseApi(
     method: "POST",
     body: JSON.stringify(stripBlanks(createWarehouseSchema.parse(input))),
   });
-  return warehouseSchema.parse(await handleResponse<unknown>(response));
+  const created = warehouseSchema.parse(await handleResponse<unknown>(response));
+  invalidateMasterDataCache();
+  return created;
 }
 
 export async function updateWarehouseApi(
@@ -51,7 +54,9 @@ export async function updateWarehouseApi(
     method: "PATCH",
     body: JSON.stringify(stripBlanks(updateWarehouseSchema.parse(input))),
   });
-  return warehouseSchema.parse(await handleResponse<unknown>(response));
+  const updated = warehouseSchema.parse(await handleResponse<unknown>(response));
+  invalidateMasterDataCache();
+  return updated;
 }
 
 export async function setWarehouseStatusApi(
@@ -61,5 +66,7 @@ export async function setWarehouseStatusApi(
   const response = await authFetch(`${BASE_URL}/${id}/${action}`, {
     method: "POST",
   });
-  return warehouseSchema.parse(await handleResponse<unknown>(response));
+  const updated = warehouseSchema.parse(await handleResponse<unknown>(response));
+  invalidateMasterDataCache();
+  return updated;
 }

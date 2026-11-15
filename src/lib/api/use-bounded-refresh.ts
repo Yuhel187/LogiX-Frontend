@@ -12,8 +12,16 @@ export function useBoundedRefresh(
   useEffect(() => {
     if (!enabled) return;
     let attempts = 0;
+    let lastRefreshAt = Date.now();
     const focus = () => {
-      if (document.visibilityState === "visible") refresh();
+      const now = Date.now();
+      if (
+        document.visibilityState === "visible" &&
+        now - lastRefreshAt >= LIVE_REFRESH.focusCooldownMs
+      ) {
+        lastRefreshAt = now;
+        refresh();
+      }
     };
     const timer = window.setInterval(() => {
       if (attempts >= LIVE_REFRESH.maxAttempts) {
@@ -22,6 +30,7 @@ export function useBoundedRefresh(
       }
       if (document.visibilityState === "visible") {
         attempts++;
+        lastRefreshAt = Date.now();
         refresh();
       }
     }, LIVE_REFRESH.intervalMs);

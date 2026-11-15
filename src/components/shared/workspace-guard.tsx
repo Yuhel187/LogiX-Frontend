@@ -58,6 +58,7 @@ export function WorkspaceGuard({ children }: { children: React.ReactNode }) {
     hasPermission,
     hasAnyPermission,
     isSuperAdmin,
+    isOwner,
     permissions,
     tenantTransition,
     recoverTenantContext,
@@ -165,7 +166,10 @@ export function WorkspaceGuard({ children }: { children: React.ReactNode }) {
   if (transportPermission && !hasPermission(transportPermission)) {
     isBlocked = true;
   }
-  if (driverRoute && !canAccessDriverExperience(permissions, isSuperAdmin)) {
+  if (
+    driverRoute &&
+    !canAccessDriverExperience(permissions, isSuperAdmin, isOwner)
+  ) {
     isBlocked = true;
   }
   if (isBlocked) {

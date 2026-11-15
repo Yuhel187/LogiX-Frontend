@@ -3,7 +3,7 @@
 import * as React from "react";
 import { toast } from "sonner";
 import { useTranslation } from "@/lib/i18n";
-import { listWarehousesApi } from "@/features/master-data/api/warehouses.api";
+import { getCachedWarehouses } from "@/features/master-data";
 import type { Warehouse } from "@/features/master-data/schemas/warehouse.schema";
 import { fetchDashboardSummaryApi } from "../api/dashboard.api";
 import type {
@@ -36,10 +36,10 @@ export function useDashboardSummary(): UseDashboardSummaryResult {
   const [isRefreshing, setIsRefreshing] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string | null>(null);
 
-  // Load warehouses once on mount
+  // Load warehouses once on mount (deduplicated & cached with fetchDashboardSummaryApi)
   React.useEffect(() => {
     let cancelled = false;
-    listWarehousesApi({ pageSize: 50 })
+    getCachedWarehouses({ page: 1, pageSize: 100 })
       .then((res) => {
         if (!cancelled) setWarehouses(res.items);
       })

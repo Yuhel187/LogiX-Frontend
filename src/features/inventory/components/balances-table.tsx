@@ -36,7 +36,10 @@ import {
 } from "@/components/ui/pagination";
 import type { InventoryBalance } from "../schemas/inventory.schema";
 import { formatQuantity } from "../utils/quantity";
-import { getWarehouseApi, getProductApi } from "@/features/master-data";
+import {
+  resolveWarehousesByIds,
+  resolveProductsByIds,
+} from "@/features/master-data";
 import { useAuth } from "@/lib/auth";
 import { useTranslation } from "@/lib/i18n";
 import { EntityLabel } from "@/components/shared/entity-label";
@@ -119,32 +122,23 @@ export function BalancesTable({
     let active = true;
     const warehouseKeys: string[] = JSON.parse(warehouseIds);
     const productKeys: string[] = JSON.parse(productIds);
+    const forceRefresh = retry > 0;
     Promise.all([
-      Promise.allSettled(warehouseKeys.map((id) => getWarehouseApi(id))),
-      Promise.allSettled(productKeys.map((id) => getProductApi(id))),
-    ]).then(([warehouseResults, productResults]) => {
+      resolveWarehousesByIds(warehouseKeys, { forceRefresh, tenantId }),
+      resolveProductsByIds(productKeys, { forceRefresh, tenantId }),
+    ]).then(([warehouseResolved, productResolved]) => {
       if (!active) return;
-      const warehouses: Record<string, WarehouseMeta> = {};
-      const products: Record<string, ProductMeta> = {};
-      for (const result of warehouseResults)
-        if (result.status === "fulfilled")
-          warehouses[result.value.id] = result.value;
-      for (const result of productResults)
-        if (result.status === "fulfilled")
-          products[result.value.id] = result.value;
       setMetadata({
         key: metadataKey,
-        warehouses,
-        products,
-        failed: [...warehouseResults, ...productResults].some(
-          (result) => result.status === "rejected"
-        ),
+        warehouses: warehouseResolved.items,
+        products: productResolved.items,
+        failed: warehouseResolved.failed || productResolved.failed,
       });
     });
     return () => {
       active = false;
     };
-  }, [metadataKey, warehouseIds, productIds, tenantId, accessToken]);
+  }, [metadataKey, warehouseIds, productIds, tenantId, accessToken, retry]);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
