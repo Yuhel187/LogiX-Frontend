@@ -20,6 +20,8 @@ import {
   createWarehouseApi,
   updateWarehouseApi,
 } from "../../api/warehouses.api";
+import { lookupVietnamFallbackCoordinates } from "../../utils/vietnam-geocoder";
+import { AddressCoordinatePicker } from "../shared/address-coordinate-picker";
 import { FormField } from "../shared/form-field";
 import { useResourceForm } from "../use-resource-form";
 
@@ -87,6 +89,20 @@ export function WarehouseFormDialog({
       successMessage: t("masterData.saveSuccess"),
       resolveValidationMessage: (message) => t(message),
       submit: async (values) => {
+        const autoCoords =
+          !values.latitude.trim() || !values.longitude.trim()
+            ? lookupVietnamFallbackCoordinates({
+                addressLine: values.addressLine,
+                ward: values.ward,
+                district: values.district,
+                province: values.province,
+              })
+            : null;
+        const resolvedLat =
+          values.latitude.trim() || autoCoords?.latitude || "";
+        const resolvedLng =
+          values.longitude.trim() || autoCoords?.longitude || "";
+
         if (isEdit) {
           return updateWarehouseApi(warehouse.id, {
             code: values.code.trim(),
@@ -96,11 +112,16 @@ export function WarehouseFormDialog({
             district: values.district,
             province: values.province,
             postalCode: values.postalCode,
-            latitude: values.latitude,
-            longitude: values.longitude,
+            latitude: resolvedLat,
+            longitude: resolvedLng,
           });
         }
-        return createWarehouseApi({ ...values, code: values.code.trim() || undefined });
+        return createWarehouseApi({
+          ...values,
+          code: values.code.trim() || undefined,
+          latitude: resolvedLat,
+          longitude: resolvedLng,
+        });
       },
       onSuccess: () => {
         onOpenChange(false);
@@ -217,6 +238,20 @@ export function WarehouseFormDialog({
               onChange={(e) => form.setValue("longitude", e.target.value)}
             />
           </div>
+
+          <AddressCoordinatePicker
+            addressLine={form.values.addressLine}
+            ward={form.values.ward}
+            district={form.values.district}
+            province={form.values.province}
+            latitude={form.values.latitude}
+            longitude={form.values.longitude}
+            disabled={form.isSubmitting}
+            onCoordinatesChange={(lat, lng) => {
+              form.setValue("latitude", lat);
+              form.setValue("longitude", lng);
+            }}
+          />
 
           <DialogFooter>
             <Button

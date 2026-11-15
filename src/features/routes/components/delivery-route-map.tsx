@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import L from "leaflet";
+import { resolveVietnamDomesticPolyline } from "@/features/transport/utils/route-draft";
 
 export interface DeliveryMapPoint {
   id: string;
@@ -40,10 +41,12 @@ export function DeliveryRouteMap({
       ...stops.map((stop): [number, number] => [stop.latitude, stop.longitude]),
       [depot.latitude, depot.longitude],
     ];
-    L.polyline(geometry ?? points, {
+    const { path: renderedPath, isRoadGeometry } =
+      resolveVietnamDomesticPolyline(geometry, points);
+    L.polyline(renderedPath, {
       color,
       weight: 4,
-      ...(geometry ? {} : { dashArray: "6, 8" }),
+      ...(isRoadGeometry ? {} : { dashArray: "6, 8" }),
     }).addTo(map);
     [depot, ...stops].forEach((point, index) => {
       const popup = document.createElement("span");
@@ -55,7 +58,7 @@ export function DeliveryRouteMap({
         fillOpacity: 0.85,
       }).addTo(map).bindPopup(popup);
     });
-    map.fitBounds(L.latLngBounds(points), { padding: [24, 24], maxZoom: 15 });
+    map.fitBounds(L.latLngBounds(renderedPath), { padding: [24, 24], maxZoom: 15 });
     const theme = new MutationObserver(() => {
       if (!container.current) return;
       const nextColor = getComputedStyle(container.current).getPropertyValue("--primary").trim();
