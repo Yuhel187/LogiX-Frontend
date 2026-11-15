@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import L from "leaflet";
+import type * as LeafletNamespace from "leaflet";
 import { Loader2, MapPin, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/lib/i18n";
@@ -77,61 +77,74 @@ export function AddressCoordinatePicker({
   useEffect(() => {
     if (!showMap || !mapContainerRef.current) return;
 
-    const fallback = lookupVietnamFallbackCoordinates({
-      addressLine,
-      ward,
-      district,
-      province,
-    });
-    const initialCenter: [number, number] = hasValidCoords
-      ? [parsedLat, parsedLng]
-      : fallback
-        ? [Number(fallback.latitude), Number(fallback.longitude)]
-        : DEFAULT_VIETNAM_CENTER;
+    let cancelled = false;
+    let map: LeafletNamespace.Map | null = null;
+    let marker: LeafletNamespace.CircleMarker | null = null;
+    let resize: ResizeObserver | null = null;
 
-    const map = L.map(mapContainerRef.current).setView(
-      initialCenter,
-      hasValidCoords ? 14 : 11
-    );
+    const initMap = async () => {
+      const L = (await import("leaflet")).default;
+      if (cancelled || !mapContainerRef.current) return;
 
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      maxZoom: 19,
-    }).addTo(map);
+      const fallback = lookupVietnamFallbackCoordinates({
+        addressLine,
+        ward,
+        district,
+        province,
+      });
+      const initialCenter: [number, number] = hasValidCoords
+        ? [parsedLat, parsedLng]
+        : fallback
+          ? [Number(fallback.latitude), Number(fallback.longitude)]
+          : DEFAULT_VIETNAM_CENTER;
 
-    const color =
-      getComputedStyle(mapContainerRef.current)
-        .getPropertyValue("--primary")
-        .trim() || "#16a34a";
-
-    let marker: L.CircleMarker | null = null;
-    if (hasValidCoords) {
-      marker = L.circleMarker([parsedLat, parsedLng], {
-        radius: 8,
-        color,
-        fillColor: color,
-        fillOpacity: 0.85,
-      }).addTo(map);
-    }
-
-    map.on("click", (event: L.LeafletMouseEvent) => {
-      if (disabled) return;
-      const nextLat = event.latlng.lat.toFixed(6);
-      const nextLng = event.latlng.lng.toFixed(6);
-      onCoordinatesChange(nextLat, nextLng);
-      setStatusMessage(
-        t("masterData.mapPinSelected", { lat: nextLat, lng: nextLng })
+      map = L.map(mapContainerRef.current).setView(
+        initialCenter,
+        hasValidCoords ? 14 : 11
       );
-    });
 
-    const resize = new ResizeObserver(() => map.invalidateSize());
-    resize.observe(mapContainerRef.current);
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19,
+      }).addTo(map);
+
+      const color =
+        getComputedStyle(mapContainerRef.current)
+          .getPropertyValue("--primary")
+          .trim() || "#16a34a";
+
+      if (hasValidCoords) {
+        marker = L.circleMarker([parsedLat, parsedLng], {
+          radius: 8,
+          color,
+          fillColor: color,
+          fillOpacity: 0.85,
+        }).addTo(map);
+      }
+
+      map.on("click", (event: LeafletNamespace.LeafletMouseEvent) => {
+        if (disabled) return;
+        const nextLat = event.latlng.lat.toFixed(6);
+        const nextLng = event.latlng.lng.toFixed(6);
+        onCoordinatesChange(nextLat, nextLng);
+        setStatusMessage(
+          t("masterData.mapPinSelected", { lat: nextLat, lng: nextLng })
+        );
+      });
+
+      const currentMap = map;
+      resize = new ResizeObserver(() => currentMap.invalidateSize());
+      resize.observe(mapContainerRef.current);
+    };
+
+    void initMap();
 
     return () => {
-      resize.disconnect();
+      cancelled = true;
+      resize?.disconnect();
       if (marker) marker.remove();
-      map.remove();
+      if (map) map.remove();
     };
   }, [
     showMap,
