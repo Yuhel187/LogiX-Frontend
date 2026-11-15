@@ -31,6 +31,8 @@ import {
   createCustomerAddressApi,
   updateCustomerAddressApi,
 } from "../../api/customers.api";
+import { lookupVietnamFallbackCoordinates } from "../../utils/vietnam-geocoder";
+import { AddressCoordinatePicker } from "../shared/address-coordinate-picker";
 import { FormField } from "../shared/form-field";
 import { useResourceForm } from "../use-resource-form";
 
@@ -111,6 +113,20 @@ export function CustomerAddressFormDialog({
       uniqueMessage: "",
       successMessage: t("masterData.saveSuccess"),
       submit: async (values) => {
+        const autoCoords =
+          !values.latitude.trim() || !values.longitude.trim()
+            ? lookupVietnamFallbackCoordinates({
+                addressLine: values.addressLine,
+                ward: values.ward,
+                district: values.district,
+                province: values.province,
+              })
+            : null;
+        const resolvedLat =
+          values.latitude.trim() || autoCoords?.latitude || undefined;
+        const resolvedLng =
+          values.longitude.trim() || autoCoords?.longitude || undefined;
+
         if (isEdit) {
           return updateCustomerAddressApi(customerId, address.id, {
             label: values.label.trim() || undefined,
@@ -121,8 +137,8 @@ export function CustomerAddressFormDialog({
             district: values.district.trim() || undefined,
             province: values.province.trim(),
             postalCode: values.postalCode.trim() || undefined,
-            latitude: values.latitude.trim() || undefined,
-            longitude: values.longitude.trim() || undefined,
+            latitude: resolvedLat,
+            longitude: resolvedLng,
             deliveryNote: values.deliveryNote.trim() || undefined,
           });
         }
@@ -136,8 +152,8 @@ export function CustomerAddressFormDialog({
           district: values.district.trim() || undefined,
           province: values.province.trim(),
           postalCode: values.postalCode.trim() || undefined,
-          latitude: values.latitude.trim() || undefined,
-          longitude: values.longitude.trim() || undefined,
+          latitude: resolvedLat,
+          longitude: resolvedLng,
           deliveryNote: values.deliveryNote.trim() || undefined,
           isDefault: values.isDefault,
         });
@@ -290,6 +306,20 @@ export function CustomerAddressFormDialog({
               onChange={(e) => form.setValue("longitude", e.target.value)}
             />
           </div>
+
+          <AddressCoordinatePicker
+            addressLine={form.values.addressLine}
+            ward={form.values.ward}
+            district={form.values.district}
+            province={form.values.province}
+            latitude={form.values.latitude}
+            longitude={form.values.longitude}
+            disabled={form.isSubmitting}
+            onCoordinatesChange={(lat, lng) => {
+              form.setValue("latitude", lat);
+              form.setValue("longitude", lng);
+            }}
+          />
 
           <div className="space-y-1.5">
             <Label htmlFor="address-deliveryNote">
