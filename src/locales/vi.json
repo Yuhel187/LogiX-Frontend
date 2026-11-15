@@ -20,6 +20,59 @@
       "description": "Tra cứu và xem tài khoản người dùng trên toàn nền tảng.",
       "searchPlaceholder": "Email hoặc tên hiển thị"
     },
+    "contacts": {
+      "title": "Khách hàng liên hệ",
+      "description": "Danh sách doanh nghiệp và người dùng đăng ký tư vấn, đặt lịch demo từ trang chủ.",
+      "searchPlaceholder": "Tên, email, số điện thoại hoặc tên doanh nghiệp",
+      "needsLabel": "Nhu cầu đã chọn",
+      "otherDetailLabel": "Chi tiết nhu cầu khác",
+      "otherNeedLabel": "Chi tiết nhu cầu khác",
+      "contactedByLabel": "Xử lý bởi {name} lúc {time}",
+      "contactedBy": "Phụ trách: {name}",
+      "contactedAt": "Liên hệ lúc: {time}",
+      "quickCall": "Gọi điện",
+      "quickCallUnavailable": "Khách hàng không để lại số điện thoại",
+      "quickCallDisabled": "Khách hàng không để lại số điện thoại",
+      "quickEmail": "Gửi email",
+      "copyPhone": "Sao chép SĐT",
+      "phoneCopied": "Đã sao chép số điện thoại",
+      "copiedPhone": "Đã sao chép số điện thoại",
+      "copyEmail": "Sao chép Email",
+      "copiedEmail": "Đã sao chép địa chỉ email",
+      "statusMenuLabel": "Thao tác trạng thái cho {name}",
+      "emptyTitle": "Chưa có yêu cầu liên hệ nào",
+      "emptyDescription": "Các yêu cầu đặt lịch demo từ trang chủ sẽ xuất hiện tại đây.",
+      "emailSentSuccess": "Đã gửi email phản hồi và cập nhật trạng thái Đã liên hệ.",
+      "markContacted": "Đánh dấu đã liên hệ",
+      "markQualified": "Đánh dấu đã tư vấn",
+      "markArchived": "Chuyển vào lưu trữ",
+      "markNew": "Đặt lại Mới tiếp nhận",
+      "statusUpdated": "Đã cập nhật trạng thái liên hệ.",
+      "statusUpdateFailed": "Không thể cập nhật trạng thái liên hệ. Vui lòng thử lại.",
+      "emailDialog": {
+        "title": "Gửi email phản hồi khách hàng",
+        "description": "Gửi phản hồi tới {name} ({email}) qua hệ thống LogiX hoặc mở ứng dụng email mặc định.",
+        "toLabel": "Người nhận",
+        "recipientLabel": "Người nhận",
+        "companyLabel": "Doanh nghiệp",
+        "subjectLabel": "Tiêu đề email",
+        "subjectPlaceholder": "Nhập tiêu đề email phản hồi...",
+        "defaultSubject": "[LogiX] Phản hồi yêu cầu tư vấn & Đặt lịch Demo cho {company}",
+        "messageLabel": "Nội dung phản hồi",
+        "messagePlaceholder": "Nhập nội dung tư vấn và đề xuất lịch hẹn demo...",
+        "defaultMessage": "Đội ngũ LogiX đã nhận được yêu cầu tư vấn và đặt lịch demo từ quý doanh nghiệp ({company}) đối với các nhu cầu: {needs}.\n\nChúng tôi rất mong được sắp xếp một buổi demo trực tuyến kéo dài 30–45 phút trong tuần này để trình bày chi tiết giải pháp phù hợp với quy trình vận hành thực tế của quý đơn vị.\n\nVui lòng phản hồi lại khung giờ thuận tiện nhất với bạn hoặc liên hệ trực tiếp với chúng tôi.\n\nTrân trọng,\nĐội ngũ Tư vấn Giải pháp LogiX",
+        "sendSmtp": "Gửi qua hệ thống (SMTP)",
+        "sendingSmtp": "Đang gửi email...",
+        "sending": "Đang gửi email...",
+        "openMailto": "Mở ứng dụng Email",
+        "openMailClient": "Mở ứng dụng Email",
+        "cancel": "Đóng",
+        "sentSuccess": "Đã gửi email phản hồi và cập nhật trạng thái Đã liên hệ.",
+        "sentFailed": "Không thể gửi email qua SMTP. Bạn có thể bấm 'Mở ứng dụng Email' để gửi trực tiếp.",
+        "subjectRequired": "Vui lòng nhập tiêu đề email.",
+        "messageRequired": "Vui lòng nhập nội dung email."
+      }
+    },
     "filters": {
       "search": "Tìm kiếm",
       "allStatuses": "Tất cả trạng thái"
@@ -39,6 +92,9 @@
       "owner": "Chủ sở hữu tổ chức",
       "phoneNumber": "Số điện thoại",
       "user": "Người dùng",
+      "contactPerson": "Người liên hệ",
+      "companyName": "Doanh nghiệp",
+      "needs": "Nhu cầu hiện tại",
       "status": "Trạng thái",
       "accountType": "Loại tài khoản",
       "tenantCount": "Liên kết tổ chức hoạt động",
@@ -51,7 +107,11 @@
       "ACTIVE": "Đang hoạt động",
       "SUSPENDED": "Tạm ngưng",
       "DISABLED": "Vô hiệu hóa",
-      "LOCKED": "Đã khóa"
+      "LOCKED": "Đã khóa",
+      "NEW": "Mới tiếp nhận",
+      "CONTACTED": "Đã liên hệ",
+      "QUALIFIED": "Đã tư vấn",
+      "ARCHIVED": "Lưu trữ"
     },
     "account": {
       "superAdmin": "Quản trị viên nền tảng",
@@ -1832,10 +1892,25 @@
       "eyebrow": "Enterprise Supply Chain & Logistics OS",
       "title": "Điều hành Đơn hàng, Kho bãi và Vận tải trên một Hệ thống Thống nhất",
       "subtitle": "LogiX hợp nhất toàn bộ vòng đời Order-to-Delivery: giữ chỗ tồn kho thời gian thực, đóng gói gom chuyến, tối ưu lộ trình đa điểm bằng Google OR-Tools và dự báo nhu cầu Meta Prophet — đi kèm AI Copilot kiểm soát phê duyệt.",
-      "primaryCta": "Khởi tạo tổ chức",
+      "primaryCta": "Đăng ký dùng thử",
       "primaryCtaAuth": "Mở Bảng điều khiển",
+      "demoCta": "Đặt lịch demo",
       "secondaryCta": "Khám phá nền tảng",
       "loginCta": "Đăng nhập Console",
+      "impact": {
+        "eyebrow": "Hiệu quả vận hành",
+        "title": "Mọi quyết định rõ ràng hơn",
+        "orders": {
+          "value": "Một nơi",
+          "label": "Theo dõi đơn hàng, kho và giao hàng"
+        },
+        "route": {
+          "value": "Tối ưu",
+          "label": "Lập tuyến nhanh, giảm thao tác thủ công"
+        },
+        "aiTitle": "AI đề xuất, quản lý phê duyệt",
+        "aiDescription": "Gợi ý được hiển thị rõ ràng trước khi áp dụng vào vận hành."
+      },
       "preview": {
         "orgBadge": "LogiX Enterprise · Multi-Tenant",
         "envBadge": "Mẫu Giao diện Vận hành",
@@ -1875,14 +1950,14 @@
       }
     },
     "pillars": {
-      "item1Title": "Multi-Tenant & RBAC",
-      "item1Desc": "Cô lập dữ liệu theo từng tổ chức, phân quyền động chi tiết đến từng thao tác.",
-      "item2Title": "Event-Driven Outbox",
-      "item2Desc": "Đồng bộ xuyên suốt 12 microservices qua Apache Kafka và Transactional Outbox.",
-      "item3Title": "Google OR-Tools & OSRM",
-      "item3Desc": "Giải bài toán lộ trình CVRP/VRPTW có kiểm duyệt trước khi xuất bến.",
-      "item4Title": "Human-in-the-Loop AI",
-      "item4Desc": "Meta Prophet dự báo P80 và LangGraph Copilot yêu cầu quản lý phê duyệt lệnh."
+      "item1Title": "Quản lý riêng, phân quyền rõ ràng",
+      "item1Desc": "Mỗi tổ chức có không gian dữ liệu riêng, giúp đúng người được truy cập đúng thông tin.",
+      "item2Title": "Thông tin luôn được cập nhật",
+      "item2Desc": "Mọi thay đổi về đơn hàng, kho và giao hàng được đồng bộ nhanh chóng, hạn chế sai lệch.",
+      "item3Title": "Tuyến giao hàng tối ưu",
+      "item3Desc": "Tự động gợi ý lộ trình tiết kiệm thời gian và chi phí; quản lý luôn kiểm tra trước khi chạy.",
+      "item4Title": "AI hỗ trợ, con người quyết định",
+      "item4Desc": "Dự báo nhu cầu và gợi ý xử lý thông minh, nhưng mọi quyết định quan trọng vẫn do quản lý phê duyệt."
     },
     "capabilities": {
       "eyebrow": "Phân hệ Nghiệp vụ",
@@ -1918,6 +1993,25 @@
           "tag": "IAM & Audit",
           "title": "Phân quyền Doanh nghiệp & Kiểm toán",
           "desc": "Hỗ trợ đa tổ chức, mời thành viên qua liên kết bảo mật, ma trận quyền RBAC tùy chỉnh và lưu vết kiểm toán bất biến từ audit-service."
+        }
+      }
+    },
+    "why": {
+      "eyebrow": "Vì sao chọn LogiX?",
+      "title": "Một hệ thống rõ ràng cho vận hành hiệu quả",
+      "subtitle": "LogiX giúp đội ngũ nhìn cùng một bức tranh, kiểm soát quyết định và sẵn sàng mở rộng khi doanh nghiệp phát triển.",
+      "items": {
+        "visibility": {
+          "title": "Dữ liệu tập trung, dễ theo dõi",
+          "desc": "Đơn hàng, tồn kho và vận tải được kết nối trong cùng một luồng vận hành."
+        },
+        "control": {
+          "title": "Kiểm soát trước khi thực hiện",
+          "desc": "Các đề xuất quan trọng luôn được hiển thị rõ ràng để người có thẩm quyền phê duyệt."
+        },
+        "growth": {
+          "title": "Sẵn sàng cho quy mô lớn",
+          "desc": "Thiết kế mô-đun giúp doanh nghiệp mở rộng hoạt động mà không làm mất đi sự minh bạch."
         }
       }
     },
@@ -2067,15 +2161,143 @@
       "subtitle": "Khởi tạo tổ chức mới hoặc đăng nhập vào Console để vận hành đồng bộ đơn hàng, kho bãi, tuyến đường và AI Copilot.",
       "primary": "Tạo tài khoản miễn phí",
       "primaryAuth": "Vào Workspace",
-      "secondary": "Đăng nhập Console"
+      "secondary": "Đăng nhập Console",
+      "demo": "Đặt lịch demo"
     },
     "footer": {
       "description": "Nền tảng quản trị vận tải, đơn hàng, kho bãi và dự báo chuỗi cung ứng đa tổ chức tích hợp AI.",
       "colProduct": "Phân hệ",
       "colArchitecture": "Kiến trúc",
       "colAccess": "Hệ thống",
+      "colLegal": "Thông tin & hỗ trợ",
+      "privacy": "Chính sách bảo mật",
+      "terms": "Điều khoản sử dụng",
+      "dataPolicy": "Chính sách dữ liệu",
+      "contact": "Đặt lịch demo",
       "forgotPassword": "Khôi phục mật khẩu",
       "copyright": "© 2026 LogiX Vietnam. All rights reserved."
+    },
+    "demo": {
+      "badge": "Tư vấn & Trải nghiệm Giải pháp",
+      "title": "Đặt lịch demo LogiX",
+      "description": "Để lại thông tin doanh nghiệp và các bài toán vận hành bạn đang quan tâm. Đội ngũ chuyên gia LogiX sẽ liên hệ để thiết kế buổi demo sát với quy trình thực tế của bạn.",
+      "fullNameLabel": "Họ và tên",
+      "fullNamePlaceholder": "Nguyễn Văn A",
+      "emailLabel": "Email công việc",
+      "emailPlaceholder": "ten@doanhnghiep.vn",
+      "phoneLabel": "Số điện thoại",
+      "phoneOptional": "Không bắt buộc",
+      "phonePlaceholder": "0901 234 567",
+      "companyLabel": "Tên doanh nghiệp",
+      "companyPlaceholder": "Công ty Cổ phần Logistics...",
+      "needsLabel": "Nhu cầu vận hành hiện tại của doanh nghiệp",
+      "needsHint": "Chọn một hoặc nhiều hạng mục bạn muốn xem trong buổi demo",
+      "otherDetailLabel": "Mô tả chi tiết nhu cầu khác",
+      "otherDetailPlaceholder": "Ví dụ: Tích hợp ERP nội bộ, quy trình phê duyệt đặc thù, số lượng kho và đội xe dự kiến...",
+      "submitBtn": "Gửi yêu cầu đặt lịch demo",
+      "submittingBtn": "Đang gửi thông tin...",
+      "directEmailNote": "Hoặc gửi email trực tiếp tới đội ngũ phát triển:",
+      "successTitle": "Đã ghi nhận yêu cầu đặt lịch demo!",
+      "successDescription": "Cảm ơn bạn đã quan tâm đến LogiX. Thông tin của doanh nghiệp đã được chuyển đến bộ phận Quản trị Nền tảng và chúng tôi sẽ phản hồi qua email/điện thoại trong thời gian sớm nhất.",
+      "submitAnotherBtn": "Gửi yêu cầu khác",
+      "closeBtn": "Đóng cửa sổ",
+      "needs": {
+        "ORDER_FULFILLMENT": {
+          "title": "Quản lý Đơn hàng & Xuất kho",
+          "desc": "Chuẩn hóa luồng Order-to-Shipment, kiểm tra giữ chỗ tồn kho và đóng gói xuất hàng."
+        },
+        "INVENTORY_WAREHOUSE": {
+          "title": "Quản trị Tồn kho & Đa kho bãi",
+          "desc": "Theo dõi tồn thực tế, tồn khả dụng, cảnh báo dưới ngưỡng an toàn và sổ cái biến động kho."
+        },
+        "TRANSPORT_ROUTE": {
+          "title": "Điều phối Xe & Tối ưu Lộ trình",
+          "desc": "Gán vận đơn vào chuyến, tối ưu thứ tự điểm giao bằng thuật toán VRP và kiểm soát tải trọng."
+        },
+        "DRIVER_DELIVERY": {
+          "title": "Giao diện Tài xế & Giao nhận",
+          "desc": "Cập nhật kết quả giao hàng theo thứ tự điểm dừng và đồng bộ trạng thái đơn hàng tức thì."
+        },
+        "DEMAND_FORECAST": {
+          "title": "Dự báo Nhu cầu & AI Copilot",
+          "desc": "Dự báo chuỗi thời gian Meta Prophet kết hợp trợ lý AI tra cứu và đề xuất điều phối."
+        },
+        "ENTERPRISE_RBAC": {
+          "title": "Đa tổ chức & Phân quyền động",
+          "desc": "Cô lập dữ liệu đa thuê bao (Multi-tenant), phân quyền chi tiết theo vai trò và nhật ký kiểm toán."
+        },
+        "OTHER": {
+          "title": "Nhu cầu khác",
+          "desc": "Tư vấn bài toán vận hành đặc thù hoặc yêu cầu tùy chỉnh riêng của doanh nghiệp."
+        }
+      },
+      "errors": {
+        "fullNameRequired": "Vui lòng nhập họ và tên người liên hệ.",
+        "fullNameTooLong": "Họ và tên không được vượt quá 200 ký tự.",
+        "emailRequired": "Vui lòng nhập địa chỉ email liên hệ.",
+        "emailInvalid": "Địa chỉ email không đúng định dạng.",
+        "phoneInvalid": "Số điện thoại không hợp lệ (chỉ gồm chữ số và ký tự +, -, khoảng trắng).",
+        "companyRequired": "Vui lòng nhập tên doanh nghiệp.",
+        "companyTooLong": "Tên doanh nghiệp không được vượt quá 255 ký tự.",
+        "needsRequired": "Vui lòng chọn ít nhất một nhu cầu vận hành hiện tại.",
+        "otherDetailRequired": "Vui lòng nhập mô tả chi tiết khi chọn mục Nhu cầu khác.",
+        "otherDetailTooLong": "Mô tả chi tiết không được vượt quá 2000 ký tự.",
+        "rateLimited": "Bạn đã gửi quá nhiều yêu cầu trong thời gian ngắn. Vui lòng thử lại sau ít phút.",
+        "submitFailed": "Không thể gửi yêu cầu lúc này. Vui lòng kiểm tra kết nối mạng và thử lại."
+      }
+    },
+    "legal": {
+      "effectiveDate": "Hiệu lực cập nhật: 01/01/2026 • Tuân thủ Luật BVDLCN 91/2025/QH15, NĐ 13/2023/NĐ-CP & GDPR (EU 2016/679)",
+      "complianceBadge": "Chuẩn Pháp lý Việt Nam & GDPR",
+      "closeBtn": "Đã hiểu và Đóng",
+      "privacyBody": "LogiX bảo vệ dữ liệu cá nhân và dữ liệu vận hành doanh nghiệp theo Luật Bảo vệ dữ liệu cá nhân số 91/2025/QH15, Nghị định 13/2023/NĐ-CP và Quy định bảo vệ dữ liệu chung Châu Âu (GDPR - EU 2016/679).",
+      "termsBody": "Điều khoản sử dụng quy định quyền, nghĩa vụ, phạm vi dịch vụ SaaS B2B đa tổ chức, nguyên tắc kiểm duyệt con người (Human-in-the-Loop) và trách nhiệm bảo mật tài khoản trên nền tảng LogiX.",
+      "dataBody": "Chính sách dữ liệu quy định cơ chế cô lập dữ liệu đa tổ chức (Multi-tenant Isolation), nguyên tắc bản chụp vận hành bất biến (Immutable Snapshots), quản trị dữ liệu AI và quy trình ứng phó sự cố trong 72 giờ.",
+      "privacy": {
+        "subtitle": "Áp dụng cho toàn bộ người dùng, quản trị viên tổ chức, tài xế và khách hàng đăng ký tư vấn trên nền tảng LogiX.",
+        "s1Title": "1. Phân định Vai trò Pháp lý (Data Controller & Data Processor)",
+        "s1Body": "Theo Luật Bảo vệ dữ liệu cá nhân số 91/2025/QH15 (kế thừa Nghị định 13/2023/NĐ-CP) và Điều 4, Điều 28 GDPR (EU 2016/679): (a) LogiX đóng vai trò là Bên Kiểm soát Dữ liệu (Data Controller) đối với thông tin định danh tài khoản người dùng đăng ký trực tiếp (identity.users) và thông tin khách hàng tiềm năng đăng ký tư vấn/đặt lịch demo (identity.contact_leads); (b) Tổ chức doanh nghiệp sử dụng nền tảng (Tenant) là Bên Kiểm soát Dữ liệu và LogiX là Bên Xử lý Dữ liệu (Data Processor) đối với dữ liệu khách hàng nhận hàng, địa chỉ giao nhận, đơn hàng, vận đơn và hồ sơ tài xế thuộc không gian làm việc của từng tổ chức.",
+        "s2Title": "2. Phạm vi Dữ liệu Cá nhân Được Thu thập & Xử lý",
+        "s2Body": "LogiX chỉ thu thập dữ liệu cá nhân cơ bản phục vụ trực tiếp cho hoạt động quản trị chuỗi cung ứng B2B, bao gồm: (a) Thông tin tài khoản & định danh: Họ tên hiển thị, địa chỉ email, số điện thoại (tùy chọn), ảnh đại diện, vai trò và quyền hạn trong tổ chức; (b) Thông tin đăng ký tư vấn Demo: Họ tên, email công việc, số điện thoại, tên doanh nghiệp và nhu cầu vận hành; (c) Dữ liệu tác nghiệp giao nhận: Tên người nhận hàng, số điện thoại liên hệ nhận hàng, địa chỉ giao hàng (SHIPPING) và thông tin giấy phép lái xe của tài xế; (d) Dữ liệu kỹ thuật bảo mật phiên: Mã băm địa chỉ IP (ip_hash), thông tin trình duyệt (user_agent), định danh thiết bị (device_id) và mã băm Refresh Token. LogiX tuyệt đối không thu thập dữ liệu cá nhân nhạy cảm (sinh trắc học, thẻ tín dụng, hồ sơ y tế, quan điểm chính trị).",
+        "s3Title": "3. Mục đích và Cơ sở Pháp lý Xử lý Dữ liệu (Điều 6 GDPR)",
+        "s3Body": "Mọi hoạt động xử lý dữ liệu trên LogiX đều dựa trên cơ sở pháp lý rõ ràng: (a) Thực hiện hợp đồng cung cấp dịch vụ SaaS và xác thực phiên đăng nhập đa tổ chức (Multi-tenant Authentication & Dynamic RBAC); (b) Sự đồng ý tường minh của chủ thể dữ liệu khi gửi biểu mẫu đặt lịch demo hoặc chấp nhận lời mời tham gia tổ chức (TenantInvitation); (c) Nghĩa vụ pháp lý và lợi ích hợp pháp trong việc bảo vệ an toàn thông tin mạng, chống gian lận, gửi email khôi phục mật khẩu và lưu vết kiểm toán vận hành.",
+        "s4Title": "4. Biện pháp Bảo mật Kỹ thuật và Tổ chức (Điều 32 GDPR)",
+        "s4Body": "LogiX áp dụng kiến trúc bảo mật nhiều lớp theo nguyên tắc Mặc định từ chối (Fail-closed) và Đặc quyền tối thiểu (Least Privilege): Mật khẩu được băm một chiều an toàn; Refresh Token và mã khôi phục mật khẩu chỉ lưu trữ dưới dạng mã băm mật mã (token_hash) kèm cơ chế thu hồi tức thì qua token_version; giao tiếp nội bộ giữa các vi dịch vụ (Order, Inventory, Fulfillment, Transport, Identity) được ký xác thực bằng Internal Service JWT riêng biệt.",
+        "s5Title": "5. Quyền của Chủ thể Dữ liệu (Điều 12–22 GDPR & Luật BVDLCN Việt Nam)",
+        "s5Body": "Người dùng có đầy đủ các quyền theo luật định: Quyền được biết và đồng ý; Quyền truy cập, xem và tự cập nhật họ tên, số điện thoại, ảnh đại diện hoặc mật khẩu trong trang Hồ sơ cá nhân; Quyền rút lại sự đồng ý, yêu cầu hạn chế xử lý hoặc xóa dữ liệu cá nhân (Right to Erasure) khi không còn ràng buộc bởi nghĩa vụ lưu trữ chứng từ vận tải/kiểm toán của tổ chức; Quyền khiếu nại và yêu cầu trích xuất dữ liệu.",
+        "s6Title": "6. Chia sẻ Dữ liệu & Bên Xử lý Phụ (Sub-processors)",
+        "s6Body": "LogiX cam kết không bán, trao đổi hoặc chia sẻ dữ liệu cá nhân cho bất kỳ bên thứ ba nào phục vụ mục đích quảng cáo thương mại. Dữ liệu chỉ được truyền qua hạ tầng máy chủ cơ sở dữ liệu và dịch vụ chuyển tiếp thư điện tử (SMTP) nhằm gửi thông báo hệ thống, thư mời thành viên và phản hồi tư vấn theo yêu cầu của chính người dùng."
+      },
+      "terms": {
+        "subtitle": "Quy định điều kiện truy cập, vận hành nghiệp vụ và trách nhiệm pháp lý trên hệ thống LogiX.",
+        "s1Title": "1. Phạm vi Dịch vụ & Chấp thuận Điều khoản",
+        "s1Body": "Bằng việc tạo tài khoản, khởi tạo Tổ chức (Tenant) hoặc truy cập Workspace trên LogiX, người dùng và doanh nghiệp xác nhận đã đọc, hiểu và đồng ý tuân thủ Điều khoản sử dụng này. LogiX cung cấp nền tảng quản trị chuỗi cung ứng hợp nhất bao gồm: Quản lý Dữ liệu nền (Khách hàng, Kho hàng, Sản phẩm, Đội xe, Tài xế), Quản lý Đơn hàng (Order), Tồn kho & Giữ chỗ (Inventory), Đóng gói & Vận đơn (Fulfillment), Điều phối Lộ trình & Chuyến giao (Transport), Dự báo nhu cầu (Forecast) và Trợ lý AI Copilot.",
+        "s2Title": "2. Quản trị Tổ chức (Multi-Tenant) & Trách nhiệm Phân quyền",
+        "s2Body": "Mỗi Tổ chức trên LogiX hoạt động trong một không gian dữ liệu độc lập do Chủ sở hữu (OWNER) quản lý. Chủ sở hữu và Quản trị viên (ADMIN) chịu hoàn toàn trách nhiệm trong việc mời thành viên, thiết lập vai trò (Role), cấp phát quyền hạn (Permission), liên kết tài khoản cho Tài xế và đảm bảo mọi dữ liệu đối tác/khách hàng đưa lên hệ thống đều có cơ sở pháp lý hợp lệ theo quy định của pháp luật Việt Nam.",
+        "s3Title": "3. Quy tắc Nghiệp vụ & Kiểm duyệt Con người (Human-in-the-Loop)",
+        "s3Body": "Hệ thống thực thi nghiêm ngặt tính toàn vẹn trạng thái từ Đơn hàng đến Giao nhận (Order-to-Delivery) và kiểm soát đồng thời lạc quan (Optimistic Concurrency Control). Mọi kết quả từ dịch vụ Dự báo nhu cầu Meta Prophet, Bộ tối ưu lộ trình VRP và Trợ lý AI Copilot chỉ đóng vai trò hỗ trợ ra quyết định; Điều phối viên và người có thẩm quyền bắt buộc phải kiểm tra bản xem trước (Preview) và xác nhận tường minh trước khi phê duyệt lộ trình, xuất chuyến, hủy chuyến hoặc điều chỉnh tồn kho.",
+        "s4Title": "4. Bảo toàn Lịch sử Tài xế & Chứng từ Vận hành",
+        "s4Body": "Nhằm đảm bảo tính minh bạch và chống chối bỏ trong vận hành giao nhận, liên kết tài khoản người dùng với hồ sơ Tài xế chỉ được phép sửa đổi trước khi tài xế từng tham gia bất kỳ chuyến giao hàng nào (kể cả chuyến nháp). Khi tài xế đã được gán vào chuyến xe, liên kết định danh được khóa vĩnh viễn để bảo vệ tính xác thực của lịch sử giao nhận.",
+        "s5Title": "5. Các Hành vi Bị Nghiêm cấm",
+        "s5Body": "Người dùng không được phép: (a) Cố tình vượt qua rào cản phân quyền RBAC hoặc truy cập trái phép dữ liệu của tổ chức khác; (b) Giả mạo định danh, chia sẻ trái phép khóa phiên truy cập hoặc can thiệp vào giao thức API Gateway; (c) Tải lên mã độc, thực hiện tấn công tự động gây quá tải hệ thống hoặc sử dụng nền tảng để điều phối hàng hóa cấm theo quy định pháp luật.",
+        "s6Title": "6. Tạm ngưng Dịch vụ, Giới hạn Trách nhiệm & Luật Áp dụng",
+        "s6Body": "Quản trị viên nền tảng (SUPER ADMIN) có quyền tạm ngưng hoặc vô hiệu hóa tài khoản/tổ chức vi phạm nghiêm trọng điều khoản an toàn thông tin hoặc theo yêu cầu của cơ quan nhà nước có thẩm quyền. Điều khoản sử dụng này được điều chỉnh và giải thích theo pháp luật nước Cộng hòa Xã hội Chủ nghĩa Việt Nam (bao gồm Luật Giao dịch điện tử 2023 và Luật An toàn thông tin mạng)."
+      },
+      "data": {
+        "subtitle": "Tiêu chuẩn quản trị dữ liệu, cô lập đa thuê bao, bản chụp bất biến và ứng phó sự cố trên LogiX.",
+        "s1Title": "1. Kiến trúc Cô lập Dữ liệu Đa tổ chức (Multi-Tenant Isolation)",
+        "s1Body": "Toàn bộ cơ sở dữ liệu của LogiX được phân tách theo kiến trúc Schema-per-Service kết hợp khóa định danh tổ chức (tenant_id) bắt buộc trên mọi bảng nghiệp vụ. Mọi truy vấn đọc/ghi đều được xác thực ngữ cảnh tổ chức ở tầng máy chủ (Server-side Tenant Enforcement), đảm bảo dữ liệu giữa các doanh nghiệp được cô lập tuyệt đối.",
+        "s2Title": "2. Nguyên tắc Bản chụp Bất biến (Immutable Operational Snapshots)",
+        "s2Body": "Để bảo vệ tính toàn vẹn lịch sử chứng từ theo chuẩn kiểm toán chuỗi cung ứng, tại thời điểm xác nhận Đơn hàng, khởi tạo Vận đơn, tạo Chuyến xe và phê duyệt Lộ trình, hệ thống tự động đóng băng bản chụp JSON bất biến (Snapshot) của thông tin Khách hàng, Địa chỉ giao hàng (SHIPPING), Kho xuất phát, Phương tiện và Tài xế. Việc cập nhật danh mục Master Data về sau không làm biến đổi dữ liệu lịch sử của các giao dịch đã phát sinh.",
+        "s3Title": "3. Quản trị Dữ liệu đối với Trí tuệ Nhân tạo (AI & Forecasting Governance)",
+        "s3Body": "Dữ liệu chuỗi thời gian đơn hàng và tồn kho của từng tổ chức chỉ được truy xuất trong phạm vi cô lập của chính tổ chức đó để tính toán đường cơ sở dự báo (Forecast Runs) và gợi ý lộ trình. LogiX cam kết không sử dụng dữ liệu kinh doanh, giá trị đơn hàng hay danh sách khách hàng của tổ chức để huấn luyện các mô hình ngôn ngữ lớn công cộng bên ngoài.",
+        "s4Title": "4. Nhật ký Kiểm toán Bất biến (Audit Trail) & Truy cập Quản trị",
+        "s4Body": "Mọi sự kiện thay đổi trạng thái đơn hàng, phiếu xuất/nhập kho, điều phối chuyến xe và thao tác quản trị đều được ghi nhận kèm định danh người thực hiện (actorId), thời gian chuẩn UTC (occurredAt), phiên bản bản ghi (aggregateVersion) và mã truy vết (correlationId). Các thao tác hỗ trợ kỹ thuật đặc biệt của Quản trị viên nền tảng đều yêu cầu nhập lý do và xem trước thay đổi.",
+        "s5Title": "5. Lưu trữ, Xóa mềm & Quyền Hoàn trả Dữ liệu (Điều 17 & 28 GDPR)",
+        "s5Body": "Dữ liệu nghiệp vụ áp dụng cơ chế xóa mềm (deleted_at) và lưu trữ lịch sử chuyển trạng thái nhằm bảo toàn tính toàn vẹn tham chiếu trong suốt thời gian tổ chức hoạt động. Khi chấm dứt sử dụng dịch vụ, Chủ sở hữu tổ chức có quyền yêu cầu trích xuất dữ liệu vận hành và yêu cầu xóa hoặc ẩn danh hóa dữ liệu cá nhân theo đúng thời hạn quy định của Luật Bảo vệ dữ liệu cá nhân và Luật Dữ liệu 2024.",
+        "s6Title": "6. Quy trình Ứng phó & Thông báo Sự cố Dữ liệu trong 72 Giờ (Điều 33 GDPR)",
+        "s6Body": "LogiX duy trì cơ chế kiểm soát tính nhất quán dữ liệu (Outbox/Inbox Idempotency) và giám sát an ninh liên tục. Trong trường hợp xảy ra sự cố xâm phạm hoặc rò rỉ dữ liệu cá nhân, LogiX cam kết kích hoạt quy trình khoanh vùng khắc phục ngay lập tức và thông báo bằng văn bản cho Tổ chức bị ảnh hưởng cùng cơ quan chuyên trách bảo vệ dữ liệu trong vòng tối đa 72 giờ kể từ khi phát hiện."
+      }
     }
   }
 }

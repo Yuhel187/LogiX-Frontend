@@ -17,6 +17,7 @@ import {
   Warehouse,
   Building2,
   Users,
+  Headset,
   Contact,
   ContactRound,
 } from "lucide-react";
@@ -75,6 +76,12 @@ export function AppSidebar() {
             title: t("admin.users.title"),
             href: "/admin/users",
             icon: Users,
+            superAdminOnly: true,
+          },
+          {
+            title: t("admin.contacts.title"),
+            href: "/admin/contacts",
+            icon: Headset,
             superAdminOnly: true,
           },
         ],

@@ -1,4 +1,13 @@
 {
+  "chat": {
+    "appTitle": "LogiX Copilot",
+    "welcomeMessage": "Hello! I am LogiX AI Assistant. How can I assist you with warehouse and logistics operations today?",
+    "inputPlaceholder": "Type your message or question...",
+    "expand": "Expand to full screen",
+    "collapse": "Collapse sidebar",
+    "newChat": "New conversation",
+    "openCopilot": "Open LogiX AI Assistant"
+  },
   "admin": {
     "navTitle": "Platform Admin",
     "organizations": {
@@ -10,6 +19,59 @@
       "title": "All users",
       "description": "Search and review user accounts across the platform.",
       "searchPlaceholder": "Email or display name"
+    },
+    "contacts": {
+      "title": "Contact requests",
+      "description": "Review enterprises and prospective users who submitted demo and consultation requests from the landing page.",
+      "searchPlaceholder": "Name, email, phone number, or company name",
+      "needsLabel": "Selected needs",
+      "otherDetailLabel": "Other need details",
+      "otherNeedLabel": "Other need details",
+      "contactedByLabel": "Handled by {name} at {time}",
+      "contactedBy": "Handled by: {name}",
+      "contactedAt": "Contacted at: {time}",
+      "quickCall": "Call now",
+      "quickCallUnavailable": "No phone number provided",
+      "quickCallDisabled": "No phone number provided",
+      "quickEmail": "Send email",
+      "copyPhone": "Copy phone",
+      "phoneCopied": "Phone number copied",
+      "copiedPhone": "Phone number copied",
+      "copyEmail": "Copy email",
+      "copiedEmail": "Email address copied",
+      "statusMenuLabel": "Status actions for {name}",
+      "emptyTitle": "No contact requests yet",
+      "emptyDescription": "Demo requests submitted from the landing page will appear here.",
+      "emailSentSuccess": "Follow-up email sent and status updated to Contacted.",
+      "markContacted": "Mark as contacted",
+      "markQualified": "Mark as qualified",
+      "markArchived": "Move to archive",
+      "markNew": "Reset to New",
+      "statusUpdated": "Contact request status updated.",
+      "statusUpdateFailed": "Unable to update contact status. Please retry.",
+      "emailDialog": {
+        "title": "Send follow-up email to prospect",
+        "description": "Send a follow-up reply to {name} ({email}) via LogiX SMTP or open your default mail client.",
+        "toLabel": "Recipient",
+        "recipientLabel": "Recipient",
+        "companyLabel": "Company",
+        "subjectLabel": "Email subject",
+        "subjectPlaceholder": "Enter follow-up email subject...",
+        "defaultSubject": "[LogiX] Demo & Consultation Follow-up for {company}",
+        "messageLabel": "Message content",
+        "messagePlaceholder": "Enter consultation details and proposed demo schedule...",
+        "defaultMessage": "The LogiX team has received the demo and consultation request from your organization ({company}) regarding: {needs}.\n\nWe would love to schedule a 30–45 minute live walkthrough this week tailored to your operational workflows.\n\nPlease reply with your preferred time slot or reach out to us directly.\n\nBest regards,\nLogiX Solutions Consulting Team",
+        "sendSmtp": "Send via LogiX (SMTP)",
+        "sendingSmtp": "Sending email...",
+        "sending": "Sending email...",
+        "openMailto": "Open Mail App",
+        "openMailClient": "Open Mail App",
+        "cancel": "Cancel",
+        "sentSuccess": "Follow-up email sent and status updated to Contacted.",
+        "sentFailed": "Unable to send email via SMTP. You can click 'Open Mail App' to send directly.",
+        "subjectRequired": "Please enter an email subject.",
+        "messageRequired": "Please enter the email message."
+      }
     },
     "filters": {
       "search": "Search",
@@ -30,6 +92,9 @@
       "owner": "Organization owner",
       "phoneNumber": "Phone number",
       "user": "User",
+      "contactPerson": "Contact person",
+      "companyName": "Company",
+      "needs": "Current needs",
       "status": "Status",
       "accountType": "Account type",
       "tenantCount": "Active memberships",
@@ -42,7 +107,11 @@
       "ACTIVE": "Active",
       "SUSPENDED": "Suspended",
       "DISABLED": "Disabled",
-      "LOCKED": "Locked"
+      "LOCKED": "Locked",
+      "NEW": "New",
+      "CONTACTED": "Contacted",
+      "QUALIFIED": "Qualified",
+      "ARCHIVED": "Archived"
     },
     "account": {
       "superAdmin": "Super Admin",
@@ -582,15 +651,6 @@
     "offline": "Offline",
     "error": "Something went wrong. Please try again."
   },
-  "chat": {
-    "appTitle": "LogiX Copilot",
-    "welcomeMessage": "Hello! I am LogiX AI Assistant. How can I assist you with warehouse and logistics operations today?",
-    "inputPlaceholder": "Type your message or question...",
-    "expand": "Expand to full screen",
-    "collapse": "Collapse sidebar",
-    "newChat": "New conversation",
-    "openCopilot": "Open LogiX AI Assistant"
-  },
   "masterData": {
     "navTitle": "Master data",
     "statusActive": "Active",
@@ -901,6 +961,7 @@
     "createError": "Failed to create organization. Please try again.",
     "settingsTitle": "Organization Settings",
     "settingsDesc": "Manage your organization info and settings",
+    "legalProfileDesc": "Business details printed on delivery notes and goods issue slips. Issued documents keep the details recorded at the time of issue, even if you update the business information later.",
     "orgNameUpdate": "Update organization name",
     "orgLogoLabel": "Logo URL (optional)",
     "orgLogoPlaceholder": "https://example.com/logo.png",
@@ -960,25 +1021,6 @@
     "deletingOrg": "Deleting...",
     "deleteSuccess": "Organization deleted successfully.",
     "deleteError": "Failed to delete organization. Please check permissions or member constraints.",
-    "legalProfileTitle": "Legal profile",
-    "legalProfileDesc": "Business details printed on delivery notes and goods issue slips. Issued documents keep the details recorded at the time of issue, even if you update the business information later.",
-    "legalName": "Legal name",
-    "legalNamePlaceholder": "e.g. ABC Logistics Co., Ltd.",
-    "taxCode": "Tax code",
-    "taxCodePlaceholder": "e.g. 0312345678",
-    "legalPhone": "Phone",
-    "legalPhonePlaceholder": "e.g. 028 3812 3456",
-    "legalAddressLine": "Street address",
-    "legalAddressLinePlaceholder": "House number, street",
-    "legalWard": "Ward",
-    "legalDistrict": "District",
-    "legalProvince": "Province/City",
-    "legalPostalCode": "Postal code",
-    "legalAddressHint": "Street address and Province/City must be provided together (or both left empty).",
-    "legalProfileReadonly": "Only Owners or Admins can edit the legal profile.",
-    "legalProfileLoadError": "Failed to load the legal profile.",
-    "legalProfileSave": "Save legal profile",
-    "legalProfileSaveSuccess": "Legal profile saved",
     "membersTitle": "Organization Members",
     "membersDesc": "Manage people who have access to this organization.",
     "membersAndInvitationsTitle": "Members & Invitations",
@@ -1056,7 +1098,25 @@
     "sendInvite": "Send Invitation",
     "inviteFeatureComingSoon": "Email invitation feature is currently under development.",
     "roleUpdateSuccess": "Role updated successfully.",
-    "removeMemberSuccess": "Member removed from organization successfully."
+    "removeMemberSuccess": "Member removed from organization successfully.",
+    "legalProfileTitle": "Legal profile",
+    "legalName": "Legal name",
+    "legalNamePlaceholder": "e.g. ABC Logistics Co., Ltd.",
+    "taxCode": "Tax code",
+    "taxCodePlaceholder": "e.g. 0312345678",
+    "legalPhone": "Phone",
+    "legalPhonePlaceholder": "e.g. 028 3812 3456",
+    "legalAddressLine": "Street address",
+    "legalAddressLinePlaceholder": "House number, street",
+    "legalWard": "Ward",
+    "legalDistrict": "District",
+    "legalProvince": "Province/City",
+    "legalPostalCode": "Postal code",
+    "legalAddressHint": "Street address and Province/City must be provided together (or both left empty).",
+    "legalProfileReadonly": "Only Owners or Admins can edit the legal profile.",
+    "legalProfileLoadError": "Failed to load the legal profile.",
+    "legalProfileSave": "Save legal profile",
+    "legalProfileSaveSuccess": "Legal profile saved"
   },
   "account": {
     "pageTitle": "Account Settings",
@@ -1832,10 +1892,25 @@
       "eyebrow": "Enterprise Supply Chain & Logistics OS",
       "title": "Unified Order, Inventory, and Transport Operations for Modern Enterprises",
       "subtitle": "LogiX orchestrates the complete Order-to-Delivery lifecycle: real-time inventory reservation, wave fulfillment, Google OR-Tools route optimization, and Meta Prophet demand forecasting—augmented by a human-approved AI Copilot.",
-      "primaryCta": "Create organization",
+      "primaryCta": "Start free trial",
       "primaryCtaAuth": "Open Console",
+      "demoCta": "Schedule a demo",
       "secondaryCta": "Explore platform",
       "loginCta": "Console Sign In",
+      "impact": {
+        "eyebrow": "Operational impact",
+        "title": "Clearer decisions, every day",
+        "orders": {
+          "value": "One place",
+          "label": "Track orders, inventory, and delivery"
+        },
+        "route": {
+          "value": "Optimized",
+          "label": "Plan routes faster with less manual work"
+        },
+        "aiTitle": "AI suggests, managers approve",
+        "aiDescription": "Recommendations stay visible and controlled before they affect operations."
+      },
       "preview": {
         "orgBadge": "LogiX Enterprise · Multi-Tenant",
         "envBadge": "Operations Console Specimen",
@@ -1875,14 +1950,14 @@
       }
     },
     "pillars": {
-      "item1Title": "Multi-Tenant & RBAC",
-      "item1Desc": "Strict organization data isolation with dynamic permission matrices per role.",
-      "item2Title": "Event-Driven Outbox",
-      "item2Desc": "Reliable synchronization across 12 microservices via Apache Kafka and Transactional Outbox.",
-      "item3Title": "Google OR-Tools & OSRM",
-      "item3Desc": "Solves CVRP/VRPTW stop sequencing with explicit manager approval before dispatch.",
-      "item4Title": "Human-in-the-Loop AI",
-      "item4Desc": "Meta Prophet P80 demand forecasting and LangGraph Copilot gated by approval cards."
+      "item1Title": "Private workspace, clear permissions",
+      "item1Desc": "Each organization has its own data space, so the right people see the right information.",
+      "item2Title": "Always up-to-date information",
+      "item2Desc": "Order, inventory, and delivery updates stay in sync quickly, reducing errors and rework.",
+      "item3Title": "Smarter delivery routes",
+      "item3Desc": "Get time- and cost-saving route suggestions, with every plan reviewed before dispatch.",
+      "item4Title": "AI helps, people decide",
+      "item4Desc": "Get demand forecasts and smart recommendations while managers keep control of important decisions."
     },
     "capabilities": {
       "eyebrow": "Core Capabilities",
@@ -1918,6 +1993,25 @@
           "tag": "IAM & Audit",
           "title": "Enterprise Governance & Immutable Audit",
           "desc": "Manage multi-tenant memberships, secure invite links, custom RBAC roles, and immutable audit trails via audit-service."
+        }
+      }
+    },
+    "why": {
+      "eyebrow": "Why LogiX?",
+      "title": "One clear system for better operations",
+      "subtitle": "LogiX gives teams one shared view, controlled decisions, and a foundation that can grow with the business.",
+      "items": {
+        "visibility": {
+          "title": "Connected data, easy to follow",
+          "desc": "Orders, inventory, and transport stay connected in one operational flow."
+        },
+        "control": {
+          "title": "Control before action",
+          "desc": "Important recommendations remain visible so the right people can review and approve them."
+        },
+        "growth": {
+          "title": "Ready to scale",
+          "desc": "A modular foundation helps the business grow without losing operational clarity."
         }
       }
     },
@@ -2067,15 +2161,143 @@
       "subtitle": "Create an organization or sign in to the Console to unify orders, inventory, route optimization, and AI Copilot.",
       "primary": "Create free account",
       "primaryAuth": "Open Workspace",
-      "secondary": "Console Sign In"
+      "secondary": "Console Sign In",
+      "demo": "Book a demo"
     },
     "footer": {
       "description": "Multi-tenant enterprise platform for order orchestration, inventory control, transport dispatch, and AI forecasting.",
       "colProduct": "Capabilities",
       "colArchitecture": "Architecture",
       "colAccess": "Access",
+      "colLegal": "Information & support",
+      "privacy": "Privacy policy",
+      "terms": "Terms of use",
+      "dataPolicy": "Data policy",
+      "contact": "Book a demo",
       "forgotPassword": "Reset password",
       "copyright": "© 2026 LogiX Vietnam. All rights reserved."
+    },
+    "demo": {
+      "badge": "Solutions Consulting & Walkthrough",
+      "title": "Book a LogiX demo",
+      "description": "Share your organization details and operational priorities. Our specialists will reach out to tailor a live walkthrough for your workflows.",
+      "fullNameLabel": "Full name",
+      "fullNamePlaceholder": "Nguyen Van A",
+      "emailLabel": "Work email",
+      "emailPlaceholder": "name@company.com",
+      "phoneLabel": "Phone number",
+      "phoneOptional": "Optional",
+      "phonePlaceholder": "+84 901 234 567",
+      "companyLabel": "Company name",
+      "companyPlaceholder": "Acme Logistics Corporation...",
+      "needsLabel": "Current operational needs",
+      "needsHint": "Select one or more areas you would like to explore during the demo",
+      "otherDetailLabel": "Describe your specific needs",
+      "otherDetailPlaceholder": "E.g., ERP integration requirements, custom approval rules, expected number of warehouses and fleet vehicles...",
+      "submitBtn": "Submit demo request",
+      "submittingBtn": "Submitting request...",
+      "directEmailNote": "Or email our product team directly:",
+      "successTitle": "Demo request received!",
+      "successDescription": "Thank you for your interest in LogiX. Your company details have been forwarded to our Platform Admin team and we will reach out via email or phone shortly.",
+      "submitAnotherBtn": "Submit another request",
+      "closeBtn": "Close window",
+      "needs": {
+        "ORDER_FULFILLMENT": {
+          "title": "Order & Shipment Fulfillment",
+          "desc": "Streamline Order-to-Shipment lifecycles, stock reservations, and pick-pack readiness."
+        },
+        "INVENTORY_WAREHOUSE": {
+          "title": "Multi-Warehouse Inventory",
+          "desc": "Track on-hand and available stock, low-stock thresholds, and immutable stock ledgers."
+        },
+        "TRANSPORT_ROUTE": {
+          "title": "Fleet Dispatch & Route Optimization",
+          "desc": "Assign shipments to trips, optimize stop sequences with VRP solvers, and enforce capacity."
+        },
+        "DRIVER_DELIVERY": {
+          "title": "Driver Execution & POD",
+          "desc": "Record stop-by-stop delivery outcomes and synchronize shipment and order statuses in real time."
+        },
+        "DEMAND_FORECAST": {
+          "title": "Demand Forecasting & AI Copilot",
+          "desc": "Combine Meta Prophet time-series forecasting with an AI assistant for operational insights."
+        },
+        "ENTERPRISE_RBAC": {
+          "title": "Multi-Tenant Governance & Dynamic RBAC",
+          "desc": "Enforce strict tenant isolation, granular role permissions, and immutable audit trails."
+        },
+        "OTHER": {
+          "title": "Other requirements",
+          "desc": "Discuss specialized supply chain workflows or custom enterprise requirements."
+        }
+      },
+      "errors": {
+        "fullNameRequired": "Please enter the contact person's full name.",
+        "fullNameTooLong": "Full name must not exceed 200 characters.",
+        "emailRequired": "Please enter a contact email address.",
+        "emailInvalid": "Please enter a valid email address.",
+        "phoneInvalid": "Please enter a valid phone number (digits, +, -, and spaces only).",
+        "companyRequired": "Please enter your company name.",
+        "companyTooLong": "Company name must not exceed 255 characters.",
+        "needsRequired": "Please select at least one operational need.",
+        "otherDetailRequired": "Please describe your specific requirements when selecting Other.",
+        "otherDetailTooLong": "Description must not exceed 2000 characters.",
+        "rateLimited": "Too many requests submitted recently. Please wait a moment and try again.",
+        "submitFailed": "Unable to submit your request right now. Please check your connection and retry."
+      }
+    },
+    "legal": {
+      "effectiveDate": "Effective Date: Jan 1, 2026 • Compliant with Vietnam PDPL No. 91/2025/QH15, Decree 13/2023/ND-CP & EU GDPR (2016/679)",
+      "complianceBadge": "Vietnam PDPL & EU GDPR Compliant",
+      "closeBtn": "Acknowledge & Close",
+      "privacyBody": "LogiX protects personal and enterprise operational data in accordance with Vietnam's Personal Data Protection Law No. 91/2025/QH15, Decree 13/2023/ND-CP, and the EU General Data Protection Regulation (GDPR - EU 2016/679).",
+      "termsBody": "These Terms of Use govern access rights, multi-tenant B2B SaaS scope, Human-in-the-Loop approval rules, and account security responsibilities on the LogiX platform.",
+      "dataBody": "Our Data Policy defines strict Multi-tenant Isolation, Immutable Operational Snapshots, AI data governance, and our 72-hour data incident notification protocol.",
+      "privacy": {
+        "subtitle": "Applicable to all users, organization administrators, drivers, and prospective customers on the LogiX platform.",
+        "s1Title": "1. Legal Role Allocation (Data Controller & Data Processor)",
+        "s1Body": "Under Vietnam's Personal Data Protection Law No. 91/2025/QH15 (succeeding Decree 13/2023/ND-CP) and Articles 4 and 28 of the EU GDPR (2016/679): (a) LogiX acts as the Data Controller for user account identity records (identity.users) and prospective customer demo inquiries (identity.contact_leads); (b) Each subscribing Enterprise Organization (Tenant) acts as the Data Controller and LogiX acts as the Data Processor for recipient records, shipping addresses, sales orders, shipments, and driver profiles managed within that tenant's workspace.",
+        "s2Title": "2. Categories of Personal Data Collected & Processed",
+        "s2Body": "LogiX collects only basic personal data strictly necessary for B2B supply chain operations: (a) Account & Identity Data: Display name, email address, optional phone number, avatar, and tenant RBAC roles/permissions; (b) Demo Consultation Leads: Full name, work email, phone number, company name, and selected operational needs; (c) Fulfillment & Delivery Data: Recipient contact name, delivery phone number, shipping address (SHIPPING), and driver license identifiers; (d) Technical Session Security Data: Hashed IP address (ip_hash), browser user agent, device identifier, and hashed refresh tokens. LogiX never collects sensitive personal data (biometrics, payment card numbers, health records, or political opinions).",
+        "s3Title": "3. Purposes & Lawful Basis for Processing (GDPR Article 6)",
+        "s3Body": "All data processing on LogiX rests on explicit lawful bases: (a) Performance of B2B SaaS service contracts and multi-tenant authentication/authorization; (b) Explicit consent provided when submitting a demo request form or accepting a tenant invitation (TenantInvitation); (c) Compliance with legal obligations and legitimate interests in network security, fraud prevention, password recovery, and immutable operational auditing.",
+        "s4Title": "4. Technical & Organizational Security Measures (GDPR Article 32)",
+        "s4Body": "LogiX enforces defense-in-depth security built on Fail-closed and Least Privilege principles: Passwords are protected via one-way cryptographic hashing; Refresh Tokens and password reset tokens are stored exclusively as cryptographic hashes (token_hash) with instant revocation via token_version; internal microservice communication (Order, Inventory, Fulfillment, Transport, Identity) is authenticated using dedicated Internal Service JWT signatures.",
+        "s5Title": "5. Data Subject Rights (GDPR Articles 12–22 & Vietnam PDPL)",
+        "s5Body": "Data subjects retain full statutory rights: The right to be informed and manage consent; the right to access and update display name, phone number, avatar, and password within Profile Settings; the right to withdraw consent, restrict processing, or request erasure (Right to Erasure) where retention is not mandated by statutory transport or audit record obligations; and the right to data portability.",
+        "s6Title": "6. Sub-processors & Data Transfers",
+        "s6Body": "LogiX never sells, rents, or shares personal data with third parties for commercial advertising. Data is processed solely through database infrastructure and transactional email relay services (SMTP) to deliver system notifications, organization invitations, and requested consultation follow-ups."
+      },
+      "terms": {
+        "subtitle": "Governing access conditions, operational invariants, and legal responsibilities across the LogiX platform.",
+        "s1Title": "1. Service Scope & Acceptance of Terms",
+        "s1Body": "By registering an account, creating an Organization (Tenant), or accessing a Workspace on LogiX, users and enterprises agree to be bound by these Terms of Use. LogiX provides an integrated multi-tenant supply chain platform covering Master Data (Customers, Warehouses, Products, Vehicles, Drivers), Order Management, Inventory & Reservations, Shipment Fulfillment, Route Optimization & Trip Dispatch, AI Demand Forecasting, and AI Copilot.",
+        "s2Title": "2. Multi-Tenant Organization Governance & RBAC Responsibility",
+        "s2Body": "Each Organization on LogiX operates within an isolated workspace managed by its Organization Owner (OWNER). Organization Owners and Administrators (ADMIN) are solely responsible for inviting members, configuring roles, granting permissions, linking Driver accounts, and ensuring that all customer and personnel data uploaded to the workspace has a valid lawful basis.",
+        "s3Title": "3. Operational Invariants & Human-in-the-Loop Approval",
+        "s3Body": "The platform strictly enforces Order-to-Delivery state transitions and Optimistic Concurrency Control. Outputs generated by the Meta Prophet Forecasting service, VRP Route Optimizer, and AI Copilot serve strictly as decision-support recommendations; dispatchers and authorized personnel must review explicit Previews and confirm sensitive mutations before approving routes, dispatching trips, canceling trips, or adjusting stock.",
+        "s4Title": "4. Driver Identity Integrity & Operational Records",
+        "s4Body": "To preserve non-repudiation and delivery auditability, a Driver's linked user account may only be reassigned before that driver has ever been assigned to any trip (including draft trips). Once a driver has participated in a trip, the account link is permanently locked to safeguard historical delivery records.",
+        "s5Title": "5. Prohibited Conduct",
+        "s5Body": "Users must not: (a) Attempt to bypass RBAC permission guards or access data belonging to another tenant; (b) Spoof identities, share session tokens, or tamper with API Gateway boundaries; (c) Upload malicious code, conduct automated denial-of-service attacks, or use the platform to coordinate prohibited goods.",
+        "s6Title": "6. Service Suspension, Limitation of Liability & Governing Law",
+        "s6Body": "Platform Super Administrators (SUPER ADMIN) reserve the right to suspend or disable accounts or organizations that violate security policies or applicable laws. These Terms of Use are governed by and construed in accordance with the laws of the Socialist Republic of Vietnam (including the Law on Electronic Transactions 2023 and Law on Cyberinformation Security)."
+      },
+      "data": {
+        "subtitle": "Standards for multi-tenant isolation, immutable operational snapshots, AI governance, and incident response.",
+        "s1Title": "1. Multi-Tenant Data Isolation Architecture",
+        "s1Body": "LogiX databases enforce Schema-per-Service separation combined with mandatory organization identifiers (tenant_id) across all domain tables. Every read and write operation is authorized against the active tenant context server-side, guaranteeing strict logical isolation between organizations.",
+        "s2Title": "2. Immutable Operational Snapshots & Historical Integrity",
+        "s2Body": "To guarantee audit-grade supply chain traceability, at the exact moment of Order confirmation, Shipment creation, Trip creation, and Route approval, LogiX captures immutable JSON snapshots of Customer details, Shipping Address (SHIPPING), Origin Warehouse, Vehicle, and Driver. Subsequent edits to Master Data never retroactively alter historical order or trip records.",
+        "s3Title": "3. AI & Demand Forecasting Data Governance",
+        "s3Body": "Historical order and inventory time-series data of an organization is processed exclusively within that organization's isolated scope to compute forecast baselines and route proposals. LogiX never uses proprietary tenant business data, order values, or customer lists to train external public language models.",
+        "s4Title": "4. Immutable Audit Trails & Platform Administration",
+        "s4Body": "All order state transitions, stock movements, trip dispatches, and administrative actions are recorded with performer identity (actorId), UTC timestamp (occurredAt), aggregate version, and correlation ID. Platform support actions require explicit reasons and preview confirmation.",
+        "s5Title": "5. Retention, Soft Deletion & Data Portability (GDPR Articles 17 & 28)",
+        "s5Body": "Operational entities utilize soft deletion (deleted_at) and status history tables to preserve referential integrity throughout an organization's active lifecycle. Upon contract termination, the Organization Owner may request structured data export and permanent deletion or anonymization of personal data in accordance with Vietnam's Law on Data 2024 and PDPL.",
+        "s6Title": "6. 72-Hour Data Breach Response Protocol (GDPR Article 33)",
+        "s6Body": "LogiX maintains transactional Outbox/Inbox idempotency and continuous security monitoring. In the event of a confirmed personal data breach, LogiX will immediately execute containment procedures and notify affected Organizations and competent data protection authorities within a maximum of 72 hours of discovery."
+      }
     }
   }
 }

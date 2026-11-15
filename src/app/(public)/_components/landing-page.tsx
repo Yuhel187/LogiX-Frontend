@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Check, Menu, RotateCcw, X } from "lucide-react";
+import { ArrowRight, Calendar, Check, Mail, Menu, RotateCcw, ShieldCheck, X } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -40,6 +40,16 @@ import { LocaleSwitcher } from "@/components/shared/locale-switcher";
 import { StatCard } from "@/components/shared/stat-card";
 import { StatusBadge, type LogisticsStatus } from "@/components/shared/status-badge";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { DemoRequestDialog } from "./demo-request-dialog";
 import { useAuth } from "@/lib/auth";
 import {
   LOGIN_ROUTE,
@@ -224,28 +234,28 @@ const HERO_ROWS: Array<{
   status: LogisticsStatus;
   sKey: string;
 }> = [
-  {
-    c1: "landing.hero.preview.rows.row1Code",
-    c2: "landing.hero.preview.rows.row1Route",
-    c3: "landing.hero.preview.rows.row1Progress",
-    status: "in_transit",
-    sKey: "landing.hero.preview.rows.row1Status",
-  },
-  {
-    c1: "landing.hero.preview.rows.row2Code",
-    c2: "landing.hero.preview.rows.row2Route",
-    c3: "landing.hero.preview.rows.row2Progress",
-    status: "delivered",
-    sKey: "landing.hero.preview.rows.row2Status",
-  },
-  {
-    c1: "landing.hero.preview.rows.row3Code",
-    c2: "landing.hero.preview.rows.row3Route",
-    c3: "landing.hero.preview.rows.row3Progress",
-    status: "processing",
-    sKey: "landing.hero.preview.rows.row3Status",
-  },
-];
+    {
+      c1: "landing.hero.preview.rows.row1Code",
+      c2: "landing.hero.preview.rows.row1Route",
+      c3: "landing.hero.preview.rows.row1Progress",
+      status: "in_transit",
+      sKey: "landing.hero.preview.rows.row1Status",
+    },
+    {
+      c1: "landing.hero.preview.rows.row2Code",
+      c2: "landing.hero.preview.rows.row2Route",
+      c3: "landing.hero.preview.rows.row2Progress",
+      status: "delivered",
+      sKey: "landing.hero.preview.rows.row2Status",
+    },
+    {
+      c1: "landing.hero.preview.rows.row3Code",
+      c2: "landing.hero.preview.rows.row3Route",
+      c3: "landing.hero.preview.rows.row3Progress",
+      status: "processing",
+      sKey: "landing.hero.preview.rows.row3Status",
+    },
+  ];
 
 const PILLARS = [
   { code: "01", title: "landing.pillars.item1Title", desc: "landing.pillars.item1Desc" },
@@ -286,6 +296,63 @@ const CAPABILITIES = [
     desc: "landing.capabilities.items.governance.desc",
   },
 ] as const;
+
+const WHY_LOGIX_ITEMS = [
+  {
+    title: "landing.why.items.visibility.title",
+    desc: "landing.why.items.visibility.desc",
+  },
+  {
+    title: "landing.why.items.control.title",
+    desc: "landing.why.items.control.desc",
+  },
+  {
+    title: "landing.why.items.growth.title",
+    desc: "landing.why.items.growth.desc",
+  },
+] as const;
+
+const LEGAL_DOCUMENTS = {
+  privacy: {
+    title: "landing.footer.privacy",
+    subtitle: "landing.legal.privacy.subtitle",
+    body: "landing.legal.privacyBody",
+    sections: [
+      { title: "landing.legal.privacy.s1Title", body: "landing.legal.privacy.s1Body" },
+      { title: "landing.legal.privacy.s2Title", body: "landing.legal.privacy.s2Body" },
+      { title: "landing.legal.privacy.s3Title", body: "landing.legal.privacy.s3Body" },
+      { title: "landing.legal.privacy.s4Title", body: "landing.legal.privacy.s4Body" },
+      { title: "landing.legal.privacy.s5Title", body: "landing.legal.privacy.s5Body" },
+      { title: "landing.legal.privacy.s6Title", body: "landing.legal.privacy.s6Body" },
+    ],
+  },
+  terms: {
+    title: "landing.footer.terms",
+    subtitle: "landing.legal.terms.subtitle",
+    body: "landing.legal.termsBody",
+    sections: [
+      { title: "landing.legal.terms.s1Title", body: "landing.legal.terms.s1Body" },
+      { title: "landing.legal.terms.s2Title", body: "landing.legal.terms.s2Body" },
+      { title: "landing.legal.terms.s3Title", body: "landing.legal.terms.s3Body" },
+      { title: "landing.legal.terms.s4Title", body: "landing.legal.terms.s4Body" },
+      { title: "landing.legal.terms.s5Title", body: "landing.legal.terms.s5Body" },
+      { title: "landing.legal.terms.s6Title", body: "landing.legal.terms.s6Body" },
+    ],
+  },
+  data: {
+    title: "landing.footer.dataPolicy",
+    subtitle: "landing.legal.data.subtitle",
+    body: "landing.legal.dataBody",
+    sections: [
+      { title: "landing.legal.data.s1Title", body: "landing.legal.data.s1Body" },
+      { title: "landing.legal.data.s2Title", body: "landing.legal.data.s2Body" },
+      { title: "landing.legal.data.s3Title", body: "landing.legal.data.s3Body" },
+      { title: "landing.legal.data.s4Title", body: "landing.legal.data.s4Body" },
+      { title: "landing.legal.data.s5Title", body: "landing.legal.data.s5Body" },
+      { title: "landing.legal.data.s6Title", body: "landing.legal.data.s6Body" },
+    ],
+  },
+} as const;
 
 const ORDERS_ROWS: typeof HERO_ROWS = [
   {
@@ -367,15 +434,6 @@ const FAQ_ITEMS = [
 ] as const;
 
 const FOOTER_COLS = [
-  {
-    heading: "landing.footer.colProduct",
-    links: [
-      { href: "#capabilities", label: "landing.capabilities.items.orders.title" },
-      { href: "#capabilities", label: "landing.capabilities.items.inventory.title" },
-      { href: "#capabilities", label: "landing.capabilities.items.transport.title" },
-      { href: "#capabilities", label: "landing.capabilities.items.forecast.title" },
-    ],
-  },
   {
     heading: "landing.footer.colArchitecture",
     links: [
@@ -542,6 +600,10 @@ export function LandingPage() {
   const [approvalDecision, setApprovalDecision] = React.useState<
     "pending" | "approved" | "rejected"
   >("pending");
+  const [legalDocument, setLegalDocument] = React.useState<
+    keyof typeof LEGAL_DOCUMENTS | null
+  >(null);
+  const [demoDialogOpen, setDemoDialogOpen] = React.useState(false);
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-primary/15 selection:text-foreground">
@@ -667,46 +729,72 @@ export function LandingPage() {
           <CornerPolygons corners={["top-left", "bottom-right"]} size="lg" />
 
           <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 pb-16 sm:pt-16 sm:pb-20">
-            <Reveal initialVisible>
-              <div className="max-w-3xl space-y-5">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
-                  {t("landing.hero.eyebrow")}
-                </p>
-                <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-foreground leading-[1.12]">
-                  {t("landing.hero.title")}
-                </h1>
-                <p className="max-w-2xl text-sm sm:text-base text-muted-foreground leading-relaxed">
-                  {t("landing.hero.subtitle")}
-                </p>
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1">
-                  <Button asChild className="h-10 sm:h-11 px-6 text-sm font-semibold rounded-md gap-2">
-                    <Link href={isAuthenticated ? WORKSPACE_HOME_ROUTE : REGISTER_ROUTE}>
-                      <span>
-                        {t(
-                          isAuthenticated
-                            ? "landing.hero.primaryCtaAuth"
-                            : "landing.hero.primaryCta"
-                        )}
-                      </span>
-                      <ArrowRight className="size-4" />
-                    </Link>
-                  </Button>
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="h-10 sm:h-11 px-5 text-sm font-medium rounded-md border-border bg-background"
-                  >
-                    <Link href={isAuthenticated ? "#platform" : LOGIN_ROUTE}>
-                      {t(
-                        isAuthenticated
-                          ? "landing.hero.secondaryCta"
-                          : "landing.hero.loginCta"
-                      )}
-                    </Link>
-                  </Button>
+            <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.58fr)] lg:gap-16">
+              <Reveal initialVisible>
+                <div className="max-w-3xl space-y-5">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
+                    {t("landing.hero.eyebrow")}
+                  </p>
+                  <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-foreground leading-[1.12]">
+                    {t("landing.hero.title")}
+                  </h1>
+                  <p className="max-w-2xl text-sm sm:text-base text-muted-foreground leading-relaxed">
+                    {t("landing.hero.subtitle")}
+                  </p>
+                  <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 pt-1">
+                    <Button asChild className="h-10 sm:h-11 px-6 text-sm font-semibold rounded-md gap-2">
+                      <Link href={isAuthenticated ? WORKSPACE_HOME_ROUTE : REGISTER_ROUTE}>
+                        <span>
+                          {t(
+                            isAuthenticated
+                              ? "landing.hero.primaryCtaAuth"
+                              : "landing.hero.primaryCta"
+                          )}
+                        </span>
+                        <ArrowRight className="size-4" />
+                      </Link>
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setDemoDialogOpen(true)}
+                      className="h-10 sm:h-11 px-5 text-sm font-semibold rounded-md border-primary/40 bg-primary/5 text-primary hover:bg-primary/10 hover:text-primary gap-2"
+                    >
+                      <Calendar className="size-4" />
+                      <span>{t("landing.hero.demoCta")}</span>
+                    </Button>
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="h-10 sm:h-11 px-5 text-sm font-medium rounded-md border-border bg-background"
+                    >
+                      <Link href="#platform">
+                        {t("landing.hero.secondaryCta")}
+                      </Link>
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </Reveal>
+              </Reveal>
+
+              <Reveal initialVisible delayMs={100}>
+                <div className="relative flex min-h-64 items-center justify-center px-6 py-10 sm:min-h-72">
+                  <div
+                    aria-hidden="true"
+                    className="absolute size-56 rounded-full bg-primary/10 blur-3xl"
+                  />
+                  <div className="relative z-10 animate-float">
+                    <Image
+                      src="/logo_logix.png"
+                      alt="LogiX"
+                      width={300}
+                      height={300}
+                      priority
+                      className="h-auto w-52 object-contain drop-shadow-[0_0_20px_rgba(16,185,129,0.2)] sm:w-60"
+                    />
+                  </div>
+                </div>
+              </Reveal>
+            </div>
 
             <Reveal initialVisible delayMs={120} className="mt-10 sm:mt-14">
               <Card className="relative gap-0 py-0 rounded-lg border border-border bg-card shadow-sm ring-0 overflow-hidden">
@@ -1132,7 +1220,46 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* 5. Operational Workflow Grid */}
+        {/* 4. Why LogiX */}
+        <section
+          id="why-logix"
+          className="border-b border-border bg-background py-16 sm:py-20"
+        >
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <Reveal>
+              <div className="max-w-2xl space-y-3">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
+                  {t("landing.why.eyebrow")}
+                </p>
+                <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                  {t("landing.why.title")}
+                </h2>
+                <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
+                  {t("landing.why.subtitle")}
+                </p>
+              </div>
+            </Reveal>
+            <div className="mt-8 grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-border bg-border md:grid-cols-3">
+              {WHY_LOGIX_ITEMS.map((item, index) => (
+                <Reveal key={item.title} delayMs={index * 70}>
+                  <div className="h-full bg-card p-6">
+                    <span className="font-mono text-xs font-semibold text-primary">
+                      {`0${index + 1}`}
+                    </span>
+                    <h3 className="mt-4 text-sm font-semibold text-foreground">
+                      {t(item.title)}
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      {t(item.desc)}
+                    </p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 6. Operational Workflow Grid */}
         <section
           id="architecture"
           className="relative overflow-hidden border-b border-border bg-background py-16 sm:py-20 lg:py-24"
@@ -1179,7 +1306,7 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* 6. Enterprise FAQ (2-column split) */}
+        {/* 7. Enterprise FAQ (2-column split) */}
         <section id="faq" className="border-b border-border bg-muted/35 py-16 sm:py-20 lg:py-24">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-12 items-start">
@@ -1216,8 +1343,8 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* 7. Final CTA Band */}
-        <section className="bg-background py-16 sm:py-20">
+        {/* 8. Final CTA Band */}
+        <section id="demo" className="bg-background py-16 sm:py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <Reveal>
               <div className="relative overflow-hidden flex flex-col items-start justify-between gap-6 rounded-lg border border-border bg-muted/30 p-8 sm:p-10 lg:flex-row lg:items-center transition-colors duration-300 hover:border-primary/40">
@@ -1231,6 +1358,15 @@ export function LandingPage() {
                   </p>
                 </div>
                 <div className="relative z-10 flex flex-col sm:flex-row w-full sm:w-auto items-stretch sm:items-center gap-3 shrink-0">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setDemoDialogOpen(true)}
+                    className="h-10 px-5 text-sm font-medium rounded-md gap-2"
+                  >
+                    <Mail className="size-4" />
+                    {t("landing.cta.demo")}
+                  </Button>
                   {isAuthenticated ? (
                     <Button asChild className="h-10 px-5 text-sm font-semibold rounded-md gap-2">
                       <Link href={WORKSPACE_HOME_ROUTE}>
@@ -1291,6 +1427,35 @@ export function LandingPage() {
                   </ul>
                 </div>
               ))}
+              <div className="space-y-3">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
+                  {t("landing.footer.colLegal")}
+                </h3>
+                <ul className="space-y-2 text-xs text-muted-foreground">
+                  {(Object.keys(LEGAL_DOCUMENTS) as Array<keyof typeof LEGAL_DOCUMENTS>).map(
+                    (documentKey) => (
+                      <li key={documentKey}>
+                        <button
+                          type="button"
+                          onClick={() => setLegalDocument(documentKey)}
+                          className="transition-colors hover:text-foreground cursor-pointer"
+                        >
+                          {t(LEGAL_DOCUMENTS[documentKey].title)}
+                        </button>
+                      </li>
+                    )
+                  )}
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => setDemoDialogOpen(true)}
+                      className="transition-colors hover:text-foreground cursor-pointer"
+                    >
+                      {t("landing.footer.contact")}
+                    </button>
+                  </li>
+                </ul>
+              </div>
             </div>
           </Reveal>
           <div className="mt-10 flex flex-col-reverse items-start justify-between gap-4 border-t border-border/60 pt-6 sm:flex-row sm:items-center">
@@ -1302,7 +1467,73 @@ export function LandingPage() {
           </div>
         </div>
       </footer>
+
+      <DemoRequestDialog open={demoDialogOpen} onOpenChange={setDemoDialogOpen} />
+
+      <Dialog
+        open={legalDocument !== null}
+        onOpenChange={(open) => {
+          if (!open) setLegalDocument(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-2xl lg:max-w-3xl max-h-[88vh] overflow-y-auto rounded-2xl border border-border bg-card p-6 sm:p-8 text-card-foreground shadow-2xl gap-6">
+          <DialogHeader className="space-y-2 text-left border-b border-border/70 pb-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge
+                variant="outline"
+                className="border-primary/30 bg-primary/10 text-primary text-[11px] font-semibold uppercase tracking-wider px-2.5 py-0.5"
+              >
+                {t("landing.legal.complianceBadge")}
+              </Badge>
+              <span className="text-[11px] text-muted-foreground">
+                {t("landing.legal.effectiveDate")}
+              </span>
+            </div>
+            <DialogTitle className="flex items-center gap-2 text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+              <ShieldCheck className="size-5 text-primary shrink-0" />
+              <span>
+                {legalDocument ? t(LEGAL_DOCUMENTS[legalDocument].title) : ""}
+              </span>
+            </DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm leading-relaxed text-muted-foreground">
+              {legalDocument ? t(LEGAL_DOCUMENTS[legalDocument].subtitle) : ""}
+            </DialogDescription>
+          </DialogHeader>
+
+          {legalDocument ? (
+            <div className="space-y-4">
+              <div className="rounded-xl border border-primary/25 bg-primary/[0.05] p-4 text-xs sm:text-sm leading-relaxed text-foreground">
+                {t(LEGAL_DOCUMENTS[legalDocument].body)}
+              </div>
+              <div className="space-y-3">
+                {LEGAL_DOCUMENTS[legalDocument].sections.map((section) => (
+                  <section
+                    key={section.title}
+                    className="rounded-xl border border-border/80 bg-background/60 p-4 sm:p-5 space-y-2"
+                  >
+                    <h4 className="text-sm font-semibold text-foreground">
+                      {t(section.title)}
+                    </h4>
+                    <p className="text-xs sm:text-sm leading-relaxed text-muted-foreground">
+                      {t(section.body)}
+                    </p>
+                  </section>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          <DialogFooter className="border-t border-border/70 pt-4">
+            <Button
+              type="button"
+              onClick={() => setLegalDocument(null)}
+              className="h-10 px-5 text-sm font-semibold"
+            >
+              {t("landing.legal.closeBtn")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
-

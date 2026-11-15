@@ -245,8 +245,8 @@ export function AdminListView({
           </Button>
         }
       />
-      <div className="grid min-w-0 grid-cols-1 items-end gap-3 rounded-xl border border-border/70 bg-card p-4 @xl:grid-cols-[minmax(0,1fr)_12rem_auto]">
-        <div className="min-w-0 flex-1 space-y-1.5">
+      <div className="grid min-w-0 grid-cols-1 items-end gap-3 rounded-xl border border-border/70 bg-card p-4 @xl:grid-cols-[minmax(0,1fr)_14rem_auto]">
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
           <Label htmlFor="admin-search">{t("admin.filters.search")}</Label>
           <div className="relative">
             <Search
@@ -264,7 +264,7 @@ export function AdminListView({
             />
           </div>
         </div>
-        <div className="space-y-1.5">
+        <div className="flex flex-col gap-1.5">
           <Label htmlFor="admin-status">{t("admin.columns.status")}</Label>
           <Select
             value={query?.status || "all"}
@@ -274,7 +274,7 @@ export function AdminListView({
           >
             <SelectTrigger
               id="admin-status"
-              className="h-10 w-full rounded-lg bg-background"
+              className="h-10 w-full rounded-lg bg-background px-3 data-[size=default]:h-10"
             >
               <SelectValue />
             </SelectTrigger>
