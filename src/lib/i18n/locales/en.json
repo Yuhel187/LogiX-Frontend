@@ -6,7 +6,20 @@
     "expand": "Expand to full screen",
     "collapse": "Collapse sidebar",
     "newChat": "New conversation",
-    "openCopilot": "Open LogiX AI Assistant"
+    "openCopilot": "Open LogiX AI Assistant",
+    "history": "Conversation history",
+    "chatHistory": "Conversations",
+    "noHistory": "No conversations yet",
+    "initializingHistory": "Loading conversation history...",
+    "untitledThread": "Conversation",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "last7Days": "Previous 7 days",
+    "older": "Older",
+    "deleteChat": "Delete conversation",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "closeHistory": "Close history"
   },
   "admin": {
     "navTitle": "Platform Admin",

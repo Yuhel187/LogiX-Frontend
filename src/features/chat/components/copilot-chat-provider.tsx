@@ -3,6 +3,7 @@
 import * as React from "react";
 import { CopilotKit } from "@copilotkit/react-core/v2";
 import { useAuth } from "@/lib/auth";
+import { getOrCreateSessionId } from "@/features/chat/lib/session";
 
 export interface CopilotChatProviderProps {
   children: React.ReactNode;
@@ -13,7 +14,7 @@ const isServerSnapshot = () => false;
 const noopSubscribe = () => () => {};
 
 export function CopilotChatProvider({ children }: CopilotChatProviderProps) {
-  const { accessToken } = useAuth();
+  const { accessToken, isLoading } = useAuth();
   const isClient = React.useSyncExternalStore(
     noopSubscribe,
     isClientSnapshot,
@@ -33,11 +34,16 @@ export function CopilotChatProvider({ children }: CopilotChatProviderProps) {
   // Follows token refreshes so the agent never receives an expired token.
   const headers = React.useMemo(() => {
     const result: Record<string, string> = {};
+    if (isClient) {
+      const sessionId = getOrCreateSessionId();
+      if (sessionId) result["x-logix-chat-session-id"] = sessionId;
+    }
     if (accessToken) result.Authorization = `Bearer ${accessToken}`;
     return result;
-  }, [accessToken]);
+  }, [accessToken, isClient]);
 
-  if (!isClient) {
+  // Wait for hydration and resolved accessToken so mount-time /connect always carries JWT.
+  if (!isClient || isLoading || !accessToken) {
     return <>{children}</>;
   }
 

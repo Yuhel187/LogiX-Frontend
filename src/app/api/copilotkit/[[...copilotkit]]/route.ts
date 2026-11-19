@@ -4,6 +4,8 @@ import {
   createCopilotRuntimeHandler,
 } from "@copilotkit/runtime/v2";
 import type { AgentsConfig } from "@copilotkit/runtime/v2";
+import { getAguiBaseUrl } from "@/lib/agui-server";
+import { sqliteRunner } from "@/lib/sqlite-runner";
 
 process.env.COPILOTKIT_TELEMETRY_DISABLED = "true";
 process.env.DO_NOT_TRACK = "1";
@@ -11,10 +13,7 @@ process.env.DO_NOT_TRACK = "1";
 const AGENT_ID = "logix-copilot";
 
 // Agent runs go through the API gateway, which proxies /api/v1/agent to agent-service.
-const AGUI_BASE_URL =
-  process.env.LOGIX_AGUI_BASE_URL ??
-  process.env.NEXT_PUBLIC_LOGIX_AGUI_BASE_URL ??
-  "http://localhost:3000/api/v1/agent";
+const AGUI_BASE_URL = getAguiBaseUrl();
 
 function createLogixAgent(
   agentId: string,
@@ -89,6 +88,7 @@ function handleCopilotKitRequest(request: Request) {
 
   const runtime = new CopilotRuntime({
     agents,
+    runner: sqliteRunner,
     ɵtelemetry: {
       capture: async () => {},
     },

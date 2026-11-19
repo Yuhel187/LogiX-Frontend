@@ -43,3 +43,6 @@ next-env.d.ts
 # Harness core maintenance binary
 scripts/bin/harness
 scripts/bin/harness.exe
+
+# Local SQLite store for CopilotKit thread replay
+/.data/
