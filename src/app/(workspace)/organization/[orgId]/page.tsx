@@ -39,6 +39,7 @@ import {
   UnifiedMembersView,
   formatIdentityError,
 } from "@/features/identity";
+import { ModelConfigSettings } from "@/features/ai-config";
 import { cn } from "@/lib/utils";
 
 interface ActiveTenantProps {
@@ -306,6 +307,8 @@ function GeneralSettingsForm({
         tenantId={tenant.id}
         role={tenant.role}
       />
+
+      <ModelConfigSettings tenantId={tenant.id} />
 
       {/* Thiết lập tổ chức mặc định */}
       <div className="pt-6 border-t border-border/60 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
