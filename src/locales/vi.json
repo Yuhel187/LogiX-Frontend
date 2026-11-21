@@ -876,6 +876,51 @@
     "userRole": "Điều phối viên",
     "adminBadge": "Quyền Quản trị viên Vận hành"
   },
+  "globalSearch": {
+    "dialogTitle": "Tìm kiếm toàn cục & Điều hướng nhanh",
+    "inputPlaceholder": "Nhập mã đơn (SO-...), vận đơn (SHP-...), chuyến xe (TR-...), kho, SKU hoặc tên trang...",
+    "ClearInput": "Xóa từ khóa",
+    "searching": "Đang tra cứu dữ liệu vận hành...",
+    "noResultsTitle": "Không tìm thấy kết quả phù hợp",
+    "noResultsDesc": "Thử tìm bằng mã đơn hàng, mã vận đơn, mã chuyến xe, mã SKU hoặc hỏi Trợ lý AI bên dưới.",
+    "groups": {
+      "orders": "Đơn hàng (Sales Orders)",
+      "shipments": "Lô giao hàng (Shipments)",
+      "trips": "Chuyến xe & Lộ trình (Delivery Trips)",
+      "masterData": "Kho hàng, Sản phẩm & Đối tác (Master Data)",
+      "navigation": "Điều hướng màn hình",
+      "quickActions": "Trợ lý AI & Thao tác nhanh"
+    },
+    "badges": {
+      "order": "Đơn hàng",
+      "shipment": "Vận đơn",
+      "trip": "Chuyến xe",
+      "warehouse": "Kho hàng",
+      "product": "Sản phẩm",
+      "customer": "Khách hàng",
+      "vehicle": "Phương tiện",
+      "page": "Màn hình",
+      "action": "Thao tác"
+    },
+    "pages": {
+      "createOrder": "Tạo đơn hàng mới",
+      "createTrip": "Tạo chuyến xe giao hàng mới",
+      "accountSettings": "Cài đặt tài khoản cá nhân",
+      "organizationSettings": "Cài đặt thông tin tổ chức"
+    },
+    "actions": {
+      "askCopilotWithQuery": "Hỏi LogiX AI Copilot về \"{query}\"",
+      "askCopilotDefault": "Mở Trợ lý AI LogiX Copilot",
+      "askCopilotSubtitle": "Tra cứu thông minh, phân tích tồn kho & tối ưu lộ trình bằng AI",
+      "switchTheme": "Chuyển đổi chế độ Sáng / Tối",
+      "switchLanguage": "Chuyển sang tiếng Anh (Switch to English)"
+    },
+    "footer": {
+      "navigate": "Di chuyển",
+      "select": "Mở kết quả",
+      "close": "Đóng"
+    }
+  },
   "userMenu": {
     "profile": "Hồ sơ cá nhân",
     "settings": "Cài đặt tài khoản",
