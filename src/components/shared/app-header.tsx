@@ -13,6 +13,7 @@ import {
   Package,
   PanelLeft,
   Settings,
+  Sparkles,
   Truck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -207,6 +208,22 @@ export function AppHeader() {
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {/* LogiX AI Copilot Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => {
+            if (typeof window !== "undefined") {
+              window.dispatchEvent(new CustomEvent("logix:open-copilot"));
+            }
+          }}
+          className="relative size-9 rounded-lg text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 hover:bg-emerald-500/10 border border-emerald-500/20 cursor-pointer"
+          aria-label={t("chat.openCopilot") || "LogiX Copilot"}
+          title={t("chat.openCopilot") || "LogiX Copilot"}
+        >
+          <Sparkles className="size-4.5" />
+        </Button>
 
         {/* Theme Toggle Button */}
         <ThemeToggle />

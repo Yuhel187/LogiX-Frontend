@@ -1,5 +1,6 @@
 const SESSION_KEY = "logix_chat_session_id";
 const THREAD_KEY = "logix_chat_thread_id";
+const SCOPE_KEY = "logix_chat_scope";
 
 function createId(prefix: string) {
   const value =
@@ -60,9 +61,24 @@ export function getInitialThreadId(): string {
   return "";
 }
 
+/**
+ * Rotate the active local thread when switching user or tenant so requests
+ * never reuse a threadId belonging to a different actor.
+ */
+export function syncThreadScope(scope: string): string | null {
+  if (typeof window === "undefined" || !scope) return null;
+  const previousScope = localStorage.getItem(SCOPE_KEY);
+  localStorage.setItem(SCOPE_KEY, scope);
+  if (previousScope && previousScope !== scope) {
+    return createNewThreadId();
+  }
+  return null;
+}
+
 export function clearSessionAndThread(): void {
   if (typeof window !== "undefined") {
     localStorage.removeItem(SESSION_KEY);
     localStorage.removeItem(THREAD_KEY);
+    localStorage.removeItem(SCOPE_KEY);
   }
 }

@@ -2,11 +2,23 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { Maximize2, Minimize2, Plus, Sparkles } from "lucide-react";
-import { CopilotSidebar, useDefaultRenderTool, useInterrupt } from "@copilotkit/react-core/v2";
+import { History, Maximize2, Minimize2, Plus, Sparkles } from "lucide-react";
+import {
+  CopilotSidebar,
+  useDefaultRenderTool,
+  useInterrupt,
+} from "@copilotkit/react-core/v2";
+import { ChatHistoryDrawer } from "./chat-history-drawer";
 import { UniversalApprovalCard } from "./universal-approval-card";
+import { useChatThreads } from "@/features/chat/hooks/use-chat-threads";
 import { normalizeApprovalData } from "@/features/chat/lib/parse-approval-data";
-import { createNewThreadId, getInitialThreadId } from "@/features/chat/lib/session";
+import {
+  createNewThreadId,
+  getInitialThreadId,
+  saveThreadId,
+  syncThreadScope,
+} from "@/features/chat/lib/session";
+import { useAuth } from "@/lib/auth";
 import { useTranslation } from "@/lib/i18n";
 
 const DEFAULT_SIDEBAR_WIDTH = 400;
@@ -20,7 +32,9 @@ export interface LogixCopilotSidebarProps {
 interface LogixCopilotSidebarContentProps {
   agentId: string;
   threadId: string;
-  setThreadId: (id: string) => void;
+  chatResetVersion: number;
+  onSelectThread: (id: string) => void;
+  onNewChat: () => void;
   defaultOpen: boolean;
   width: number;
   isExpanded: boolean;
@@ -30,13 +44,19 @@ interface LogixCopilotSidebarContentProps {
 function LogixCopilotSidebarContent({
   agentId,
   threadId,
-  setThreadId,
+  chatResetVersion,
+  onSelectThread,
+  onNewChat,
   defaultOpen,
   width,
   isExpanded,
   setIsExpanded,
 }: LogixCopilotSidebarContentProps) {
   const { t } = useTranslation();
+  const [isHistoryOpen, setIsHistoryOpen] = React.useState(false);
+  const { threads, isLoading: isLoadingThreads, fetchThreads, deleteThread } =
+    useChatThreads();
+
   const isProduction = process.env.NODE_ENV === "production";
   const showToolResults =
     process.env.NEXT_PUBLIC_SHOW_TOOL_RESULTS !== undefined
@@ -63,6 +83,11 @@ function LogixCopilotSidebarContent({
       );
     },
   });
+
+  const handleOpenHistory = React.useCallback(() => {
+    setIsHistoryOpen(true);
+    void fetchThreads();
+  }, [fetchThreads]);
 
   const headerSlot = React.useMemo(
     () => ({
@@ -130,11 +155,22 @@ function LogixCopilotSidebarContent({
 
           {/* Header Actions */}
           <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={handleOpenHistory}
+              className="h-9 w-9 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer shrink-0"
+              title={t("chat.history") || "Lịch sử hội thoại"}
+              aria-label="Chat history"
+            >
+              <History className="h-[19px] w-[19px] stroke-[2]" />
+            </button>
+
             {/* New Thread Button */}
             <button
               type="button"
               onClick={() => {
-                setThreadId(createNewThreadId());
+                onNewChat();
+                void fetchThreads();
               }}
               className="h-9 w-9 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer shrink-0"
               title={t("chat.newChat") || "Cuộc trò chuyện mới"}
@@ -156,7 +192,7 @@ function LogixCopilotSidebarContent({
         </div>
       ),
     }),
-    [isExpanded, setIsExpanded, setThreadId, t]
+    [fetchThreads, handleOpenHistory, isExpanded, onNewChat, setIsExpanded, t]
   );
 
   const labelsSlot = React.useMemo(
@@ -172,16 +208,35 @@ function LogixCopilotSidebarContent({
   );
 
   return (
-    <CopilotSidebar
-      agentId={agentId}
-      threadId={threadId}
-      // Do not key on locale: remounting re-runs CopilotKit's body-margin effect and corrupts the layout. Labels update reactively.
-      key={threadId}
-      defaultOpen={defaultOpen}
-      width={isExpanded ? "100vw" : width}
-      header={headerSlot}
-      labels={labelsSlot}
-    />
+    <>
+      <CopilotSidebar
+        agentId={agentId}
+        threadId={threadId}
+        // Remount when thread changes so CopilotKit triggers connectAgent() and replays history from SQLite.
+        key={`${threadId}:${chatResetVersion}`}
+        defaultOpen={defaultOpen}
+        width={isExpanded ? "100vw" : width}
+        header={headerSlot}
+        labels={labelsSlot}
+      />
+
+      {isHistoryOpen ? (
+        <ChatHistoryDrawer
+          isOpen={isHistoryOpen}
+          onClose={() => setIsHistoryOpen(false)}
+          threads={threads}
+          activeThreadId={threadId}
+          onSelectThread={onSelectThread}
+          onNewChat={() => {
+            onNewChat();
+            void fetchThreads();
+          }}
+          onDeleteThread={deleteThread}
+          isLoading={isLoadingThreads}
+          isExpanded={isExpanded}
+        />
+      ) : null}
+    </>
   );
 }
 
@@ -190,12 +245,21 @@ export function LogixCopilotSidebar({
   agentId = "default",
   width = DEFAULT_SIDEBAR_WIDTH,
 }: LogixCopilotSidebarProps) {
+  const { user, activeTenant } = useAuth();
   const [isExpanded, setIsExpanded] = React.useState(false);
   const [threadId, setThreadId] = React.useState("");
+  const [chatResetVersion, setChatResetVersion] = React.useState(0);
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
-      setThreadId(getInitialThreadId());
+      const scope = user?.id ? `${user.id}:${activeTenant?.id ?? ""}` : "";
+      const rotated = scope ? syncThreadScope(scope) : null;
+      if (rotated) {
+        setThreadId(rotated);
+        setChatResetVersion((v) => v + 1);
+      } else {
+        setThreadId(getInitialThreadId());
+      }
     }, 0);
 
     const handleSync = () => {
@@ -210,7 +274,7 @@ export function LogixCopilotSidebar({
       clearTimeout(timer);
       window.removeEventListener("focus", handleSync);
     };
-  }, []);
+  }, [activeTenant?.id, user?.id]);
 
   React.useEffect(() => {
     document.body.classList.toggle("copilot-sidebar-expanded", isExpanded);
@@ -230,7 +294,7 @@ export function LogixCopilotSidebar({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isExpanded]);
 
-  // Listen for programmatic open events (e.g. from global command palette)
+  // Listen for programmatic open events (e.g. from header button or global command palette)
   React.useEffect(() => {
     const handleOpenRequest = (event: Event) => {
       const customEvent = event as CustomEvent<{ prompt?: string }>;
@@ -238,7 +302,7 @@ export function LogixCopilotSidebar({
 
       const openSidebarIfClosed = () => {
         const toggleBtn = document.querySelector(
-          'button[data-slot="chat-toggle-button"], button[data-testid="copilot-chat-toggle"]'
+          'button[data-slot="chat-toggle-button"], button[data-testid="copilot-chat-toggle"], [data-copilot-sidebar-trigger], button[aria-label*="Copilot"], button[aria-label*="Chat"], button[data-testid="copilot-trigger"]'
         ) as HTMLButtonElement | null;
         const aside = document.querySelector(
           "aside[data-copilot-sidebar]"
@@ -286,6 +350,22 @@ export function LogixCopilotSidebar({
       window.removeEventListener("logix:open-copilot", handleOpenRequest);
   }, []);
 
+  const handleSelectThread = React.useCallback(
+    (selectedId: string) => {
+      if (selectedId === threadId) return;
+      saveThreadId(selectedId);
+      setThreadId(selectedId);
+      setChatResetVersion((v) => v + 1);
+    },
+    [threadId]
+  );
+
+  const handleNewChat = React.useCallback(() => {
+    const nextId = createNewThreadId();
+    setThreadId(nextId);
+    setChatResetVersion(0);
+  }, []);
+
   if (!threadId) {
     return null;
   }
@@ -294,7 +374,9 @@ export function LogixCopilotSidebar({
     <LogixCopilotSidebarContent
       agentId={agentId}
       threadId={threadId}
-      setThreadId={setThreadId}
+      chatResetVersion={chatResetVersion}
+      onSelectThread={handleSelectThread}
+      onNewChat={handleNewChat}
       defaultOpen={defaultOpen}
       width={width}
       isExpanded={isExpanded}

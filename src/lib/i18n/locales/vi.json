@@ -6,7 +6,20 @@
     "expand": "Mở rộng toàn màn hình",
     "collapse": "Thu nhỏ thanh bên",
     "newChat": "Cuộc trò chuyện mới",
-    "openCopilot": "Mở Trợ lý AI LogiX"
+    "openCopilot": "Mở Trợ lý AI LogiX",
+    "history": "Lịch sử hội thoại",
+    "chatHistory": "Hội thoại",
+    "noHistory": "Chưa có cuộc trò chuyện nào",
+    "initializingHistory": "Đang tải lịch sử hội thoại...",
+    "untitledThread": "Cuộc trò chuyện",
+    "today": "Hôm nay",
+    "yesterday": "Hôm qua",
+    "last7Days": "7 ngày trước",
+    "older": "Cũ hơn",
+    "deleteChat": "Xóa cuộc trò chuyện",
+    "delete": "Xóa",
+    "cancel": "Hủy",
+    "closeHistory": "Đóng lịch sử"
   },
   "admin": {
     "navTitle": "Quản trị nền tảng",
