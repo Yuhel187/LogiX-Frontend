@@ -863,6 +863,51 @@
     "userRole": "Dispatcher",
     "adminBadge": "Operations Admin Access"
   },
+  "globalSearch": {
+    "dialogTitle": "Global Search & Command Palette",
+    "inputPlaceholder": "Search orders (SO-...), shipments (SHP-...), trips (TR-...), warehouses, SKUs, or pages...",
+    "ClearInput": "Clear search",
+    "searching": "Searching operational records...",
+    "noResultsTitle": "No matching records found",
+    "noResultsDesc": "Try searching by order number, shipment code, trip code, SKU, or ask LogiX AI Copilot below.",
+    "groups": {
+      "orders": "Sales Orders",
+      "shipments": "Shipments",
+      "trips": "Delivery Trips & Routes",
+      "masterData": "Warehouses, Products & Partners (Master Data)",
+      "navigation": "Quick Navigation",
+      "quickActions": "AI Copilot & Quick Actions"
+    },
+    "badges": {
+      "order": "Order",
+      "shipment": "Shipment",
+      "trip": "Trip",
+      "warehouse": "Warehouse",
+      "product": "Product",
+      "customer": "Customer",
+      "vehicle": "Vehicle",
+      "page": "Page",
+      "action": "Action"
+    },
+    "pages": {
+      "createOrder": "Create new sales order",
+      "createTrip": "Create new delivery trip",
+      "accountSettings": "Account settings",
+      "organizationSettings": "Organization settings"
+    },
+    "actions": {
+      "askCopilotWithQuery": "Ask LogiX AI Copilot about \"{query}\"",
+      "askCopilotDefault": "Open LogiX AI Copilot",
+      "askCopilotSubtitle": "Intelligent lookup, stockout analysis & route optimization via AI",
+      "switchTheme": "Toggle Light / Dark theme",
+      "switchLanguage": "Chuyển sang Tiếng Việt (Switch to Vietnamese)"
+    },
+    "footer": {
+      "navigate": "Navigate",
+      "select": "Open",
+      "close": "Close"
+    }
+  },
   "userMenu": {
     "profile": "Profile",
     "settings": "Account Settings",

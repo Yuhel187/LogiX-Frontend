@@ -12,9 +12,7 @@ import {
   Menu,
   Package,
   PanelLeft,
-  Search,
   Settings,
-  Sparkles,
   Truck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -31,6 +29,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { LanguageToggle } from "@/components/shared/language-toggle";
+import { GlobalSearchPalette } from "@/components/shared/global-search-palette";
 import { useSidebar } from "@/components/shared/sidebar-context";
 import { useTranslation } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
@@ -122,23 +121,7 @@ export function AppHeader() {
       </div>
 
       {/* Center/Search palette */}
-      <div className="app-header-search mx-2 hidden min-w-0 max-w-xs flex-1 sm:mx-4 md:block xl:max-w-sm 2xl:max-w-md">
-        <button
-          type="button"
-          onClick={() => {}}
-          className="flex w-full items-center justify-between gap-2 rounded-xl border border-input/80 bg-muted/30 px-3 py-2 text-sm text-muted-foreground shadow-2xs transition-colors hover:border-ring hover:bg-muted/60 focus:outline-hidden min-w-0 cursor-pointer"
-        >
-          <span className="flex items-center gap-2 min-w-0 overflow-hidden">
-            <Search className="size-4 text-muted-foreground shrink-0" />
-            <span className="truncate text-xs sm:text-sm text-left">
-              {t("header.searchPlaceholder")}
-            </span>
-          </span>
-          <kbd className="pointer-events-none hidden select-none items-center gap-1 rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] font-medium opacity-100 sm:flex border border-border/60 shrink-0">
-            <span>⌘</span>K
-          </kbd>
-        </button>
-      </div>
+      <GlobalSearchPalette />
 
       {/* Right Actions: Language, Notifications, ThemeToggle, User Avatar */}
       <div className="app-header-actions flex shrink-0 items-center gap-2 sm:gap-2.5">
@@ -224,22 +207,6 @@ export function AppHeader() {
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
-
-        {/* LogiX AI Copilot Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => {
-            if (typeof window !== "undefined") {
-              window.dispatchEvent(new CustomEvent("logix:open-copilot"));
-            }
-          }}
-          className="relative size-9 rounded-lg text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 hover:bg-emerald-500/10 border border-emerald-500/20 cursor-pointer"
-          aria-label={t("chat.openCopilot") || "LogiX Copilot"}
-          title={t("chat.openCopilot") || "LogiX Copilot"}
-        >
-          <Sparkles className="size-4.5" />
-        </Button>
 
         {/* Theme Toggle Button */}
         <ThemeToggle />
