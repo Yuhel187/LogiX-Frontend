@@ -279,6 +279,9 @@ export function InviteMemberDialog({
                   <p className="text-[11px] text-muted-foreground">
                     {t("iam.invitations.rolesHint")}
                   </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {t("iam.invitations.singleEmailMultiRoleNote")}
+                  </p>
                 </div>
 
                 {isLoadingRoles ? (

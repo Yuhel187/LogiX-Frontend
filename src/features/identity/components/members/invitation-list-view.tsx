@@ -33,6 +33,7 @@ import { useAuth } from "@/lib/auth";
 import { PermissionGuard } from "@/components/shared/permission-guard";
 import {
   getInvitationsApi,
+  getInvitationLinkApi,
   resendInvitationApi,
   revokeInvitationApi,
   deleteInvitationApi,
@@ -135,14 +136,13 @@ export function InvitationListView({ tenantId }: InvitationListViewProps) {
     });
   }, [invitations, searchQuery, statusFilter]);
 
-  // Sao chép liên kết mời
+  // Sao chép liên kết mời (chỉ đọc, không xoay token và không gửi lại email)
   const handleCopyLink = async (id: string) => {
     setActionLoadingId(id);
     try {
-      const result = await resendInvitationApi(id, effectiveTenantId);
+      const result = await getInvitationLinkApi(id, effectiveTenantId);
       await navigator.clipboard.writeText(result.inviteLink);
       toast.success(t("iam.invitations.copied"));
-      await loadInvitations();
     } catch (cause) {
       toast.error(formatIdentityError(cause, t, "tenant.copyInviteLinkError"));
     } finally {

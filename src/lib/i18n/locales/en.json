@@ -415,7 +415,14 @@
       "poolDescription": "Only available shipments for this warehouse are listed. Their versions are checked when selected.",
       "poolEmpty": "No eligible shipments are available for this warehouse.",
       "selectedCount": "{count} selected · {total} eligible",
-      "demand": "Weight {weight} · volume {volume}"
+      "demand": "Weight {weight} · volume {volume}",
+      "selectAllForRemoval": "Select all shipments to remove from draft trip",
+      "inRouteSequence": "In route · #{sequence}",
+      "notInRouteYet": "Not in route yet",
+      "refreshPool": "Refresh list",
+      "poolEmptyForWarehouse": "No eligible shipments available for warehouse {warehouse}.",
+      "poolEligibilityHint": "Shipments appear here only when READY_TO_SHIP, belonging to this warehouse, and not assigned to another trip.",
+      "openShipmentsPage": "Open Shipments"
     },
     "cancel": {
       "title": "Cancel trip before dispatch",
@@ -518,6 +525,20 @@
       "requiredFields": "Choose a warehouse and enter a valid planned start time.",
       "warehouseLoad": "Unable to load the selected warehouse details.",
       "assignmentLoad": "Unable to load vehicle or Driver options."
+    },
+    "assignment": {
+      "busyTag": "Busy · {tripNumber}",
+      "insufficientCapacityTag": "Insufficient capacity",
+      "vehicleBusyViolation": "This vehicle is currently assigned to active trip {tripNumber}. Choose an available vehicle or unassign it.",
+      "driverBusyViolation": "This driver is currently assigned to active trip {tripNumber}. Choose an available driver or unassign them.",
+      "viewBlockingTrip": "View active trip",
+      "capacityViolation": "Selected vehicle does not have enough capacity for current manifest totals (required {requiredWeight} kg / {requiredVolume} m³, capacity {capacityWeight} kg / {capacityVolume} m³).",
+      "availabilityLoadError": "Could not verify vehicle and driver availability."
+    },
+    "maps": {
+      "navigateStop": "Navigate",
+      "openRoute": "Open route in Google Maps",
+      "openRouteLeg": "Google Maps leg {leg} (#{from}–#{to})"
     }
   },
   "shipments": {
@@ -1255,7 +1276,9 @@
     "aiInstructionsResetSuccess": "AI instructions reset to system default.",
     "aiInstructionsResetError": "Failed to reset AI instructions.",
     "aiInstructionsMaxLengthError": "Custom AI instructions must not exceed 2000 characters.",
-    "aiInstructionsReadonly": "Read-only mode. You need the AI instructions management permission (iam:ai-instructions:manage) to edit."
+    "aiInstructionsReadonly": "Read-only mode. You need the AI instructions management permission (iam:ai-instructions:manage) to edit.",
+    "tabLegalProfile": "Legal Profile",
+    "tabAiInstructions": "AI Instructions"
   },
   "account": {
     "pageTitle": "Account Settings",
@@ -1519,7 +1542,8 @@
         "organizationLabel": "Organization",
         "verifying": "Verifying invitation link...",
         "successMessage": "Welcome to {tenantName}! Redirecting to workspace..."
-      }
+      },
+      "singleEmailMultiRoleNote": "You can select multiple roles at once; only a single invitation email will be sent."
     }
   },
   "inventory": {

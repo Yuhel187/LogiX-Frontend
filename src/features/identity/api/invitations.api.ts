@@ -52,6 +52,27 @@ export async function createInvitationApi(
 }
 
 /**
+ * 3a. Lấy liên kết mời hiện tại (chỉ đọc, không xoay token và không gửi lại email)
+ */
+export async function getInvitationLinkApi(
+  invitationId: string,
+  tenantId?: string,
+  accessToken?: string
+): Promise<{ id: string; inviteLink: string; expiresAt: string }> {
+  const headers: Record<string, string> = {};
+  if (tenantId) {
+    headers["x-tenant-id"] = tenantId;
+  }
+
+  const response = await authFetch(`${API_BASE_URL}/iam/invitations/${invitationId}/link`, {
+    method: "GET",
+    headers,
+    accessToken,
+  });
+  return handleResponse<{ id: string; inviteLink: string; expiresAt: string }>(response);
+}
+
+/**
  * 3. Gửi lại lời mời (Gia hạn thêm 7 ngày và sinh token mới)
  */
 export async function resendInvitationApi(

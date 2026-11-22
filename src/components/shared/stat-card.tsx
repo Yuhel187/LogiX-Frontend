@@ -37,17 +37,17 @@ export function StatCard({
   return (
     <Card
       className={cn(
-        "relative overflow-hidden border border-border/80 bg-card/60 backdrop-blur-sm shadow-xs transition-all hover:shadow-md hover:border-border",
+        "relative flex h-full flex-col overflow-hidden border border-border/80 bg-card/60 backdrop-blur-sm shadow-xs transition-all hover:shadow-md hover:border-border",
         className
       )}
     >
-      <CardContent className="p-5">
+      <CardContent className="flex flex-1 flex-col justify-between p-5">
         <div className="flex items-start justify-between gap-3">
-          <div className="space-y-1.5">
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <div className="min-w-0 space-y-1.5">
+            <p className="min-h-8 text-xs font-medium uppercase leading-4 tracking-wider text-muted-foreground">
               {title}
             </p>
-            <div className="text-2xl font-bold tracking-tight text-foreground">
+            <div className="text-2xl font-bold tracking-tight text-foreground tabular-nums">
               {value}
             </div>
           </div>
@@ -64,7 +64,7 @@ export function StatCard({
         </div>
 
         {(trend || description) && (
-          <div className="mt-3.5 flex flex-wrap items-center gap-2 pt-1 border-t border-border/40 text-xs">
+          <div className="mt-auto flex flex-wrap items-center gap-2 border-t border-border/40 pt-3 text-xs">
             {trend && (
               <span
                 className={cn(

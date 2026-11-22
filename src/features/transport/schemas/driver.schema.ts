@@ -64,6 +64,8 @@ export const driverTripStopSchema = z
     status: z.enum(["PENDING", "DELIVERED", "FAILED"]),
     version,
     isNext: z.boolean(),
+    latitude: z.string().nullable().optional(),
+    longitude: z.string().nullable().optional(),
     contact: driverTripContactSchema,
   })
   .strict();

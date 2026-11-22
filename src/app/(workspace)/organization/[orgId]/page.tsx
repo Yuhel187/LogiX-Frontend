@@ -16,6 +16,8 @@ import {
   ShieldAlert,
   Lock,
   LogOut,
+  FileText,
+  Sparkles,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -308,17 +310,6 @@ function GeneralSettingsForm({
         </form>
       </div>
 
-      <LegalProfileForm
-        key={tenant.id}
-        tenantId={tenant.id}
-        role={tenant.role}
-      />
-
-      <TenantAiInstructionsForm
-        key={`ai-${tenant.id}`}
-        tenantId={tenant.id}
-      />
-
       <ModelConfigSettings
         key={`model-${tenant.id}`}
         tenantId={tenant.id}
@@ -580,9 +571,9 @@ function OrganizationDetailContent({ orgId }: { orgId: string }) {
   const { t } = useTranslation();
 
   // Active tab: default is "members"
-  const [activeTab, setActiveTab] = useState<"members" | "roles" | "general">(
-    "members",
-  );
+  const [activeTab, setActiveTab] = useState<
+    "members" | "roles" | "legal-profile" | "ai-instructions" | "general"
+  >("members");
 
   const currentTenant = activeTenant?.id === orgId ? activeTenant : null;
 
@@ -608,8 +599,8 @@ function OrganizationDetailContent({ orgId }: { orgId: string }) {
       </div>
 
       {currentTenant ? (
-        <div className="w-full rounded-2xl border border-border/70 bg-card shadow-xs overflow-hidden">
-          {/* Top Tabs Bar: Gồm 3 tab tinh gọn (Thành viên & Lời mời, Vai trò, Cài đặt chung) */}
+        <div className="w-full rounded-2xl border border-border/70 bg-card shadow-xs">
+          {/* Top Tabs Bar: 5 tab tách biệt rõ ràng */}
           <div className="flex items-center gap-2 sm:gap-6 px-6 sm:px-8 pt-4 sm:pt-6 border-b border-border/60 overflow-x-auto scrollbar-none">
             {/* Tab 1: Thành viên & Lời mời */}
             <button
@@ -641,7 +632,37 @@ function OrganizationDetailContent({ orgId }: { orgId: string }) {
               <span>{t("iam.roles.title")}</span>
             </button>
 
-            {/* Tab 3: Cài đặt chung */}
+            {/* Tab 3: Hồ sơ pháp lý */}
+            <button
+              type="button"
+              onClick={() => setActiveTab("legal-profile")}
+              className={cn(
+                "flex items-center gap-2 pb-3.5 px-1 text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap",
+                activeTab === "legal-profile"
+                  ? "border-emerald-600 text-emerald-600 dark:text-emerald-400 dark:border-emerald-400"
+                  : "border-transparent text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <FileText className="size-4" />
+              <span>{t("tenant.tabLegalProfile")}</span>
+            </button>
+
+            {/* Tab 4: Chỉ dẫn AI */}
+            <button
+              type="button"
+              onClick={() => setActiveTab("ai-instructions")}
+              className={cn(
+                "flex items-center gap-2 pb-3.5 px-1 text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap",
+                activeTab === "ai-instructions"
+                  ? "border-emerald-600 text-emerald-600 dark:text-emerald-400 dark:border-emerald-400"
+                  : "border-transparent text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <Sparkles className="size-4" />
+              <span>{t("tenant.tabAiInstructions")}</span>
+            </button>
+
+            {/* Tab 5: Cài đặt chung */}
             <button
               type="button"
               onClick={() => setActiveTab("general")}
@@ -663,6 +684,17 @@ function OrganizationDetailContent({ orgId }: { orgId: string }) {
               <UnifiedMembersView tenantId={currentTenant.id} />
             ) : activeTab === "roles" ? (
               <RoleListView tenantId={currentTenant.id} />
+            ) : activeTab === "legal-profile" ? (
+              <LegalProfileForm
+                key={`legal-${currentTenant.id}`}
+                tenantId={currentTenant.id}
+                role={currentTenant.role}
+              />
+            ) : activeTab === "ai-instructions" ? (
+              <TenantAiInstructionsForm
+                key={`ai-${currentTenant.id}`}
+                tenantId={currentTenant.id}
+              />
             ) : (
               <GeneralSettingsForm
                 key={

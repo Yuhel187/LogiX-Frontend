@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { RefreshCw } from "lucide-react";
+import { ExternalLink, MapPin, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,6 +23,7 @@ import type { TripDetail } from "../schemas/trip.schema";
 import type { RouteApprovalPreview, RoutePlan } from "../schemas/route.schema";
 import type { MutationScope } from "../utils/mutation-intent";
 import { leafletGeometry, routeCoordinate, routePreviewUsable } from "../utils/route-draft";
+import { buildMultiStopGoogleMapsLegs } from "../utils/google-maps-link";
 import { tripError } from "../utils/trip-errors";
 import { RouteStopOrder } from "./route-stop-order";
 
@@ -32,6 +33,7 @@ interface TripRoutePanelProps {
   disabled: boolean;
   onReload: () => void;
   onLockedChange: (locked: boolean) => void;
+  onActiveRouteStopOrderChange?: (order: Map<string, number> | null) => void;
 }
 
 export function TripRoutePanel(props: TripRoutePanelProps) {
@@ -41,7 +43,7 @@ export function TripRoutePanel(props: TripRoutePanelProps) {
 }
 
 function RouteWorkspace({
-  trip, scope, disabled, onReload, onLockedChange,
+  trip, scope, disabled, onReload, onLockedChange, onActiveRouteStopOrderChange,
 }: TripRoutePanelProps) {
   const { t, locale } = useTranslation();
   const { hasPermission } = useAuth();
@@ -104,6 +106,48 @@ function RouteWorkspace({
     onLockedChange(command.locked || previewing || optimization.busy);
     return () => onLockedChange(false);
   }, [command.locked, previewing, optimization.busy, onLockedChange]);
+
+  useEffect(() => {
+    if (!onActiveRouteStopOrderChange) return;
+    if (!selected) {
+      onActiveRouteStopOrderChange(null);
+      return;
+    }
+    const order = new Map<string, number>();
+    selected.stops.forEach((stop, index) => {
+      order.set(stop.tripStopId, stop.sequence ?? index + 1);
+    });
+    onActiveRouteStopOrderChange(order);
+    return () => onActiveRouteStopOrderChange(null);
+  }, [onActiveRouteStopOrderChange, selected]);
+
+  const googleMapsLegs = useMemo(() => {
+    const orderedStops = ids.flatMap((id, index) => {
+      const stop = activeStops.find((item) => item.id === id);
+      if (!stop) return [];
+      return [
+        {
+          sequence: index + 1,
+          addressLine: stop.addressSnapshot.addressLine,
+          ward: stop.addressSnapshot.ward,
+          district: stop.addressSnapshot.district,
+          province: stop.addressSnapshot.province,
+          latitude: stop.latitude,
+          longitude: stop.longitude,
+        },
+      ];
+    });
+    return buildMultiStopGoogleMapsLegs(orderedStops, {
+      origin: {
+        addressLine: trip.depotSnapshot.addressLine,
+        ward: trip.depotSnapshot.ward,
+        district: trip.depotSnapshot.district,
+        province: trip.depotSnapshot.province,
+        latitude: trip.depotSnapshot.latitude,
+        longitude: trip.depotSnapshot.longitude,
+      },
+    });
+  }, [activeStops, ids, trip.depotSnapshot]);
 
   useEffect(() => {
     if (!preview) return;
@@ -184,9 +228,46 @@ function RouteWorkspace({
             </Button>
           </AlertDescription></Alert>
         ) : null}
-        <Button variant="outline" disabled={loading || command.busy} onClick={() => setRetry((value) => value + 1)}>
-          <RefreshCw className="size-4" aria-hidden="true" />{t("transport.actions.refresh")}
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" disabled={loading || command.busy} onClick={() => setRetry((value) => value + 1)}>
+            <RefreshCw className="size-4" aria-hidden="true" />{t("transport.actions.refresh")}
+          </Button>
+          {googleMapsLegs.length === 1 ? (
+            <Button asChild variant="outline">
+              <a
+                href={googleMapsLegs[0]!.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5"
+              >
+                <MapPin className="size-4" aria-hidden="true" />
+                <span>{t("transport.maps.openRoute")}</span>
+                <ExternalLink className="size-3.5" aria-hidden="true" />
+              </a>
+            </Button>
+          ) : googleMapsLegs.length > 1 ? (
+            googleMapsLegs.map((leg) => (
+              <Button key={leg.index} asChild variant="outline" size="sm">
+                <a
+                  href={leg.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5"
+                >
+                  <MapPin className="size-3.5" aria-hidden="true" />
+                  <span>
+                    {t("transport.maps.openRouteLeg", {
+                      leg: leg.index,
+                      from: leg.startSequence,
+                      to: leg.endSequence,
+                    })}
+                  </span>
+                  <ExternalLink className="size-3" aria-hidden="true" />
+                </a>
+              </Button>
+            ))
+          ) : null}
+        </div>
         {!loading && !loadError && plans.length === 0 ? <p className="text-sm">{t("transport.route.empty")}</p> : null}
         {plans.length > 0 ? (
           <div className="space-y-2">

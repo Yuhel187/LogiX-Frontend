@@ -265,6 +265,7 @@ function DraftAssignment({
   const intent = useMutationIntent(scope, `trip:${trip.id}:assignment`);
   const [vehicleId, setVehicleId] = useState<string | null>(trip.vehicleId);
   const [driverId, setDriverId] = useState<string | null>(trip.driverId);
+  const [assignmentViolation, setAssignmentViolation] = useState(false);
   const [unknownOutcome, setUnknownOutcome] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const [saving, setSaving] = useState(false);
@@ -383,6 +384,10 @@ function DraftAssignment({
           driverId={driverId}
           onVehicleChange={setVehicleId}
           onDriverChange={setDriverId}
+          currentTripId={trip.id}
+          requiredWeight={trip.totalWeight}
+          requiredVolume={trip.totalVolume}
+          onValidationChange={setAssignmentViolation}
           disabled={locked}
         />
         <p className="text-xs text-muted-foreground">
@@ -428,6 +433,7 @@ function DraftAssignment({
             trip.status !== "DRAFT" ||
             !intent.ready ||
             intent.storageFailed ||
+            (!intent.intent && assignmentViolation) ||
             saving
           }
           onClick={() => void save()}
@@ -498,6 +504,7 @@ export function TripDetailScreen({ tripId }: { tripId: string }) {
   const [retry, setRetry] = useState(0);
   const [routeLocked, setRouteLocked] = useState(false);
   const [dispatchPending, setDispatchPending] = useState(false);
+  const [activeRouteStopOrder, setActiveRouteStopOrder] = useState<Map<string, number> | null>(null);
   const canUpdate = hasPermission(TRANSPORT_PERMISSIONS.tripUpdate);
   const canDispatch = hasPermission(TRANSPORT_PERMISSIONS.tripDispatch);
 
@@ -689,11 +696,13 @@ export function TripDetailScreen({ tripId }: { tripId: string }) {
         disabled={refreshFailed}
         onReload={reload}
         onLockedChange={setRouteLocked}
+        onActiveRouteStopOrderChange={setActiveRouteStopOrder}
       />
       <TripManifestPanel
         trip={trip}
         scope={scope}
         canUpdate={canUpdate && !refreshFailed && !routeLocked}
+        activeRouteStopOrder={activeRouteStopOrder}
         onReload={reload}
       />
       <TripCancelDialog

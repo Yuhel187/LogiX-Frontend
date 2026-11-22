@@ -204,6 +204,12 @@
 }
 
 /* Workspace scrolls in main; modal compensation must not duplicate Copilot's body margin. */
+html:has(#main-content),
+body:has(#main-content) {
+  height: 100%;
+  overflow: hidden;
+}
+
 body:has(#main-content)[data-scroll-locked] {
   padding-right: 0 !important;
 }

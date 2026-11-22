@@ -415,7 +415,14 @@
       "poolDescription": "Chỉ hiển thị lô giao khả dụng của kho này. Phiên bản được kiểm tra khi chọn.",
       "poolEmpty": "Không có lô giao đủ điều kiện cho kho này.",
       "selectedCount": "Đã chọn {count} · {total} lô đủ điều kiện",
-      "demand": "Khối lượng {weight} · thể tích {volume}"
+      "demand": "Khối lượng {weight} · thể tích {volume}",
+      "selectAllForRemoval": "Chọn tất cả lô giao để gỡ khỏi chuyến nháp",
+      "inRouteSequence": "Trong lộ trình · #{sequence}",
+      "notInRouteYet": "Chưa vào lộ trình",
+      "refreshPool": "Tải lại danh sách",
+      "poolEmptyForWarehouse": "Không có lô giao đủ điều kiện tại kho {warehouse}.",
+      "poolEligibilityHint": "Lô giao chỉ hiển thị khi ở trạng thái Sẵn sàng giao (READY_TO_SHIP), thuộc đúng kho này và chưa được gán vào chuyến khác.",
+      "openShipmentsPage": "Mở danh sách lô giao hàng"
     },
     "cancel": {
       "title": "Hủy chuyến trước xuất giao",
@@ -518,6 +525,20 @@
       "requiredFields": "Hãy chọn kho và nhập thời gian bắt đầu dự kiến hợp lệ.",
       "warehouseLoad": "Không tải được thông tin kho đã chọn.",
       "assignmentLoad": "Không tải được danh sách xe hoặc tài xế."
+    },
+    "assignment": {
+      "busyTag": "Đang bận · {tripNumber}",
+      "insufficientCapacityTag": "Không đủ tải",
+      "vehicleBusyViolation": "Phương tiện đang được sử dụng ở chuyến {tripNumber} (đã duyệt hoặc đang giao). Vui lòng chọn phương tiện khác đang rảnh hoặc gỡ phân công.",
+      "driverBusyViolation": "Tài xế đang phụ trách chuyến {tripNumber} (đã duyệt hoặc đang giao). Vui lòng chọn tài xế khác đang rảnh hoặc gỡ phân công.",
+      "viewBlockingTrip": "Xem chuyến đang giữ",
+      "capacityViolation": "Phương tiện không đủ sức chứa cho tổng danh sách lô giao hiện tại (cần {requiredWeight} kg / {requiredVolume} m³, sức chứa xe {capacityWeight} kg / {capacityVolume} m³).",
+      "availabilityLoadError": "Không kiểm tra được trạng thái sẵn sàng của xe và tài xế."
+    },
+    "maps": {
+      "navigateStop": "Chỉ đường",
+      "openRoute": "Mở lộ trình trên Google Maps",
+      "openRouteLeg": "Google Maps chặng {leg} (#{from}–#{to})"
     }
   },
   "shipments": {
@@ -1255,7 +1276,9 @@
     "aiInstructionsResetSuccess": "Đã khôi phục chỉ dẫn AI về mặc định hệ thống.",
     "aiInstructionsResetError": "Không thể khôi phục chỉ dẫn AI mặc định.",
     "aiInstructionsMaxLengthError": "Chỉ dẫn AI tùy chỉnh không được vượt quá 2000 ký tự.",
-    "aiInstructionsReadonly": "Bạn đang xem ở chế độ chỉ đọc. Cần quyền cấu hình chỉ dẫn AI (iam:ai-instructions:manage) để chỉnh sửa."
+    "aiInstructionsReadonly": "Bạn đang xem ở chế độ chỉ đọc. Cần quyền cấu hình chỉ dẫn AI (iam:ai-instructions:manage) để chỉnh sửa.",
+    "tabLegalProfile": "Hồ sơ pháp lý",
+    "tabAiInstructions": "Chỉ dẫn AI"
   },
   "account": {
     "pageTitle": "Cài đặt tài khoản",
@@ -1519,7 +1542,8 @@
         "organizationLabel": "Tổ chức",
         "verifying": "Đang xác thực thông tin liên kết mời...",
         "successMessage": "Chào mừng bạn đến với {tenantName}! Đang chuyển hướng..."
-      }
+      },
+      "singleEmailMultiRoleNote": "Bạn có thể chọn nhiều vai trò cùng lúc; hệ thống chỉ gửi 1 email mời duy nhất."
     }
   },
   "inventory": {
