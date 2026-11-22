@@ -9,6 +9,7 @@ import type {
   ModelConfigParameters,
   ModelConfigSelection,
   ModelConfigTestResult,
+  ModelOption,
   ProviderAvailability,
 } from "../types/model-config.types";
 
@@ -16,6 +17,19 @@ type JsonRecord = Record<string, unknown>;
 
 function isRecord(value: unknown): value is JsonRecord {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function parseModelCatalog(value: unknown): { provider: string; models: ModelOption[] } {
+  if (!isRecord(value) || typeof value.provider !== "string" || !Array.isArray(value.models)) {
+    throw new ApiError(200, "Invalid model catalog response", "INVALID_RESPONSE");
+  }
+  const models = value.models.map((item): ModelOption => {
+    if (!isRecord(item) || typeof item.id !== "string" || typeof item.displayName !== "string") {
+      throw new ApiError(200, "Invalid model catalog response", "INVALID_RESPONSE");
+    }
+    return { id: item.id, displayName: item.displayName };
+  });
+  return { provider: value.provider, models };
 }
 
 function optionalInteger(value: unknown): number | undefined {
@@ -105,6 +119,18 @@ export async function getModelConfigApi(signal?: AbortSignal): Promise<ModelConf
   return parseModelConfig(await handleResponse<unknown>(response));
 }
 
+export async function getProviderModelsApi(
+  provider: string,
+  signal?: AbortSignal,
+): Promise<ModelOption[]> {
+  const query = new URLSearchParams({ provider });
+  const response = await authFetch(`${apiBaseUrl}/agent/model-config/models?${query.toString()}`, {
+    method: "GET",
+    signal,
+  });
+  return parseModelCatalog(await handleResponse<unknown>(response)).models;
+}
+
 export async function updateModelConfigApi(
   selection: ModelConfigSelection,
   expectedVersion: number,
@@ -142,6 +168,12 @@ export function modelConfigErrorKey(cause: unknown): string {
     }
     if (cause.code === "MODEL_CONFIG_PROVIDER_NOT_CONFIGURED") {
       return "tenant.modelConfig.errors.providerNotConfigured";
+    }
+    if (cause.code === "MODEL_CATALOG_PROVIDER_NOT_CONFIGURED") {
+      return "tenant.modelConfig.errors.providerNotConfigured";
+    }
+    if (cause.code === "MODEL_CATALOG_UNAVAILABLE") {
+      return "tenant.modelConfig.errors.catalogUnavailable";
     }
     if (cause.code === "MODEL_CONFIG_INVALID") {
       return "tenant.modelConfig.errors.invalid";

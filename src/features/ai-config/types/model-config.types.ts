@@ -36,3 +36,8 @@ export interface ModelConfigTestResult {
   provider: string;
   model: string;
 }
+
+export interface ModelOption {
+  id: string;
+  displayName: string;
+}

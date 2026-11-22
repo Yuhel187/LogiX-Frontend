@@ -17,13 +17,13 @@ import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth/auth-context";
 import { useTranslation } from "@/lib/i18n";
 import {
   getModelConfigApi,
+  getProviderModelsApi,
   modelConfigErrorKey,
   testModelConfigApi,
   updateModelConfigApi,
@@ -32,6 +32,7 @@ import {
   MODEL_CONFIG_PERMISSIONS,
   type ModelConfig,
   type ProviderAvailability,
+  type ModelOption,
 } from "../types/model-config.types";
 
 function ModelConfigSkeleton() {
@@ -76,11 +77,35 @@ export function ModelConfigSettings({ tenantId }: { tenantId: string }) {
   const [config, setConfig] = useState<ModelConfig | null>(null);
   const [provider, setProvider] = useState("");
   const [model, setModel] = useState("");
+  const [models, setModels] = useState<ModelOption[]>([]);
+  const [isModelsLoading, setIsModelsLoading] = useState(false);
+  const [modelsErrorKey, setModelsErrorKey] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
   const [errorKey, setErrorKey] = useState<string | null>(null);
   const [lastTested, setLastTested] = useState(false);
+
+  const loadModels = useCallback(async (providerName: string, signal?: AbortSignal) => {
+    if (providerName !== "gemini") {
+      setModels([]);
+      setModelsErrorKey(null);
+      return;
+    }
+    setIsModelsLoading(true);
+    setModelsErrorKey(null);
+    try {
+      const options = await getProviderModelsApi(providerName, signal);
+      setModels(options);
+    } catch (cause) {
+      if (!signal?.aborted) {
+        setModels([]);
+        setModelsErrorKey(modelConfigErrorKey(cause));
+      }
+    } finally {
+      if (!signal?.aborted) setIsModelsLoading(false);
+    }
+  }, []);
 
   const loadConfig = useCallback(async (signal?: AbortSignal) => {
     if (!canRead) {
@@ -93,15 +118,17 @@ export function ModelConfigSettings({ tenantId }: { tenantId: string }) {
     try {
       const nextConfig = await getModelConfigApi(signal);
       setConfig(nextConfig);
-      setProvider(nextConfig.provider ?? nextConfig.availableProviders.find((item) => item.configured)?.provider ?? "");
+      const nextProvider = nextConfig.provider ?? nextConfig.availableProviders.find((item) => item.configured)?.provider ?? "";
+      setProvider(nextProvider);
       setModel(nextConfig.model ?? "");
+      await loadModels(nextProvider, signal);
       setLastTested(false);
     } catch (cause) {
       if (!signal?.aborted) setErrorKey(modelConfigErrorKey(cause));
     } finally {
       if (!signal?.aborted) setIsLoading(false);
     }
-  }, [canRead]);
+  }, [canRead, loadModels]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -122,6 +149,11 @@ export function ModelConfigSettings({ tenantId }: { tenantId: string }) {
     setModel("");
     setLastTested(false);
     setErrorKey(null);
+    void loadModels(nextProvider);
+  };
+
+  const handleModelCatalogRetry = () => {
+    void loadModels(provider);
   };
 
   const handleTest = async () => {
@@ -273,7 +305,7 @@ export function ModelConfigSettings({ tenantId }: { tenantId: string }) {
           <label htmlFor="agent-model-name" className="text-sm font-semibold text-foreground">
             {t("tenant.modelConfig.modelLabel")}
           </label>
-          <Input
+          <NativeSelect
             id="agent-model-name"
             value={model}
             onChange={(event) => {
@@ -281,15 +313,28 @@ export function ModelConfigSettings({ tenantId }: { tenantId: string }) {
               setLastTested(false);
               setErrorKey(null);
             }}
-            placeholder={selectedProvider?.modelPrefix ? `${selectedProvider.modelPrefix}...` : t("tenant.modelConfig.modelPlaceholder")}
-            disabled={!canManage || isSaving || isTesting || !selectedProvider?.configured}
+            disabled={!canManage || isSaving || isTesting || isModelsLoading || !selectedProvider?.configured || models.length === 0}
             aria-describedby="agent-model-name-hint"
-            className="h-9"
-          />
+            className="w-full"
+          >
+            <NativeSelectOption value="">
+              {isModelsLoading ? t("tenant.modelConfig.modelsLoading") : t("tenant.modelConfig.modelPlaceholder")}
+            </NativeSelectOption>
+            {models.map((option) => (
+              <NativeSelectOption key={option.id} value={option.id}>
+                {option.displayName} ({option.id})
+              </NativeSelectOption>
+            ))}
+          </NativeSelect>
           <p id="agent-model-name-hint" className="text-xs leading-relaxed text-muted-foreground">
-            {selectedProvider?.modelPrefix
-              ? t("tenant.modelConfig.modelHint", { prefix: selectedProvider.modelPrefix })
-              : t("tenant.modelConfig.modelHintGeneric")}
+            {modelsErrorKey ? (
+              <span className="text-destructive">
+                {t(modelsErrorKey)}{" "}
+                <button type="button" className="font-semibold underline underline-offset-2" onClick={handleModelCatalogRetry}>
+                  {t("common.retry")}
+                </button>
+              </span>
+            ) : isModelsLoading ? t("tenant.modelConfig.modelsLoading") : models.length > 0 ? t("tenant.modelConfig.modelHint") : t("tenant.modelConfig.modelsEmpty")}
           </p>
         </div>
       </div>

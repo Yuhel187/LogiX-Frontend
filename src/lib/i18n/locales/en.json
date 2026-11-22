@@ -1052,7 +1052,7 @@
       "notConfiguredShort": "not ready",
       "modelLabel": "Model",
       "modelPlaceholder": "For example: openai/gpt-4o-mini",
-      "modelHint": "The model must start with the {prefix} prefix.",
+      "modelHint": "Choose a model from the Google Gemini catalog.",
       "modelHintGeneric": "Enter a model supported by the selected provider.",
       "credentialHint": "Credentials are managed by the service environment. The UI never stores an API key.",
       "noProviderConfigured": "No provider credentials are configured. Configure the agent-service environment first.",
@@ -1072,7 +1072,10 @@
         "testFailed": "The provider test failed. Check the model and try again.",
         "network": "Unable to reach agent-service. Check the connection and try again.",
         "unavailable": "Unable to load model configuration. Please try again."
-      }
+      },
+      "modelsLoading": "Loading models…",
+      "modelsEmpty": "No compatible Gemini models were found.",
+      "catalogUnavailable": "Unable to load the model catalog from Google."
     },
     "freePlan": "Free",
     "noTenants": "You do not belong to any organization",
