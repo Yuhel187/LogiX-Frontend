@@ -41,6 +41,7 @@ import {
   UnifiedMembersView,
   formatIdentityError,
 } from "@/features/identity";
+import { ModelConfigSettings } from "@/features/ai-config";
 import { cn } from "@/lib/utils";
 
 interface ActiveTenantProps {
@@ -315,6 +316,11 @@ function GeneralSettingsForm({
 
       <TenantAiInstructionsForm
         key={`ai-${tenant.id}`}
+        tenantId={tenant.id}
+      />
+
+      <ModelConfigSettings
+        key={`model-${tenant.id}`}
         tenantId={tenant.id}
       />
 
