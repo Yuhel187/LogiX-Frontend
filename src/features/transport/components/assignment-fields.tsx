@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { AlertCircle, AlertTriangle, RefreshCw } from "lucide-react";
 import {
   getCachedDriverById,
   getCachedDrivers,
@@ -22,7 +23,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { formatDecimal } from "@/lib/format";
 import { useTranslation } from "@/lib/i18n";
+import { getTripResourceAvailabilityApi } from "../api/trips.api";
+import type {
+  BusyDriver,
+  BusyVehicle,
+  TripResourceAvailability,
+} from "../schemas/trip.schema";
 
 interface AssignmentFieldsProps {
   vehicleId: string | null;
@@ -31,9 +39,22 @@ interface AssignmentFieldsProps {
   onDriverChange: (id: string | null) => void;
   disabled?: boolean;
   idPrefix: string;
+  currentTripId?: string;
+  requiredWeight?: string;
+  requiredVolume?: string;
+  onValidationChange?: (hasViolation: boolean) => void;
 }
 
 const SEARCH_DEBOUNCE_MS = 250;
+
+function parseNumeric(value: string | number | null | undefined): number {
+  if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  return 0;
+}
 
 export function AssignmentFields({
   vehicleId,
@@ -42,8 +63,12 @@ export function AssignmentFields({
   onDriverChange,
   disabled = false,
   idPrefix,
+  currentTripId,
+  requiredWeight,
+  requiredVolume,
+  onValidationChange,
 }: AssignmentFieldsProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [vehicleQuery, setVehicleQuery] = useState("");
   const [driverQuery, setDriverQuery] = useState("");
   const [debouncedVehicleQuery, setDebouncedVehicleQuery] = useState("");
@@ -65,6 +90,11 @@ export function AssignmentFields({
   const [currentDriverResult, setCurrentDriverResult] = useState<{
     id: string;
     value: Driver | null;
+  } | null>(null);
+  const [availabilityResult, setAvailabilityResult] = useState<{
+    key: string;
+    data: TripResourceAvailability | null;
+    failed: boolean;
   } | null>(null);
   const [retry, setRetry] = useState(0);
 
@@ -88,12 +118,15 @@ export function AssignmentFields({
 
   const vehicleKey = JSON.stringify([debouncedVehicleQuery, retry]);
   const driverKey = JSON.stringify([debouncedDriverQuery, retry]);
+  const availabilityKey = JSON.stringify([currentTripId ?? null, retry]);
   const vehicleData =
     vehicleListResult?.key === vehicleKey ? vehicleListResult : null;
   const driverData =
     driverListResult?.key === driverKey ? driverListResult : null;
-  const vehicles = vehicleData?.vehicles ?? [];
-  const drivers = driverData?.drivers ?? [];
+  const availabilityData =
+    availabilityResult?.key === availabilityKey ? availabilityResult : null;
+  const vehicles = useMemo(() => vehicleData?.vehicles ?? [], [vehicleData]);
+  const drivers = useMemo(() => driverData?.drivers ?? [], [driverData]);
   const loading = vehicleData === null || driverData === null;
   const vehicleInList = Boolean(
     vehicleId && vehicles.some((item) => item.id === vehicleId)
@@ -116,6 +149,25 @@ export function AssignmentFields({
       !driverInList &&
       currentDriverResult?.id === driverId &&
       currentDriverResult.value === null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    getTripResourceAvailabilityApi(
+      currentTripId ? { excludeTripId: currentTripId } : undefined,
+      controller.signal,
+    )
+      .then((data) => {
+        if (!controller.signal.aborted) {
+          setAvailabilityResult({ key: availabilityKey, data, failed: false });
+        }
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) {
+          setAvailabilityResult({ key: availabilityKey, data: null, failed: true });
+        }
+      });
+    return () => controller.abort();
+  }, [availabilityKey, currentTripId]);
 
   useEffect(() => {
     let current = true;
@@ -221,16 +273,69 @@ export function AssignmentFields({
     };
   }, [driverId, driverInList, retry]);
 
-  const vehicleOptions = vehicles.some((item) => item.id === vehicleId)
-    ? vehicles
-    : currentVehicle && currentVehicle.id === vehicleId
-      ? [currentVehicle, ...vehicles]
-      : vehicles;
-  const driverOptions = drivers.some((item) => item.id === driverId)
-    ? drivers
-    : currentDriver && currentDriver.id === driverId
-      ? [currentDriver, ...drivers]
-      : drivers;
+  const vehicleOptions = useMemo(
+    () =>
+      vehicles.some((item) => item.id === vehicleId)
+        ? vehicles
+        : currentVehicle && currentVehicle.id === vehicleId
+          ? [currentVehicle, ...vehicles]
+          : vehicles,
+    [currentVehicle, vehicleId, vehicles],
+  );
+  const driverOptions = useMemo(
+    () =>
+      drivers.some((item) => item.id === driverId)
+        ? drivers
+        : currentDriver && currentDriver.id === driverId
+          ? [currentDriver, ...drivers]
+          : drivers,
+    [currentDriver, driverId, drivers],
+  );
+
+  const busyDriverById = useMemo(() => {
+    const map = new Map<string, BusyDriver>();
+    for (const item of availabilityData?.data?.busyDrivers ?? []) {
+      map.set(item.driverId, item);
+    }
+    return map;
+  }, [availabilityData]);
+
+  const busyVehicleById = useMemo(() => {
+    const map = new Map<string, BusyVehicle>();
+    for (const item of availabilityData?.data?.busyVehicles ?? []) {
+      map.set(item.vehicleId, item);
+    }
+    return map;
+  }, [availabilityData]);
+
+  const neededWeight = parseNumeric(requiredWeight);
+  const neededVolume = parseNumeric(requiredVolume);
+
+  const selectedVehicle = useMemo(
+    () => (vehicleId ? vehicleOptions.find((item) => item.id === vehicleId) ?? null : null),
+    [vehicleId, vehicleOptions],
+  );
+
+  const selectedVehicleBusy = vehicleId ? busyVehicleById.get(vehicleId) ?? null : null;
+  const selectedDriverBusy = driverId ? busyDriverById.get(driverId) ?? null : null;
+
+  const weightExceeded =
+    selectedVehicle !== null &&
+    neededWeight > 0 &&
+    neededWeight > parseNumeric(selectedVehicle.capacityWeight);
+  const volumeExceeded =
+    selectedVehicle !== null &&
+    neededVolume > 0 &&
+    neededVolume > parseNumeric(selectedVehicle.capacityVolume);
+  const capacityExceeded = weightExceeded || volumeExceeded;
+
+  const hasViolation = Boolean(
+    selectedVehicleBusy || selectedDriverBusy || capacityExceeded,
+  );
+
+  useEffect(() => {
+    onValidationChange?.(hasViolation);
+  }, [hasViolation, onValidationChange]);
 
   return (
     <div className="grid min-w-0 grid-cols-1 gap-4 @container @min-[36rem]:grid-cols-2">
@@ -256,16 +361,38 @@ export function AssignmentFields({
             id={`${idPrefix}-vehicle`}
             className="w-full"
             aria-label={t("transport.fields.vehicle")}
+            aria-invalid={Boolean(selectedVehicleBusy || capacityExceeded)}
           >
             <SelectValue placeholder={t("transport.fields.optional")} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="none">{t("transport.fields.unassigned")}</SelectItem>
-            {vehicleOptions.map((vehicle) => (
-              <SelectItem key={vehicle.id} value={vehicle.id}>
-                {vehicle.code} · {vehicle.licensePlate}
-              </SelectItem>
-            ))}
+            {vehicleOptions.map((vehicle) => {
+              const busy = busyVehicleById.get(vehicle.id);
+              const overWeight =
+                neededWeight > 0 &&
+                neededWeight > parseNumeric(vehicle.capacityWeight);
+              const overVolume =
+                neededVolume > 0 &&
+                neededVolume > parseNumeric(vehicle.capacityVolume);
+              const tags: string[] = [];
+              if (busy) {
+                tags.push(
+                  t("transport.assignment.busyTag", { tripNumber: busy.tripNumber }),
+                );
+              }
+              if (overWeight || overVolume) {
+                tags.push(t("transport.assignment.insufficientCapacityTag"));
+              }
+              return (
+                <SelectItem key={vehicle.id} value={vehicle.id}>
+                  {vehicle.code} · {vehicle.licensePlate} (
+                  {formatDecimal(vehicle.capacityWeight, locale)} kg ·{" "}
+                  {formatDecimal(vehicle.capacityVolume, locale)} m³)
+                  {tags.length > 0 ? ` — ${tags.join(" · ")}` : ""}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
       </div>
@@ -291,19 +418,97 @@ export function AssignmentFields({
             id={`${idPrefix}-driver`}
             className="w-full"
             aria-label={t("transport.fields.driver")}
+            aria-invalid={Boolean(selectedDriverBusy)}
           >
             <SelectValue placeholder={t("transport.fields.optional")} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="none">{t("transport.fields.unassigned")}</SelectItem>
-            {driverOptions.map((driver) => (
-              <SelectItem key={driver.id} value={driver.id}>
-                {driver.code} · {driver.displayName}
-              </SelectItem>
-            ))}
+            {driverOptions.map((driver) => {
+              const busy = busyDriverById.get(driver.id);
+              return (
+                <SelectItem key={driver.id} value={driver.id}>
+                  {driver.code} · {driver.displayName}
+                  {busy
+                    ? ` — ${t("transport.assignment.busyTag", { tripNumber: busy.tripNumber })}`
+                    : ""}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
       </div>
+
+      {selectedVehicleBusy ? (
+        <Alert variant="destructive" role="alert" className="col-span-full">
+          <AlertTriangle aria-hidden="true" className="size-4" />
+          <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+            <span>
+              {t("transport.assignment.vehicleBusyViolation", {
+                tripNumber: selectedVehicleBusy.tripNumber,
+              })}
+            </span>
+            <Link
+              href={`/transport/${encodeURIComponent(selectedVehicleBusy.tripId)}`}
+              className="font-medium underline underline-offset-4"
+            >
+              {t("transport.assignment.viewBlockingTrip")}
+            </Link>
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      {selectedDriverBusy ? (
+        <Alert variant="destructive" role="alert" className="col-span-full">
+          <AlertTriangle aria-hidden="true" className="size-4" />
+          <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+            <span>
+              {t("transport.assignment.driverBusyViolation", {
+                tripNumber: selectedDriverBusy.tripNumber,
+              })}
+            </span>
+            <Link
+              href={`/transport/${encodeURIComponent(selectedDriverBusy.tripId)}`}
+              className="font-medium underline underline-offset-4"
+            >
+              {t("transport.assignment.viewBlockingTrip")}
+            </Link>
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      {capacityExceeded && selectedVehicle ? (
+        <Alert variant="destructive" role="alert" className="col-span-full">
+          <AlertTriangle aria-hidden="true" className="size-4" />
+          <AlertDescription>
+            {t("transport.assignment.capacityViolation", {
+              requiredWeight: formatDecimal(requiredWeight ?? "0", locale),
+              capacityWeight: formatDecimal(selectedVehicle.capacityWeight, locale),
+              requiredVolume: formatDecimal(requiredVolume ?? "0", locale),
+              capacityVolume: formatDecimal(selectedVehicle.capacityVolume, locale),
+            })}
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      {availabilityData?.failed ? (
+        <Alert variant="destructive" className="col-span-full">
+          <AlertCircle aria-hidden="true" />
+          <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+            {t("transport.assignment.availabilityLoadError")}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setRetry((value) => value + 1)}
+            >
+              <RefreshCw aria-hidden="true" className="size-4" />
+              {t("transport.actions.retry")}
+            </Button>
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
       {failed ? (
         <Alert variant="destructive" className="col-span-full">
           <AlertCircle aria-hidden="true" />
@@ -316,7 +521,7 @@ export function AssignmentFields({
               onClick={() => setRetry((value) => value + 1)}
             >
               <RefreshCw aria-hidden="true" className="size-4" />
-              {t("common.retry")}
+              {t("transport.actions.retry")}
             </Button>
           </AlertDescription>
         </Alert>

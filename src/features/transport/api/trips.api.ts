@@ -27,6 +27,7 @@ import {
   tripDetailSchema,
   tripOperationSchema,
   tripPageSchema,
+  tripResourceAvailabilitySchema,
   tripSummarySchema,
   updateTripSchema,
   type AddShipmentsInput,
@@ -41,6 +42,7 @@ import {
   type TripListParams,
   type TripOperation,
   type TripPage,
+  type TripResourceAvailability,
   type TripSummary,
   type UpdateTripInput,
 } from "../schemas/trip.schema";
@@ -144,6 +146,22 @@ export async function listEligibleShipmentsApi(
     { method: "GET", signal }
   );
   return eligibleShipmentPageSchema.parse(
+    await handleResponse<unknown>(response)
+  );
+}
+
+export async function getTripResourceAvailabilityApi(
+  params?: { excludeTripId?: string },
+  signal?: AbortSignal
+): Promise<TripResourceAvailability> {
+  const query = params?.excludeTripId
+    ? toQueryString({ excludeTripId: params.excludeTripId })
+    : "";
+  const response = await authFetch(
+    `${BASE_URL}/resource-availability${query}`,
+    { method: "GET", signal }
+  );
+  return tripResourceAvailabilitySchema.parse(
     await handleResponse<unknown>(response)
   );
 }

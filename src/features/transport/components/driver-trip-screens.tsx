@@ -8,9 +8,11 @@ import {
   CheckCircle2,
   ChevronRight,
   Clock,
+  ExternalLink,
   History,
   Info,
   MapPin,
+  Navigation,
   Phone,
   RefreshCw,
   ShieldAlert,
@@ -70,6 +72,10 @@ import {
   type DriverTripSummary,
 } from "../schemas/driver.schema";
 import type { MutationScope } from "../utils/mutation-intent";
+import {
+  buildMultiStopGoogleMapsLegs,
+  buildSingleStopGoogleMapsUrl,
+} from "../utils/google-maps-link";
 import { tripError, tripOutcomeUnknown } from "../utils/trip-errors";
 
 const PAGE_SIZE = 20;
@@ -630,6 +636,25 @@ export function DriverTripDetailScreen({ tripId }: { tripId: string }) {
   const totalCount = trip ? trip.stops.length : 0;
   const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
+  const googleMapsLegs = useMemo(() => {
+    if (!trip) return [];
+    const pendingStops = trip.stops
+      .filter((s) => s.status === "PENDING")
+      .sort((a, b) => a.approvedSequence - b.approvedSequence);
+    const targetStops = pendingStops.length > 0 ? pendingStops : trip.stops;
+    return buildMultiStopGoogleMapsLegs(
+      targetStops.map((stop) => ({
+        sequence: stop.approvedSequence,
+        addressLine: stop.contact.addressLine,
+        ward: stop.contact.ward,
+        district: stop.contact.district,
+        province: stop.contact.province,
+        latitude: stop.latitude ?? null,
+        longitude: stop.longitude ?? null,
+      })),
+    );
+  }, [trip]);
+
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6 min-w-0">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -684,30 +709,30 @@ export function DriverTripDetailScreen({ tripId }: { tripId: string }) {
         </div>
       ) : trip ? (
         <>
-          {/* Summary KPI Tiles */}
-          <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Card className="rounded-xl border bg-card p-4 shadow-xs">
+          {/* Summary Metadata Strip — unified neutral enterprise surfaces */}
+          <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <Card className="rounded-lg border-border bg-card p-4 shadow-none">
               <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <Warehouse aria-hidden="true" className="size-5" />
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                  <Warehouse aria-hidden="true" className="size-4" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-medium text-muted-foreground">{t("transport.driver.warehouse")}</p>
-                  <p className="truncate text-sm font-semibold text-foreground">
+                  <p className="text-xs text-muted-foreground">{t("transport.driver.warehouse")}</p>
+                  <p className="truncate text-sm font-medium text-foreground">
                     {snapshotValue(trip.depotSnapshot, ["name", "code"]) || t("transport.driver.notAvailable")}
                   </p>
                 </div>
               </div>
             </Card>
 
-            <Card className="rounded-xl border bg-card p-4 shadow-xs">
+            <Card className="rounded-lg border-border bg-card p-4 shadow-none">
               <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                  <Truck aria-hidden="true" className="size-5" />
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                  <Truck aria-hidden="true" className="size-4" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-medium text-muted-foreground">{t("transport.driver.vehicle")}</p>
-                  <p className="truncate text-sm font-semibold text-foreground">
+                  <p className="text-xs text-muted-foreground">{t("transport.driver.vehicle")}</p>
+                  <p className="truncate text-sm font-medium text-foreground">
                     {snapshotValue(trip.vehicleSnapshot, [
                       "licensePlate",
                       "plateNumber",
@@ -720,14 +745,14 @@ export function DriverTripDetailScreen({ tripId }: { tripId: string }) {
               </div>
             </Card>
 
-            <Card className="rounded-xl border bg-card p-4 shadow-xs">
+            <Card className="rounded-lg border-border bg-card p-4 shadow-none">
               <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
-                  <User aria-hidden="true" className="size-5" />
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                  <User aria-hidden="true" className="size-4" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-medium text-muted-foreground">{t("transport.driver.assignedDriver")}</p>
-                  <p className="truncate text-sm font-semibold text-foreground">
+                  <p className="text-xs text-muted-foreground">{t("transport.driver.assignedDriver")}</p>
+                  <p className="truncate text-sm font-medium text-foreground">
                     {snapshotValue(trip.driverSnapshot, [
                       "displayName",
                       "name",
@@ -738,22 +763,22 @@ export function DriverTripDetailScreen({ tripId }: { tripId: string }) {
               </div>
             </Card>
 
-            <Card className="rounded-xl border bg-card p-4 shadow-xs">
+            <Card className="rounded-lg border-border bg-card p-4 shadow-none">
               <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                  <CheckCircle2 aria-hidden="true" className="size-5" />
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                  <CheckCircle2 aria-hidden="true" className="size-4" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs font-medium text-muted-foreground">{t("transport.driver.progress", {
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="truncate text-xs text-muted-foreground">{t("transport.driver.progress", {
                       completed: completedCount,
                       total: totalCount,
                     })}</p>
-                    <span className="text-xs font-bold text-foreground">{progressPercent}%</span>
+                    <span className="text-xs font-semibold tabular-nums text-foreground">{progressPercent}%</span>
                   </div>
                   <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
                     <div
-                      className="h-full rounded-full bg-emerald-500 transition-all duration-300"
+                      className="h-full rounded-full bg-primary transition-all duration-300"
                       style={{ width: `${progressPercent}%` }}
                     />
                   </div>
@@ -763,10 +788,10 @@ export function DriverTripDetailScreen({ tripId }: { tripId: string }) {
           </div>
 
           {isSuperAdmin ? (
-            <Alert className="border-blue-500/20 bg-blue-500/5">
-              <ShieldAlert className="size-4 text-blue-600 dark:text-blue-400" />
-              <AlertTitle className="text-blue-900 dark:text-blue-200 font-semibold">{t("transport.driver.adminModeTitle")}</AlertTitle>
-              <AlertDescription className="text-xs text-blue-800 dark:text-blue-300">
+            <Alert className="border-border bg-muted/40">
+              <ShieldAlert className="size-4 text-muted-foreground" />
+              <AlertTitle className="font-semibold text-foreground">{t("transport.driver.adminModeTitle")}</AlertTitle>
+              <AlertDescription className="text-xs text-muted-foreground">
                 {t("transport.driver.adminModeDescription", {
                   actor: user?.displayName ?? user?.email ?? "",
                 })}
@@ -782,16 +807,51 @@ export function DriverTripDetailScreen({ tripId }: { tripId: string }) {
           ) : null}
 
           <section className="space-y-4" aria-label={t("transport.driver.stopsTitle")}>
-            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between border-b pb-3">
+            <div className="flex flex-col gap-3 border-b border-border pb-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="text-lg font-bold tracking-tight text-foreground">{t("transport.driver.stopsTitle")}</h2>
+                <h2 className="text-lg font-semibold tracking-tight text-foreground">{t("transport.driver.stopsTitle")}</h2>
                 <p className="text-xs text-muted-foreground">
                   {t("transport.driver.nextStopRule")}
                 </p>
               </div>
-              <Badge variant="secondary" className="self-start sm:self-auto text-xs">
-                {t("transport.driver.totalStopsBadge", { count: trip.stops.length })}
-              </Badge>
+              <div className="flex flex-wrap items-center gap-2">
+                {googleMapsLegs.length === 1 ? (
+                  <Button asChild variant="outline" size="sm" className="gap-1.5">
+                    <a
+                      href={googleMapsLegs[0]!.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Navigation aria-hidden="true" className="size-3.5" />
+                      <span>{t("transport.maps.openRoute")}</span>
+                      <ExternalLink aria-hidden="true" className="size-3" />
+                    </a>
+                  </Button>
+                ) : googleMapsLegs.length > 1 ? (
+                  googleMapsLegs.map((leg) => (
+                    <Button key={leg.index} asChild variant="outline" size="sm" className="gap-1.5">
+                      <a
+                        href={leg.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Navigation aria-hidden="true" className="size-3.5" />
+                        <span>
+                          {t("transport.maps.openRouteLeg", {
+                            leg: leg.index,
+                            from: leg.startSequence,
+                            to: leg.endSequence,
+                          })}
+                        </span>
+                        <ExternalLink aria-hidden="true" className="size-3" />
+                      </a>
+                    </Button>
+                  ))
+                ) : null}
+                <Badge variant="secondary" className="text-xs font-normal">
+                  {t("transport.driver.totalStopsBadge", { count: trip.stops.length })}
+                </Badge>
+              </div>
             </div>
             {trip.stops.map((stop) => (
               <DriverStopCard
@@ -967,37 +1027,52 @@ function DriverStopCard({
   const isDelivered = stop.status === "DELIVERED";
   const isFailed = stop.status === "FAILED";
 
-  const cardBorderClass = isDelivered
-    ? "border-emerald-500/30 bg-emerald-500/[0.015]"
-    : isFailed
-    ? "border-rose-500/30 bg-rose-500/[0.015]"
-    : stop.isNext && isPending
-    ? "border-primary ring-1 ring-primary/20 shadow-sm bg-primary/[0.01]"
-    : "border-border";
+  const cardBorderClass =
+    stop.isNext && isPending
+      ? "border-border border-l-2 border-l-primary shadow-xs"
+      : "border-border shadow-none";
 
   const stopLabel = getStopDisplayLabel(stop, t);
+  const stopGoogleMapsUrl = buildSingleStopGoogleMapsUrl({
+    addressLine: stop.contact.addressLine,
+    ward: stop.contact.ward,
+    district: stop.contact.district,
+    province: stop.contact.province,
+    latitude: stop.latitude ?? null,
+    longitude: stop.longitude ?? null,
+  });
 
   return (
-    <Card className={`rounded-xl transition-all ${cardBorderClass}`}>
+    <Card className={`rounded-lg bg-card transition-colors ${cardBorderClass}`}>
       <CardHeader className="pb-3">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="flex size-7 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+              <span
+                className={cn(
+                  "flex size-6 items-center justify-center rounded-md text-xs font-semibold tabular-nums",
+                  stop.isNext && isPending
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground",
+                )}
+              >
                 {stop.approvedSequence}
               </span>
-              <span className="font-semibold text-foreground text-base">
+              <span className="text-base font-semibold text-foreground">
                 {t("transport.driver.stopTitle", {
                   sequence: stop.approvedSequence,
                 })}
               </span>
               {stop.isNext && isPending ? (
-                <Badge className="bg-primary text-primary-foreground text-xs font-medium animate-pulse">
+                <Badge
+                  variant="outline"
+                  className="border-primary/30 bg-primary/10 text-xs font-medium text-primary"
+                >
                   {t("transport.driver.nextStop")}
                 </Badge>
               ) : null}
             </div>
-            <p className="text-sm font-medium text-foreground/80">
+            <p className="text-sm text-muted-foreground">
               {stopLabel}
             </p>
           </div>
@@ -1005,30 +1080,44 @@ function DriverStopCard({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="rounded-xl border bg-muted/20 p-4 space-y-3">
-          {/* Recipient info & Phone */}
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 pb-2.5">
+        <div className="space-y-3 rounded-lg border border-border bg-muted/20 p-4">
+          {/* Recipient info, Phone & Google Maps */}
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-2.5">
             <div className="flex items-center gap-2">
               <User aria-hidden="true" className="size-4 text-muted-foreground" />
-              <span className="font-semibold text-sm text-foreground">
+              <span className="text-sm font-medium text-foreground">
                 {stop.contact.recipientName || t("transport.driver.recipientUnavailable")}
               </span>
             </div>
-            {stop.contact.phone ? (
-              <a
-                className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20 transition-colors min-h-[36px]"
-                href={`tel:${stop.contact.phone}`}
-              >
-                <Phone aria-hidden="true" className="size-3.5" />
-                <span>{stop.contact.phone}</span>
-              </a>
-            ) : null}
+            <div className="flex flex-wrap items-center gap-2">
+              {stopGoogleMapsUrl ? (
+                <Button asChild variant="outline" size="sm" className="min-h-[36px] gap-1.5 text-xs">
+                  <a
+                    href={stopGoogleMapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Navigation aria-hidden="true" className="size-3.5" />
+                    <span>{t("transport.maps.navigateStop")}</span>
+                    <ExternalLink aria-hidden="true" className="size-3" />
+                  </a>
+                </Button>
+              ) : null}
+              {stop.contact.phone ? (
+                <Button asChild variant="outline" size="sm" className="min-h-[36px] gap-1.5 text-xs">
+                  <a href={`tel:${stop.contact.phone}`}>
+                    <Phone aria-hidden="true" className="size-3.5" />
+                    <span>{stop.contact.phone}</span>
+                  </a>
+                </Button>
+              ) : null}
+            </div>
           </div>
 
           {/* Address */}
           <div className="flex items-start gap-2 text-xs text-muted-foreground">
-            <MapPin aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-primary" />
-            <span className="leading-relaxed text-foreground/90">
+            <MapPin aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+            <span className="leading-relaxed text-foreground">
               {[
                 stop.contact.addressLine,
                 stop.contact.ward,
@@ -1043,11 +1132,11 @@ function DriverStopCard({
 
           {/* Delivery Note */}
           {stop.contact.deliveryNote ? (
-            <div className="flex items-start gap-2 rounded-lg bg-amber-500/10 p-2.5 text-xs text-amber-700 dark:text-amber-400 border border-amber-500/20">
-              <Info aria-hidden="true" className="size-4 shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2 rounded-md border border-border bg-muted/50 p-2.5 text-xs text-foreground">
+              <Info aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
               <div>
-                <span className="font-semibold">{t("transport.driver.deliveryNoteLabel")}</span>
-                <span>{stop.contact.deliveryNote}</span>
+                <span className="font-medium">{t("transport.driver.deliveryNoteLabel")}</span>
+                <span className="text-muted-foreground">{stop.contact.deliveryNote}</span>
               </div>
             </div>
           ) : null}
@@ -1119,24 +1208,24 @@ function DriverStopCard({
         ) : null}
 
         {canSubmit && !unknown ? (
-          <div className="flex flex-col sm:flex-row gap-3 pt-2">
+          <div className="flex flex-col gap-2.5 pt-2 sm:flex-row">
             <Button
               size="lg"
-              className="flex-1 h-12 min-h-[48px] text-sm sm:text-base gap-2 bg-emerald-600 text-white hover:bg-emerald-700 font-semibold shadow-xs cursor-pointer"
+              className="h-11 min-h-[44px] flex-1 cursor-pointer gap-2 text-sm font-medium"
               disabled={!intent.ready || intent.storageFailed}
               onClick={() => startAction("DELIVER")}
             >
-              <CheckCircle2 aria-hidden="true" className="size-5 shrink-0" />
+              <CheckCircle2 aria-hidden="true" className="size-4 shrink-0" />
               <span>{t("transport.driver.markDelivered")}</span>
             </Button>
             <Button
               variant="outline"
               size="lg"
-              className="flex-1 h-12 min-h-[48px] text-sm sm:text-base gap-2 border-rose-400 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 font-semibold cursor-pointer"
+              className="h-11 min-h-[44px] flex-1 cursor-pointer gap-2 border-border text-sm font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
               disabled={!intent.ready || intent.storageFailed}
               onClick={() => startAction("FAIL")}
             >
-              <XCircle aria-hidden="true" className="size-5 shrink-0" />
+              <XCircle aria-hidden="true" className="size-4 shrink-0" />
               <span>{t("transport.driver.markFailed")}</span>
             </Button>
           </div>

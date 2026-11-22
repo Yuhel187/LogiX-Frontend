@@ -19,7 +19,7 @@ export function DashboardKpiGrid({ kpis }: DashboardKpiGridProps) {
       {/* 1. Orders KPI -> /orders */}
       <Link
         href="/orders"
-        className="group block rounded-xl transition-all hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        className="group block h-full rounded-xl transition-all hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
         <StatCard
           title={t("dashboard.kpis.ordersToday.title")}
@@ -34,14 +34,14 @@ export function DashboardKpiGrid({ kpis }: DashboardKpiGridProps) {
           })}
           accentColor="emerald"
           icon={Package}
-          className="cursor-pointer transition-colors group-hover:border-emerald-500/50"
+          className="h-full cursor-pointer transition-colors group-hover:border-emerald-500/50"
         />
       </Link>
 
       {/* 2. Ready to Ship Shipment Pool -> /shipments */}
       <Link
         href="/shipments"
-        className="group block rounded-xl transition-all hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        className="group block h-full rounded-xl transition-all hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
         <StatCard
           title={t("dashboard.kpis.readyToShip.title")}
@@ -49,14 +49,14 @@ export function DashboardKpiGrid({ kpis }: DashboardKpiGridProps) {
           description={t("dashboard.kpis.readyToShip.description")}
           accentColor="indigo"
           icon={Box}
-          className="cursor-pointer transition-colors group-hover:border-indigo-500/50"
+          className="h-full cursor-pointer transition-colors group-hover:border-indigo-500/50"
         />
       </Link>
 
       {/* 3. Transport Velocity -> /transport */}
       <Link
         href="/transport"
-        className="group block rounded-xl transition-all hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        className="group block h-full rounded-xl transition-all hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
         <StatCard
           title={t("dashboard.kpis.activeTrips.title")}
@@ -72,14 +72,14 @@ export function DashboardKpiGrid({ kpis }: DashboardKpiGridProps) {
           })}
           accentColor="blue"
           icon={Truck}
-          className="cursor-pointer transition-colors group-hover:border-blue-500/50"
+          className="h-full cursor-pointer transition-colors group-hover:border-blue-500/50"
         />
       </Link>
 
       {/* 4. Inventory Health -> /inventory */}
       <Link
         href="/inventory"
-        className="group block rounded-xl transition-all hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        className="group block h-full rounded-xl transition-all hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
         <StatCard
           title={t("dashboard.kpis.lowStock.title")}
@@ -87,7 +87,7 @@ export function DashboardKpiGrid({ kpis }: DashboardKpiGridProps) {
           description={t("dashboard.kpis.lowStock.description")}
           accentColor="rose"
           icon={AlertTriangle}
-          className="cursor-pointer transition-colors group-hover:border-rose-500/50"
+          className="h-full cursor-pointer transition-colors group-hover:border-rose-500/50"
         />
       </Link>
     </div>
