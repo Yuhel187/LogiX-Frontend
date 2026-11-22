@@ -10,6 +10,7 @@ import { useAuth } from "@/lib/auth/auth-context";
 import { useTranslation } from "@/lib/i18n";
 import { getOrganizationApi, updateOrganizationApi } from "../../api/auth.api";
 import {
+  IAM_PERMISSIONS,
   legalProfileFormSchema,
   type LegalProfile,
 } from "../../schemas/auth.schema";
@@ -45,9 +46,6 @@ const FIELD_MAX: Record<LegalField, number> = {
   postalCode: 20,
 };
 
-// The verified account flag takes precedence over the actual membership role.
-const EDITOR_ROLES = new Set(["OWNER", "ADMIN"]);
-
 function toFormValues(profile?: LegalProfile | null): LegalFormValues {
   const next = { ...EMPTY_FORM };
   if (!profile) return next;
@@ -62,9 +60,13 @@ export function LegalProfileForm({
   tenantId: string;
   role: string;
 }) {
-  const { accessToken, isSuperAdmin } = useAuth();
+  const { accessToken, isSuperAdmin, isOwner, hasPermission } = useAuth();
   const { t } = useTranslation();
-  const canEdit = isSuperAdmin || EDITOR_ROLES.has(role);
+  const canEdit =
+    isSuperAdmin ||
+    isOwner ||
+    role === "OWNER" ||
+    hasPermission(IAM_PERMISSIONS.ORGANIZATION_MANAGE);
 
   const [values, setValues] = useState<LegalFormValues>(EMPTY_FORM);
   const [saved, setSaved] = useState<LegalFormValues>(EMPTY_FORM);
