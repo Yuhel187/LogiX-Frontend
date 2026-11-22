@@ -34,8 +34,10 @@ import { WORKSPACE_HOME_ROUTE } from "@/lib/config/routes";
 import { OrgLogo } from "@/components/shared/org-fallback-icon";
 import { DetailPageSkeleton } from "@/components/shared/page-skeletons";
 import {
+  IAM_PERMISSIONS,
   LegalProfileForm,
   RoleListView,
+  TenantAiInstructionsForm,
   UnifiedMembersView,
   formatIdentityError,
 } from "@/features/identity";
@@ -66,6 +68,7 @@ function GeneralSettingsForm({
     leaveOrganization,
     tenants,
     isSuperAdmin,
+    hasPermission,
   } = useAuth();
   const { t } = useTranslation();
   const router = useRouter();
@@ -73,7 +76,10 @@ function GeneralSettingsForm({
   // Kiểm tra quyền hạn: Tuyệt đối chỉ SUPER ADMIN hoặc OWNER mới có quyền xóa
   const isOwner = tenant.role === "OWNER";
   const canDeleteOrg = isSuperAdmin || isOwner;
-  const canEdit = isSuperAdmin || isOwner || tenant.role === "ADMIN";
+  const canEdit =
+    isSuperAdmin ||
+    isOwner ||
+    hasPermission(IAM_PERMISSIONS.ORGANIZATION_MANAGE);
   const hasMembership = tenant.role !== "SUPER_ADMIN";
 
   // Quy tắc rời tổ chức (đồng bộ với backend): không phải OWNER, còn tổ chức khác, không phải tổ chức mặc định
@@ -305,6 +311,11 @@ function GeneralSettingsForm({
         key={tenant.id}
         tenantId={tenant.id}
         role={tenant.role}
+      />
+
+      <TenantAiInstructionsForm
+        key={`ai-${tenant.id}`}
+        tenantId={tenant.id}
       />
 
       {/* Thiết lập tổ chức mặc định */}

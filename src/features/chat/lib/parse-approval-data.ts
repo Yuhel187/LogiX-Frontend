@@ -101,9 +101,17 @@ export function normalizeApprovalData(
   const target_version = typeof raw.target_version === "number" ? raw.target_version : undefined;
   const expires_at = (raw.expires_at as string) || (raw.expiresAt as string) || (iObj.expiresAt as string);
 
-  // 3. Resolve or Infer UI Descriptor
-  const rawUi = (raw.ui && typeof raw.ui === "object" ? raw.ui : null) as Partial<ConfirmationUiDescriptor> | null;
+  // 3. Resolve or Infer UI Descriptor (backend tools attach ui inside preview.ui)
   const preview = (raw.preview && typeof raw.preview === "object" ? raw.preview : {}) as Record<string, unknown>;
+  const nestedPreviewUi =
+    preview.ui && typeof preview.ui === "object"
+      ? (preview.ui as Partial<ConfirmationUiDescriptor> & { impact?: string })
+      : null;
+  const rawUi = (
+    raw.ui && typeof raw.ui === "object"
+      ? (raw.ui as Partial<ConfirmationUiDescriptor> & { impact?: string })
+      : nestedPreviewUi
+  );
 
   const isOrder = action.includes("order");
   const isShipment = action.includes("shipment");
@@ -193,7 +201,7 @@ export function normalizeApprovalData(
     subtitle,
     icon,
     severity: rawUi?.severity || "info",
-    impact_summary: rawUi?.impact_summary,
+    impact_summary: rawUi?.impact_summary || rawUi?.impact,
     attributes: attributes.length > 0 ? attributes : undefined,
     table,
   };

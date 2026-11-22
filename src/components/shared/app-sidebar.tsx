@@ -173,6 +173,7 @@ export function AppSidebar() {
             title: t("forecast.navTitle"),
             href: "/forecast",
             icon: TrendingUp,
+            anyPermissions: ["forecast:read", "forecast:run"],
           },
         ],
       },

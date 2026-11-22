@@ -17,6 +17,7 @@ import { useAuth } from "@/lib/auth/auth-context";
 import { useTranslation } from "@/lib/i18n";
 import { OrgLogo } from "@/components/shared/org-fallback-icon";
 import { DetailPageSkeleton } from "@/components/shared/page-skeletons";
+import { TenantAiInstructionsForm } from "@/features/identity";
 
 interface ActiveTenantProps {
   id: string;
@@ -201,7 +202,15 @@ function GeneralSettingsForm({
         </form>
       </div>
 
-      {/* Card 2: Thiết lập tổ chức mặc định */}
+      {/* Card 2: Chỉ dẫn AI tùy chỉnh */}
+      <div className="w-full rounded-2xl border border-border/70 bg-card p-6 sm:p-8 shadow-xs">
+        <TenantAiInstructionsForm
+          key={`ai-${activeTenant.id}`}
+          tenantId={activeTenant.id}
+        />
+      </div>
+
+      {/* Card 3: Thiết lập tổ chức mặc định */}
       <div className="w-full rounded-2xl border border-border/70 bg-card p-6 sm:p-8 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div className="space-y-1 max-w-xl">
           <div className="flex items-center gap-2.5">

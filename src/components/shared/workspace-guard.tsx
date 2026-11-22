@@ -49,6 +49,10 @@ const ROUTE_PERMISSIONS: RoutePermissionRule[] = [
     pattern: /\/orders/,
     anyPermissions: ["order:sales-order:read", "order:sales-order:create"],
   },
+  {
+    pattern: /^\/forecast(?:\/|$)/,
+    anyPermissions: ["forecast:read", "forecast:run"],
+  },
 ];
 
 export function WorkspaceGuard({ children }: { children: React.ReactNode }) {

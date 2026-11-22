@@ -1,5 +1,18 @@
 import { z } from "zod";
 
+export const MAX_TENANT_AI_INSTRUCTIONS_LENGTH = 2000;
+
+export const IAM_PERMISSIONS = {
+  ROLE_READ: "iam:role:read",
+  ROLE_MANAGE: "iam:role:manage",
+  MEMBER_READ: "iam:member:read",
+  MEMBER_INVITE: "iam:member:invite",
+  MEMBER_ASSIGN_ROLE: "iam:member:assign-role",
+  MEMBER_REMOVE: "iam:member:remove",
+  ORGANIZATION_MANAGE: "iam:organization:manage",
+  AI_INSTRUCTIONS_MANAGE: "iam:ai-instructions:manage",
+} as const;
+
 export const authUserSchema = z.object({
   id: z.string(),
   email: z.string().email(),
@@ -144,6 +157,35 @@ export const legalProfileViewSchema = z.object({
   postalCode: z.string().nullable(),
 });
 
+export const tenantAiInstructionsUpdaterSchema = z.object({
+  id: z.string(),
+  displayName: z.string(),
+  email: z.string(),
+});
+
+export const tenantAiInstructionsViewSchema = z.object({
+  tenantId: z.string(),
+  customInstructions: z.string().nullable(),
+  enabled: z.boolean(),
+  isDefault: z.boolean(),
+  maxLength: z.number().int().positive(),
+  version: z.number().int().nonnegative(),
+  updatedAt: z.string().nullable(),
+  updatedBy: tenantAiInstructionsUpdaterSchema.nullable(),
+});
+
+export const updateTenantAiInstructionsSchema = z.object({
+  customInstructions: z
+    .string()
+    .max(
+      MAX_TENANT_AI_INSTRUCTIONS_LENGTH,
+      "tenant.aiInstructionsMaxLengthError",
+    )
+    .nullable()
+    .optional(),
+  enabled: z.boolean().optional(),
+});
+
 export const organizationDetailSchema = z.object({
   id: z.string(),
   code: z.string(),
@@ -152,6 +194,7 @@ export const organizationDetailSchema = z.object({
   status: z.string().optional(),
   settings: z.record(z.string(), z.any()).optional().default({}),
   legalProfile: legalProfileViewSchema,
+  aiInstructions: tenantAiInstructionsViewSchema.optional(),
   role: z.string(),
   isDefault: z.boolean(),
   createdAt: z.string().optional(),
@@ -227,3 +270,12 @@ export type UpdateProfileData = z.infer<typeof updateProfileSchema>;
 export type ChangePasswordData = z.infer<typeof changePasswordSchema>;
 export type UserSession = z.infer<typeof userSessionSchema>;
 export type OrgMember = z.infer<typeof orgMemberSchema>;
+export type TenantAiInstructionsUpdater = z.infer<
+  typeof tenantAiInstructionsUpdaterSchema
+>;
+export type TenantAiInstructionsView = z.infer<
+  typeof tenantAiInstructionsViewSchema
+>;
+export type UpdateTenantAiInstructionsData = z.infer<
+  typeof updateTenantAiInstructionsSchema
+>;
