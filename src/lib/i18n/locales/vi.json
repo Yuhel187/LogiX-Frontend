@@ -1052,7 +1052,7 @@
       "notConfiguredShort": "chưa sẵn sàng",
       "modelLabel": "Model",
       "modelPlaceholder": "Ví dụ: openai/gpt-4o-mini",
-      "modelHint": "Model cần bắt đầu bằng tiền tố {prefix}.",
+      "modelHint": "Chọn một model từ danh sách Google Gemini.",
       "modelHintGeneric": "Nhập đúng model được provider hỗ trợ.",
       "credentialHint": "Credential được quản lý bởi môi trường service. UI không lưu API key.",
       "noProviderConfigured": "Chưa có provider nào được cấu hình credential. Hãy cấu hình environment của agent-service trước.",
@@ -1072,7 +1072,10 @@
         "testFailed": "Không thể kiểm tra provider. Hãy kiểm tra model và thử lại.",
         "network": "Không thể kết nối tới agent-service. Hãy kiểm tra kết nối rồi thử lại.",
         "unavailable": "Không thể tải cấu hình model. Hãy thử lại."
-      }
+      },
+      "modelsLoading": "Đang tải danh sách model…",
+      "modelsEmpty": "Không có model Gemini khác phù hợp.",
+      "catalogUnavailable": "Không thể tải danh sách model từ Google."
     },
     "freePlan": "Miễn phí",
     "noTenants": "Bạn chưa tham gia tổ chức nào",
