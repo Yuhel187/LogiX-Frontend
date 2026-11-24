@@ -296,11 +296,18 @@ export function LogixCopilotSidebar({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isExpanded]);
 
-  // Listen for programmatic open events (e.g. from header button or global command palette)
+  // Listen for programmatic open events (e.g. from header button, command palette, or Conversation Management Center)
   React.useEffect(() => {
     const handleOpenRequest = (event: Event) => {
-      const customEvent = event as CustomEvent<{ prompt?: string }>;
+      const customEvent = event as CustomEvent<{ prompt?: string; threadId?: string }>;
       const promptText = customEvent.detail?.prompt?.trim();
+      const targetThreadId = customEvent.detail?.threadId?.trim();
+
+      if (targetThreadId) {
+        saveThreadId(targetThreadId);
+        setThreadId(targetThreadId);
+        setChatResetVersion((v) => v + 1);
+      }
 
       const openSidebarIfClosed = () => {
         const toggleBtn = document.querySelector(

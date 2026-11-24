@@ -567,7 +567,7 @@ function GeneralSettingsForm({
 // MAIN DETAIL PAGE CONTENT
 // ==========================================
 function OrganizationDetailContent({ orgId }: { orgId: string }) {
-  const { activeTenant, tenants, isLoading } = useAuth();
+  const { activeTenant, tenants, isLoading, isSuperAdmin } = useAuth();
   const { t } = useTranslation();
 
   // Active tab: default is "members"
@@ -576,6 +576,10 @@ function OrganizationDetailContent({ orgId }: { orgId: string }) {
   >("members");
 
   const currentTenant = activeTenant?.id === orgId ? activeTenant : null;
+  const canAccessRolesTab =
+    Boolean(currentTenant) && (isSuperAdmin || currentTenant?.role === "OWNER");
+  const effectiveTab =
+    activeTab === "roles" && !canAccessRolesTab ? "members" : activeTab;
 
   const isDefaultTenant = tenants.some(
     (item) => item.id === currentTenant?.id && item.isDefault,
@@ -617,20 +621,22 @@ function OrganizationDetailContent({ orgId }: { orgId: string }) {
               <span>{t("tenant.tabMembers")}</span>
             </button>
 
-            {/* Tab 2: Phân quyền & Vai trò */}
-            <button
-              type="button"
-              onClick={() => setActiveTab("roles")}
-              className={cn(
-                "flex items-center gap-2 pb-3.5 px-1 text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap",
-                activeTab === "roles"
-                  ? "border-emerald-600 text-emerald-600 dark:text-emerald-400 dark:border-emerald-400"
-                  : "border-transparent text-muted-foreground hover:text-foreground",
-              )}
-            >
-              <ShieldCheck className="size-4" />
-              <span>{t("iam.roles.title")}</span>
-            </button>
+            {/* Tab 2: Phân quyền & Vai trò (Chỉ dành cho OWNER và SUPER_ADMIN) */}
+            {canAccessRolesTab ? (
+              <button
+                type="button"
+                onClick={() => setActiveTab("roles")}
+                className={cn(
+                  "flex items-center gap-2 pb-3.5 px-1 text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap",
+                  effectiveTab === "roles"
+                    ? "border-emerald-600 text-emerald-600 dark:text-emerald-400 dark:border-emerald-400"
+                    : "border-transparent text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <ShieldCheck className="size-4" />
+                <span>{t("iam.roles.title")}</span>
+              </button>
+            ) : null}
 
             {/* Tab 3: Hồ sơ pháp lý */}
             <button
@@ -680,17 +686,17 @@ function OrganizationDetailContent({ orgId }: { orgId: string }) {
 
           {/* Tab Content */}
           <div className="p-6 sm:p-8">
-            {activeTab === "members" ? (
+            {effectiveTab === "members" ? (
               <UnifiedMembersView tenantId={currentTenant.id} />
-            ) : activeTab === "roles" ? (
+            ) : effectiveTab === "roles" && canAccessRolesTab ? (
               <RoleListView tenantId={currentTenant.id} />
-            ) : activeTab === "legal-profile" ? (
+            ) : effectiveTab === "legal-profile" ? (
               <LegalProfileForm
                 key={`legal-${currentTenant.id}`}
                 tenantId={currentTenant.id}
                 role={currentTenant.role}
               />
-            ) : activeTab === "ai-instructions" ? (
+            ) : effectiveTab === "ai-instructions" ? (
               <TenantAiInstructionsForm
                 key={`ai-${currentTenant.id}`}
                 tenantId={currentTenant.id}

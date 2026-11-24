@@ -226,7 +226,7 @@ export function RolePermissionMatrixDialog({
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
                 {isOwnerRole
                   ? t("iam.roles.ownerFullAccess")
-                  : t("tenant.selectedCount", { count: selectedIds.size })}
+                  : t("iam.roles.selectedPermissionsCount", { count: selectedIds.size })}
               </span>
             </div>
           </div>
@@ -365,7 +365,7 @@ export function RolePermissionMatrixDialog({
         <DialogFooter className="px-6 py-4 border-t border-border/60 bg-muted/20 sm:justify-between items-center">
           <div className="text-xs text-muted-foreground">
             {!isOwnerRole &&
-              t("tenant.selectedCount", { count: selectedIds.size })}
+              t("iam.roles.selectedPermissionsCount", { count: selectedIds.size })}
           </div>
           <div className="flex items-center gap-2">
             <Button
