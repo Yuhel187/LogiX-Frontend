@@ -19,7 +19,69 @@
     "deleteChat": "Delete conversation",
     "delete": "Delete",
     "cancel": "Cancel",
-    "closeHistory": "Close history"
+    "closeHistory": "Close history",
+    "management": {
+      "navTitle": "AI Conversations",
+      "title": "AI Conversation Management",
+      "description": "Review, search, and govern AI conversation history across your organization.",
+      "refresh": "Refresh",
+      "retry": "Retry",
+      "searchPlaceholder": "Search by title or thread ID...",
+      "scopeLabel": "Scope",
+      "scopeOrg": "Entire organization",
+      "scopeMine": "My conversations",
+      "statusLabel": "Status",
+      "statusAll": "All statuses",
+      "status": {
+        "ACTIVE": "Active",
+        "ARCHIVED": "Archived"
+      },
+      "roles": {
+        "USER": "User",
+        "ASSISTANT": "LogiX Copilot",
+        "TOOL": "System tool",
+        "SYSTEM": "System"
+      },
+      "columns": {
+        "title": "Conversation title",
+        "user": "User",
+        "status": "Status",
+        "messages": "Messages",
+        "lastActivity": "Last activity",
+        "actions": "Actions"
+      },
+      "untitled": "Untitled conversation",
+      "unknownUser": "Unknown user",
+      "empty": "No conversations match the current filters.",
+      "loadError": "Failed to load AI conversations.",
+      "loadDetailError": "Failed to load conversation details.",
+      "detailLoading": "Loading conversation details...",
+      "noMessages": "No stored messages in this conversation.",
+      "readOnlyBadge": "Read-only",
+      "viewDetail": "View details",
+      "titleLabel": "Conversation title",
+      "rename": "Rename",
+      "archive": "Archive",
+      "restore": "Restore",
+      "delete": "Delete",
+      "confirmDeleteButton": "Confirm delete",
+      "resumeInCopilot": "Continue in Copilot",
+      "executions": "AI runs",
+      "lastModel": "Latest model",
+      "tokens": "Tokens (in / out)",
+      "renameSuccess": "Conversation title updated.",
+      "archiveSuccess": "Conversation archived.",
+      "restoreSuccess": "Conversation restored to active.",
+      "deleteSuccess": "Conversation deleted.",
+      "actionError": "Failed to update conversation.",
+      "paginationSummary": "Showing {count} of {total} conversations (Page {page}/{pages})",
+      "previous": "Previous",
+      "next": "Next",
+      "accessDeniedTitle": "Access denied",
+      "accessDeniedDesc": "You need organization AI conversation read permission (granted by Owner) or Owner / Super Admin access to view this page.",
+      "deleteConfirmTitle": "Delete AI conversation",
+      "deleteConfirmDesc": "Are you sure you want to delete \"{title}\"? This conversation will be removed from the list and cannot be resumed."
+    }
   },
   "admin": {
     "navTitle": "Platform Admin",
@@ -1417,7 +1479,8 @@
       "cannotDeleteRoleWithMembers": "This role is currently assigned to {count} members. Please reassign them before deleting.",
       "cannotChangeCode": "Role code cannot be changed once created.",
       "codeValidation": "Code can only contain uppercase letters, numbers, and underscores",
-      "deleteFailed": "Failed to delete role"
+      "deleteFailed": "Failed to delete role",
+      "selectedPermissionsCount": "Selected: {count} permissions"
     },
     "matrix": {
       "title": "Permission Matrix",
@@ -1451,7 +1514,8 @@
       "ORDER": "Orders & Contracts",
       "IAM": "Organization & Access Control",
       "FORECAST": "Demand Forecasting (Prophet)",
-      "REPORT": "Analytics & Reports"
+      "REPORT": "Analytics & Reports",
+      "AGENT": "AI Assistant (LogiX Copilot)"
     },
     "resources": {
       "shipment": "Shipments",
@@ -1470,7 +1534,9 @@
       "ai_instructions": "Custom AI Instructions",
       "demand_forecast": "Demand Forecast",
       "analytics": "Analytics Reports",
-      "export": "Report Export"
+      "export": "Report Export",
+      "conversation": "AI Conversations",
+      "model_config": "AI Model Configuration"
     },
     "invitations": {
       "title": "Organization Invitations",

@@ -19,7 +19,69 @@
     "deleteChat": "Xóa cuộc trò chuyện",
     "delete": "Xóa",
     "cancel": "Hủy",
-    "closeHistory": "Đóng lịch sử"
+    "closeHistory": "Đóng lịch sử",
+    "management": {
+      "navTitle": "Hội thoại AI",
+      "title": "Quản lý hội thoại AI",
+      "description": "Theo dõi, tra cứu và quản trị lịch sử cuộc trò chuyện AI của tổ chức.",
+      "refresh": "Tải lại",
+      "retry": "Thử lại",
+      "searchPlaceholder": "Tìm theo tiêu đề hoặc mã hội thoại...",
+      "scopeLabel": "Phạm vi hiển thị",
+      "scopeOrg": "Toàn tổ chức",
+      "scopeMine": "Hội thoại của tôi",
+      "statusLabel": "Trạng thái",
+      "statusAll": "Tất cả trạng thái",
+      "status": {
+        "ACTIVE": "Đang hoạt động",
+        "ARCHIVED": "Đã lưu trữ"
+      },
+      "roles": {
+        "USER": "Người dùng",
+        "ASSISTANT": "LogiX Copilot",
+        "TOOL": "Công cụ hệ thống",
+        "SYSTEM": "Hệ thống"
+      },
+      "columns": {
+        "title": "Tiêu đề hội thoại",
+        "user": "Người dùng",
+        "status": "Trạng thái",
+        "messages": "Tin nhắn",
+        "lastActivity": "Hoạt động gần nhất",
+        "actions": "Thao tác"
+      },
+      "untitled": "Cuộc trò chuyện chưa đặt tên",
+      "unknownUser": "Người dùng không xác định",
+      "empty": "Chưa có cuộc hội thoại nào phù hợp với bộ lọc.",
+      "loadError": "Không thể tải danh sách hội thoại AI.",
+      "loadDetailError": "Không thể tải chi tiết hội thoại.",
+      "detailLoading": "Đang tải chi tiết hội thoại...",
+      "noMessages": "Hội thoại này chưa có tin nhắn nào được lưu.",
+      "readOnlyBadge": "Chỉ đọc",
+      "viewDetail": "Xem chi tiết",
+      "titleLabel": "Tiêu đề hội thoại",
+      "rename": "Đổi tiêu đề",
+      "archive": "Lưu trữ",
+      "restore": "Khôi phục",
+      "delete": "Xóa",
+      "confirmDeleteButton": "Xác nhận xóa",
+      "resumeInCopilot": "Tiếp tục trong Copilot",
+      "executions": "Lượt chạy AI",
+      "lastModel": "Mô hình gần nhất",
+      "tokens": "Token (vào / ra)",
+      "renameSuccess": "Đã cập nhật tiêu đề hội thoại.",
+      "archiveSuccess": "Đã lưu trữ hội thoại.",
+      "restoreSuccess": "Đã khôi phục hội thoại về trạng thái hoạt động.",
+      "deleteSuccess": "Đã xóa hội thoại thành công.",
+      "actionError": "Không thể thực hiện thao tác trên hội thoại.",
+      "paginationSummary": "Hiển thị {count} / {total} hội thoại (Trang {page}/{pages})",
+      "previous": "Trước",
+      "next": "Tiếp",
+      "accessDeniedTitle": "Không có quyền truy cập",
+      "accessDeniedDesc": "Bạn cần quyền Xem hội thoại AI của tổ chức (do Chủ sở hữu cấp) hoặc là Chủ sở hữu / Quản trị viên nền tảng để truy cập trang này.",
+      "deleteConfirmTitle": "Xác nhận xóa hội thoại AI",
+      "deleteConfirmDesc": "Bạn có chắc chắn muốn xóa hội thoại \"{title}\" không? Hội thoại sẽ bị ẩn khỏi danh sách và không thể tiếp tục trò chuyện."
+    }
   },
   "admin": {
     "navTitle": "Quản trị nền tảng",
@@ -1417,7 +1479,8 @@
       "cannotDeleteRoleWithMembers": "Vai trò này đang được gán cho {count} thành viên. Vui lòng chuyển vai trò của họ trước khi xóa.",
       "cannotChangeCode": "Mã vai trò không thể thay đổi sau khi tạo.",
       "codeValidation": "Mã chỉ chứa chữ in hoa, số và dấu gạch dưới",
-      "deleteFailed": "Xóa vai trò thất bại"
+      "deleteFailed": "Xóa vai trò thất bại",
+      "selectedPermissionsCount": "Đã chọn: {count} quyền"
     },
     "matrix": {
       "title": "Ma trận Phân quyền",
@@ -1451,7 +1514,8 @@
       "ORDER": "Quản lý Đơn hàng & Hợp đồng",
       "IAM": "Quản trị Tổ chức & Phân quyền",
       "FORECAST": "Dự báo Nhu cầu (AI Prophet)",
-      "REPORT": "Báo cáo & Thống kê"
+      "REPORT": "Báo cáo & Thống kê",
+      "AGENT": "Trợ lý AI (LogiX Copilot)"
     },
     "resources": {
       "shipment": "Lô giao hàng",
@@ -1470,7 +1534,9 @@
       "ai_instructions": "Chỉ dẫn AI tùy chỉnh",
       "demand_forecast": "Dự báo nhu cầu",
       "analytics": "Báo cáo phân tích",
-      "export": "Xuất dữ liệu báo cáo"
+      "export": "Xuất dữ liệu báo cáo",
+      "conversation": "Hội thoại AI",
+      "model_config": "Cấu hình mô hình AI"
     },
     "invitations": {
       "title": "Lời mời Tham gia Tổ chức",
