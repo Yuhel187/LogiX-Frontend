@@ -1515,7 +1515,8 @@
       "IAM": "Quản trị Tổ chức & Phân quyền",
       "FORECAST": "Dự báo Nhu cầu (AI Prophet)",
       "REPORT": "Báo cáo & Thống kê",
-      "AGENT": "Trợ lý AI (LogiX Copilot)"
+      "AGENT": "Trợ lý AI (LogiX Copilot)",
+      "AUDIT": "Nhật ký Kiểm toán"
     },
     "resources": {
       "shipment": "Lô giao hàng",
@@ -1536,7 +1537,8 @@
       "analytics": "Báo cáo phân tích",
       "export": "Xuất dữ liệu báo cáo",
       "conversation": "Hội thoại AI",
-      "model_config": "Cấu hình mô hình AI"
+      "model_config": "Cấu hình mô hình AI",
+      "log": "Nhật ký kiểm toán"
     },
     "invitations": {
       "title": "Lời mời Tham gia Tổ chức",

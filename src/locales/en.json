@@ -1515,7 +1515,8 @@
       "IAM": "Organization & Access Control",
       "FORECAST": "Demand Forecasting (Prophet)",
       "REPORT": "Analytics & Reports",
-      "AGENT": "AI Assistant (LogiX Copilot)"
+      "AGENT": "AI Assistant (LogiX Copilot)",
+      "AUDIT": "Audit Logs"
     },
     "resources": {
       "shipment": "Shipments",
@@ -1536,7 +1537,8 @@
       "analytics": "Analytics Reports",
       "export": "Report Export",
       "conversation": "AI Conversations",
-      "model_config": "AI Model Configuration"
+      "model_config": "AI Model Configuration",
+      "log": "Audit Trail"
     },
     "invitations": {
       "title": "Organization Invitations",
