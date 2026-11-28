@@ -21,6 +21,7 @@ import {
   Contact,
   ContactRound,
   MessageSquare,
+  ScrollText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -39,6 +40,7 @@ import { SHIPMENT_PERMISSIONS } from "@/features/shipments";
 import { DRIVER_PERMISSIONS } from "@/features/master-data";
 import { TRANSPORT_PERMISSIONS } from "@/features/transport";
 import { AGENT_CONVERSATION_PERMISSIONS } from "@/features/chat/constants/conversation-permissions";
+import { AUDIT_PERMISSIONS } from "@/features/audit";
 
 interface NavItem {
   title: string;
@@ -101,6 +103,12 @@ export function AppSidebar() {
             href: "/conversations",
             icon: MessageSquare,
             permission: AGENT_CONVERSATION_PERMISSIONS.READ,
+          },
+          {
+            title: t("audit.navTitle"),
+            href: "/audit-logs",
+            icon: ScrollText,
+            permission: AUDIT_PERMISSIONS.LOG_READ,
           },
         ],
       },

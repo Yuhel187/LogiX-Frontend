@@ -2545,5 +2545,115 @@
         "s6Body": "LogiX maintains transactional Outbox/Inbox idempotency and continuous security monitoring. In the event of a confirmed personal data breach, LogiX will immediately execute containment procedures and notify affected Organizations and competent data protection authorities within a maximum of 72 hours of discovery."
       }
     }
+  },
+  "audit": {
+    "navTitle": "Audit Logs",
+    "pageTitle": "Audit Logs",
+    "pageDescription": "Inspect immutable audit records across business operations, access control changes, and AI assistant tool calls.",
+    "accessDeniedTitle": "Audit Logs access denied",
+    "accessDeniedDesc": "Your account does not have permission to view audit logs. Contact your organization Owner to request access.",
+    "common": {
+      "empty": "—",
+      "systemActor": "System"
+    },
+    "outcomes": {
+      "SUCCESS": "Success",
+      "DENIED": "Denied",
+      "FAILED": "Failed"
+    },
+    "actorTypes": {
+      "USER": "User",
+      "SYSTEM": "System",
+      "AGENT": "AI Agent"
+    },
+    "filters": {
+      "action": "Action",
+      "actionPlaceholder": "e.g. ORDER_CONFIRMED, INVENTORY_ADJUSTED...",
+      "outcome": "Outcome",
+      "allOutcomes": "All outcomes",
+      "actorType": "Actor type",
+      "allActorTypes": "All actors",
+      "sourceService": "Source service",
+      "allServices": "All services",
+      "correlationId": "Correlation ID",
+      "actorId": "Actor ID",
+      "entityType": "Entity type",
+      "entityTypePlaceholder": "SalesOrder, Role, DeliveryTrip, ToolCall...",
+      "entityId": "Entity ID",
+      "uuidPlaceholder": "Enter UUID...",
+      "from": "From",
+      "to": "To",
+      "moreFilters": "Advanced filters",
+      "apply": "Apply",
+      "reset": "Reset"
+    },
+    "table": {
+      "occurredAt": "Timestamp",
+      "actor": "Actor",
+      "action": "Action",
+      "entity": "Entity",
+      "service": "Source service",
+      "outcome": "Outcome",
+      "correlation": "Correlation",
+      "detail": "Detail"
+    },
+    "actions": {
+      "refresh": "Refresh",
+      "retry": "Retry",
+      "inspect": "Inspect",
+      "copy": "Copy",
+      "copied": "Copied",
+      "filterByCorrelation": "Filter by chain"
+    },
+    "empty": {
+      "title": "No matching audit records",
+      "description": "Adjust or reset your filters to inspect other activities within your organization."
+    },
+    "pagination": {
+      "summary": "{total} records — Page {page} of {totalPages}",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "detail": {
+      "subtitle": "Immutable read-only record with secrets and tokens automatically redacted.",
+      "tabs": {
+        "overview": "Overview",
+        "diff": "Data changes",
+        "chain": "Event chain ({count})"
+      },
+      "occurredAt": "Occurred at",
+      "ingestedAt": "Ingested at",
+      "processingLatency": "Event processing latency",
+      "latencyValue": "{ms} ms",
+      "entity": "Target entity",
+      "actorId": "Actor ID",
+      "sourceEventId": "Source event ID",
+      "correlationId": "Correlation ID",
+      "causationId": "Causation ID"
+    },
+    "diff": {
+      "title": "Before & after comparison",
+      "tableMode": "Diff table",
+      "jsonMode": "JSON",
+      "field": "Field",
+      "before": "Before",
+      "after": "After",
+      "noChanges": "This event does not include before/after payload snapshots.",
+      "metadata": "Metadata",
+      "changeTypes": {
+        "added": "Added",
+        "removed": "Removed",
+        "changed": "Changed",
+        "unchanged": "Unchanged"
+      }
+    },
+    "chain": {
+      "description": "Cross-service event timeline sharing this correlation ID in chronological order. Select any step to inspect its details.",
+      "empty": "No related events found for this correlation ID."
+    },
+    "errors": {
+      "loadFailed": "Unable to load audit logs. Please try again.",
+      "loadChainFailed": "Unable to load correlation event chain. Please try again."
+    }
   }
 }
