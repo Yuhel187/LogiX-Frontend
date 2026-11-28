@@ -38,6 +38,7 @@ export function TripCreateScreen() {
   const [plannedStartAt, setPlannedStartAt] = useState("");
   const [vehicleId, setVehicleId] = useState<string | null>(null);
   const [driverId, setDriverId] = useState<string | null>(null);
+  const [assignmentViolation, setAssignmentViolation] = useState(false);
   const [warehouse, setWarehouse] = useState<Warehouse | null>(null);
   const [warehouseFailed, setWarehouseFailed] = useState(false);
   const [warehouseRetry, setWarehouseRetry] = useState(0);
@@ -244,6 +245,7 @@ export function TripCreateScreen() {
             driverId={driverId}
             onVehicleChange={setVehicleId}
             onDriverChange={setDriverId}
+            onValidationChange={setAssignmentViolation}
             disabled={!editable}
           />
 
@@ -298,6 +300,7 @@ export function TripCreateScreen() {
               onClick={() => void submit()}
               disabled={
                 !canCreate ||
+                assignmentViolation ||
                 !intent.ready ||
                 intent.storageFailed ||
                 submitting ||

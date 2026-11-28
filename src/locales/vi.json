@@ -19,7 +19,69 @@
     "deleteChat": "Xóa cuộc trò chuyện",
     "delete": "Xóa",
     "cancel": "Hủy",
-    "closeHistory": "Đóng lịch sử"
+    "closeHistory": "Đóng lịch sử",
+    "management": {
+      "navTitle": "Hội thoại AI",
+      "title": "Quản lý hội thoại AI",
+      "description": "Theo dõi, tra cứu và quản trị lịch sử cuộc trò chuyện AI của tổ chức.",
+      "refresh": "Tải lại",
+      "retry": "Thử lại",
+      "searchPlaceholder": "Tìm theo tiêu đề hoặc mã hội thoại...",
+      "scopeLabel": "Phạm vi hiển thị",
+      "scopeOrg": "Toàn tổ chức",
+      "scopeMine": "Hội thoại của tôi",
+      "statusLabel": "Trạng thái",
+      "statusAll": "Tất cả trạng thái",
+      "status": {
+        "ACTIVE": "Đang hoạt động",
+        "ARCHIVED": "Đã lưu trữ"
+      },
+      "roles": {
+        "USER": "Người dùng",
+        "ASSISTANT": "LogiX Copilot",
+        "TOOL": "Công cụ hệ thống",
+        "SYSTEM": "Hệ thống"
+      },
+      "columns": {
+        "title": "Tiêu đề hội thoại",
+        "user": "Người dùng",
+        "status": "Trạng thái",
+        "messages": "Tin nhắn",
+        "lastActivity": "Hoạt động gần nhất",
+        "actions": "Thao tác"
+      },
+      "untitled": "Cuộc trò chuyện chưa đặt tên",
+      "unknownUser": "Người dùng không xác định",
+      "empty": "Chưa có cuộc hội thoại nào phù hợp với bộ lọc.",
+      "loadError": "Không thể tải danh sách hội thoại AI.",
+      "loadDetailError": "Không thể tải chi tiết hội thoại.",
+      "detailLoading": "Đang tải chi tiết hội thoại...",
+      "noMessages": "Hội thoại này chưa có tin nhắn nào được lưu.",
+      "readOnlyBadge": "Chỉ đọc",
+      "viewDetail": "Xem chi tiết",
+      "titleLabel": "Tiêu đề hội thoại",
+      "rename": "Đổi tiêu đề",
+      "archive": "Lưu trữ",
+      "restore": "Khôi phục",
+      "delete": "Xóa",
+      "confirmDeleteButton": "Xác nhận xóa",
+      "resumeInCopilot": "Tiếp tục trong Copilot",
+      "executions": "Lượt chạy AI",
+      "lastModel": "Mô hình gần nhất",
+      "tokens": "Token (vào / ra)",
+      "renameSuccess": "Đã cập nhật tiêu đề hội thoại.",
+      "archiveSuccess": "Đã lưu trữ hội thoại.",
+      "restoreSuccess": "Đã khôi phục hội thoại về trạng thái hoạt động.",
+      "deleteSuccess": "Đã xóa hội thoại thành công.",
+      "actionError": "Không thể thực hiện thao tác trên hội thoại.",
+      "paginationSummary": "Hiển thị {count} / {total} hội thoại (Trang {page}/{pages})",
+      "previous": "Trước",
+      "next": "Tiếp",
+      "accessDeniedTitle": "Không có quyền truy cập",
+      "accessDeniedDesc": "Bạn cần quyền Xem hội thoại AI của tổ chức (do Chủ sở hữu cấp) hoặc là Chủ sở hữu / Quản trị viên nền tảng để truy cập trang này.",
+      "deleteConfirmTitle": "Xác nhận xóa hội thoại AI",
+      "deleteConfirmDesc": "Bạn có chắc chắn muốn xóa hội thoại \"{title}\" không? Hội thoại sẽ bị ẩn khỏi danh sách và không thể tiếp tục trò chuyện."
+    }
   },
   "admin": {
     "navTitle": "Quản trị nền tảng",
@@ -415,7 +477,14 @@
       "poolDescription": "Chỉ hiển thị lô giao khả dụng của kho này. Phiên bản được kiểm tra khi chọn.",
       "poolEmpty": "Không có lô giao đủ điều kiện cho kho này.",
       "selectedCount": "Đã chọn {count} · {total} lô đủ điều kiện",
-      "demand": "Khối lượng {weight} · thể tích {volume}"
+      "demand": "Khối lượng {weight} · thể tích {volume}",
+      "selectAllForRemoval": "Chọn tất cả lô giao để gỡ khỏi chuyến nháp",
+      "inRouteSequence": "Trong lộ trình · #{sequence}",
+      "notInRouteYet": "Chưa vào lộ trình",
+      "refreshPool": "Tải lại danh sách",
+      "poolEmptyForWarehouse": "Không có lô giao đủ điều kiện tại kho {warehouse}.",
+      "poolEligibilityHint": "Lô giao chỉ hiển thị khi ở trạng thái Sẵn sàng giao (READY_TO_SHIP), thuộc đúng kho này và chưa được gán vào chuyến khác.",
+      "openShipmentsPage": "Mở danh sách lô giao hàng"
     },
     "cancel": {
       "title": "Hủy chuyến trước xuất giao",
@@ -518,6 +587,20 @@
       "requiredFields": "Hãy chọn kho và nhập thời gian bắt đầu dự kiến hợp lệ.",
       "warehouseLoad": "Không tải được thông tin kho đã chọn.",
       "assignmentLoad": "Không tải được danh sách xe hoặc tài xế."
+    },
+    "assignment": {
+      "busyTag": "Đang bận · {tripNumber}",
+      "insufficientCapacityTag": "Không đủ tải",
+      "vehicleBusyViolation": "Phương tiện đang được sử dụng ở chuyến {tripNumber} (đã duyệt hoặc đang giao). Vui lòng chọn phương tiện khác đang rảnh hoặc gỡ phân công.",
+      "driverBusyViolation": "Tài xế đang phụ trách chuyến {tripNumber} (đã duyệt hoặc đang giao). Vui lòng chọn tài xế khác đang rảnh hoặc gỡ phân công.",
+      "viewBlockingTrip": "Xem chuyến đang giữ",
+      "capacityViolation": "Phương tiện không đủ sức chứa cho tổng danh sách lô giao hiện tại (cần {requiredWeight} kg / {requiredVolume} m³, sức chứa xe {capacityWeight} kg / {capacityVolume} m³).",
+      "availabilityLoadError": "Không kiểm tra được trạng thái sẵn sàng của xe và tài xế."
+    },
+    "maps": {
+      "navigateStop": "Chỉ đường",
+      "openRoute": "Mở lộ trình trên Google Maps",
+      "openRouteLeg": "Google Maps chặng {leg} (#{from}–#{to})"
     }
   },
   "shipments": {
@@ -1040,6 +1123,43 @@
     "saveSettings": "Lưu thay đổi",
     "saveSuccess": "Đã lưu cài đặt tổ chức",
     "saveError": "Lưu thất bại. Vui lòng thử lại.",
+    "modelConfig": {
+      "title": "Mô hình AI",
+      "description": "Chọn provider và model mặc định cho các lần chạy agent của tổ chức.",
+      "active": "Đang hoạt động",
+      "providerLabel": "Provider",
+      "providerPlaceholder": "Chọn provider",
+      "providerReady": "Đã sẵn sàng",
+      "providerUnavailable": "Chưa cấu hình",
+      "providerHint": "Provider phải có credential trong môi trường agent-service.",
+      "notConfiguredShort": "chưa sẵn sàng",
+      "modelLabel": "Model",
+      "modelPlaceholder": "Ví dụ: openai/gpt-4o-mini",
+      "modelHint": "Chọn một model từ danh sách Google Gemini.",
+      "modelHintGeneric": "Nhập đúng model được provider hỗ trợ.",
+      "credentialHint": "Credential được quản lý bởi môi trường service. UI không lưu API key.",
+      "noProviderConfigured": "Chưa có provider nào được cấu hình credential. Hãy cấu hình environment của agent-service trước.",
+      "readOnlyNotice": "Bạn có thể xem cấu hình. Chỉ quản trị viên có quyền quản lý model mới được thay đổi.",
+      "testButton": "Kiểm tra kết nối",
+      "testing": "Đang kiểm tra…",
+      "tested": "Đã kiểm tra kết nối",
+      "saveButton": "Lưu model",
+      "saving": "Đang lưu…",
+      "testSuccess": "Kết nối provider thành công",
+      "saveSuccess": "Đã cập nhật model cho tổ chức",
+      "errors": {
+        "noPermission": "Bạn không có quyền quản lý model của tổ chức này.",
+        "providerNotConfigured": "Provider này chưa có credential trong agent-service.",
+        "invalid": "Provider hoặc model không hợp lệ. Hãy kiểm tra lại lựa chọn.",
+        "conflict": "Cấu hình đã được cập nhật ở nơi khác. Hãy tải lại rồi kiểm tra lại thay đổi.",
+        "testFailed": "Không thể kiểm tra provider. Hãy kiểm tra model và thử lại.",
+        "network": "Không thể kết nối tới agent-service. Hãy kiểm tra kết nối rồi thử lại.",
+        "unavailable": "Không thể tải cấu hình model. Hãy thử lại."
+      },
+      "modelsLoading": "Đang tải danh sách model…",
+      "modelsEmpty": "Không có model Gemini khác phù hợp.",
+      "catalogUnavailable": "Không thể tải danh sách model từ Google."
+    },
     "freePlan": "Miễn phí",
     "noTenants": "Bạn chưa tham gia tổ chức nào",
     "loadingTenants": "Đang tải danh sách tổ chức...",
@@ -1184,7 +1304,43 @@
     "legalProfileReadonly": "Chỉ Chủ sở hữu hoặc Quản trị viên mới có thể chỉnh sửa hồ sơ pháp lý.",
     "legalProfileLoadError": "Không thể tải hồ sơ pháp lý.",
     "legalProfileSave": "Lưu hồ sơ pháp lý",
-    "legalProfileSaveSuccess": "Đã lưu hồ sơ pháp lý"
+    "legalProfileSaveSuccess": "Đã lưu hồ sơ pháp lý",
+    "aiInstructionsTitle": "Chỉ dẫn AI tùy chỉnh (LogiX Copilot)",
+    "aiInstructionsDesc": "Cá nhân hóa ngữ cảnh vận hành, quy ước kho bãi, thuật ngữ nội bộ và văn phong phản hồi của trợ lý AI cho riêng tổ chức này.",
+    "aiInstructionsStatusActive": "Đang áp dụng",
+    "aiInstructionsStatusPaused": "Đang tạm tắt",
+    "aiInstructionsStatusDefault": "Mặc định hệ thống",
+    "aiInstructionsUpdatedBy": "Cập nhật bởi {name} · {time}",
+    "aiInstructionsUpdatedAt": "Cập nhật lúc {time}",
+    "aiInstructionsLoading": "Đang tải cấu hình chỉ dẫn AI...",
+    "aiInstructionsLoadError": "Không thể tải cấu hình chỉ dẫn AI.",
+    "aiInstructionsRetry": "Thử lại",
+    "aiInstructionsEnabledLabel": "Kích hoạt chỉ dẫn tùy chỉnh",
+    "aiInstructionsEnabledHint": "Tắt tùy chọn này để tạm thời quay về chỉ dẫn mặc định mà không làm mất nội dung đã lưu.",
+    "aiInstructionsPresetsLabel": "Gợi ý nhanh:",
+    "aiInstructionsPresetWarehouseLabel": "Quy ước kho mặc định",
+    "aiInstructionsPresetWarehouseText": "Khi kiểm tra tồn kho hoặc tạo đơn hàng mà chưa nêu rõ kho, hãy hỏi xác nhận xem có dùng kho trung tâm hay không và hiển thị đơn vị tính theo thùng/kiện.",
+    "aiInstructionsPresetToneLabel": "Văn phong ngắn gọn",
+    "aiInstructionsPresetToneText": "Trả lời ngắn gọn bằng gạch đầu dòng, nêu rõ mã chứng từ (đơn hàng, vận đơn, chuyến xe) và bước hành động tiếp theo.",
+    "aiInstructionsPresetDispatchLabel": "Ưu tiên điều phối",
+    "aiInstructionsPresetDispatchText": "Khi tư vấn tối ưu lộ trình, luôn tóm tắt tổng quãng đường tiết kiệm được và nhắc điều phối viên kiểm tra tải trọng xe trước khi duyệt.",
+    "aiInstructionsFieldLabel": "Nội dung chỉ dẫn cho tổ chức",
+    "aiInstructionsPlaceholder": "VD: Xưng hô là Trợ lý vận hành Bắc Việt. Luôn nêu rõ mã kho WH-HN hoặc WH-HCM khi báo cáo tồn kho...",
+    "aiInstructionsGuardrailsNote": "Chỉ dẫn tùy chỉnh chỉ áp dụng cho ngữ cảnh nghiệp vụ và văn phong. Các nguyên tắc an toàn của LogiX (bắt buộc gọi Prophet/OR-Tools, Confirmation Gate, phân quyền RBAC và cô lập dữ liệu tenant) luôn được bảo vệ và không thể bị ghi đè.",
+    "aiInstructionsSaveButton": "Lưu chỉ dẫn",
+    "aiInstructionsRevertButton": "Hoàn tác",
+    "aiInstructionsResetButton": "Khôi phục mặc định",
+    "aiInstructionsResetTitle": "Khôi phục chỉ dẫn AI mặc định?",
+    "aiInstructionsResetDesc": "Nội dung chỉ dẫn tùy chỉnh hiện tại của tổ chức sẽ bị xóa và LogiX Copilot sẽ quay lại cấu hình mặc định hệ thống.",
+    "aiInstructionsResetConfirm": "Khôi phục mặc định",
+    "aiInstructionsSaveSuccess": "Đã lưu cấu hình chỉ dẫn AI của tổ chức.",
+    "aiInstructionsSaveError": "Không thể lưu cấu hình chỉ dẫn AI.",
+    "aiInstructionsResetSuccess": "Đã khôi phục chỉ dẫn AI về mặc định hệ thống.",
+    "aiInstructionsResetError": "Không thể khôi phục chỉ dẫn AI mặc định.",
+    "aiInstructionsMaxLengthError": "Chỉ dẫn AI tùy chỉnh không được vượt quá 2000 ký tự.",
+    "aiInstructionsReadonly": "Bạn đang xem ở chế độ chỉ đọc. Cần quyền cấu hình chỉ dẫn AI (iam:ai-instructions:manage) để chỉnh sửa.",
+    "tabLegalProfile": "Hồ sơ pháp lý",
+    "tabAiInstructions": "Chỉ dẫn AI"
   },
   "account": {
     "pageTitle": "Cài đặt tài khoản",
@@ -1323,7 +1479,8 @@
       "cannotDeleteRoleWithMembers": "Vai trò này đang được gán cho {count} thành viên. Vui lòng chuyển vai trò của họ trước khi xóa.",
       "cannotChangeCode": "Mã vai trò không thể thay đổi sau khi tạo.",
       "codeValidation": "Mã chỉ chứa chữ in hoa, số và dấu gạch dưới",
-      "deleteFailed": "Xóa vai trò thất bại"
+      "deleteFailed": "Xóa vai trò thất bại",
+      "selectedPermissionsCount": "Đã chọn: {count} quyền"
     },
     "matrix": {
       "title": "Ma trận Phân quyền",
@@ -1339,6 +1496,8 @@
         "update": "Chỉnh sửa",
         "delete": "Xóa",
         "execute": "Thực thi / Duyệt",
+        "approve": "Phê duyệt",
+        "complete": "Hoàn tất",
         "manage": "Toàn quyền"
       },
       "selectAllModule": "Chọn toàn bộ phân hệ",
@@ -1348,20 +1507,38 @@
       "saveSuccess": "Cập nhật quyền hạn cho vai trò thành công!"
     },
     "modules": {
+      "FULFILLMENT": "Xuất kho & Lô giao hàng",
       "INVENTORY": "Quản lý Kho & Tồn kho",
       "TRANSPORT": "Điều phối Vận tải & Đội xe",
+      "MASTER_DATA": "Danh mục Dữ liệu gốc",
       "ORDER": "Quản lý Đơn hàng & Hợp đồng",
       "IAM": "Quản trị Tổ chức & Phân quyền",
-      "REPORT": "Báo cáo & Thống kê"
+      "FORECAST": "Dự báo Nhu cầu (AI Prophet)",
+      "REPORT": "Báo cáo & Thống kê",
+      "AGENT": "Trợ lý AI (LogiX Copilot)",
+      "AUDIT": "Nhật ký Kiểm toán"
     },
     "resources": {
+      "shipment": "Lô giao hàng",
       "warehouse": "Kho bãi & Vị trí",
       "stock": "Tồn kho & Kiểm kê",
       "trip": "Chuyến xe & Hành trình",
-      "vehicle": "Phương tiện & Tài xế",
+      "route": "Tuyến vận chuyển",
+      "driver": "Tài xế & Chuyến được giao",
+      "vehicle": "Phương tiện vận tải",
+      "customer": "Khách hàng & Địa chỉ",
+      "product": "Sản phẩm (SKU)",
       "sales_order": "Đơn hàng bán hàng",
       "role": "Vai trò & Phân quyền",
-      "member": "Thành viên tổ chức"
+      "member": "Thành viên tổ chức",
+      "organization": "Hồ sơ tổ chức",
+      "ai_instructions": "Chỉ dẫn AI tùy chỉnh",
+      "demand_forecast": "Dự báo nhu cầu",
+      "analytics": "Báo cáo phân tích",
+      "export": "Xuất dữ liệu báo cáo",
+      "conversation": "Hội thoại AI",
+      "model_config": "Cấu hình mô hình AI",
+      "log": "Nhật ký kiểm toán"
     },
     "invitations": {
       "title": "Lời mời Tham gia Tổ chức",
@@ -1433,7 +1610,8 @@
         "organizationLabel": "Tổ chức",
         "verifying": "Đang xác thực thông tin liên kết mời...",
         "successMessage": "Chào mừng bạn đến với {tenantName}! Đang chuyển hướng..."
-      }
+      },
+      "singleEmailMultiRoleNote": "Bạn có thể chọn nhiều vai trò cùng lúc; hệ thống chỉ gửi 1 email mời duy nhất."
     }
   },
   "inventory": {
@@ -2366,6 +2544,116 @@
         "s6Title": "6. Quy trình Ứng phó & Thông báo Sự cố Dữ liệu trong 72 Giờ (Điều 33 GDPR)",
         "s6Body": "LogiX duy trì cơ chế kiểm soát tính nhất quán dữ liệu (Outbox/Inbox Idempotency) và giám sát an ninh liên tục. Trong trường hợp xảy ra sự cố xâm phạm hoặc rò rỉ dữ liệu cá nhân, LogiX cam kết kích hoạt quy trình khoanh vùng khắc phục ngay lập tức và thông báo bằng văn bản cho Tổ chức bị ảnh hưởng cùng cơ quan chuyên trách bảo vệ dữ liệu trong vòng tối đa 72 giờ kể từ khi phát hiện."
       }
+    }
+  },
+  "audit": {
+    "navTitle": "Nhật ký kiểm toán",
+    "pageTitle": "Nhật ký kiểm toán",
+    "pageDescription": "Tra cứu nhật ký kiểm toán bất biến cho các thao tác nghiệp vụ, phân quyền và trợ lý AI trong tổ chức.",
+    "accessDeniedTitle": "Không có quyền truy cập Nhật ký kiểm toán",
+    "accessDeniedDesc": "Tài khoản của bạn chưa được cấp quyền xem nhật ký kiểm toán. Vui lòng liên hệ Chủ sở hữu tổ chức để được phân quyền.",
+    "common": {
+      "empty": "—",
+      "systemActor": "Hệ thống"
+    },
+    "outcomes": {
+      "SUCCESS": "Thành công",
+      "DENIED": "Bị từ chối",
+      "FAILED": "Thất bại"
+    },
+    "actorTypes": {
+      "USER": "Người dùng",
+      "SYSTEM": "Hệ thống",
+      "AGENT": "Trợ lý AI"
+    },
+    "filters": {
+      "action": "Hành động",
+      "actionPlaceholder": "Ví dụ: ORDER_CONFIRMED, INVENTORY_ADJUSTED...",
+      "outcome": "Kết quả",
+      "allOutcomes": "Tất cả kết quả",
+      "actorType": "Loại tác nhân",
+      "allActorTypes": "Tất cả tác nhân",
+      "sourceService": "Dịch vụ nguồn",
+      "allServices": "Tất cả dịch vụ",
+      "correlationId": "Mã truy vết (Correlation ID)",
+      "actorId": "Mã tác nhân (Actor ID)",
+      "entityType": "Loại đối tượng",
+      "entityTypePlaceholder": "SalesOrder, Role, DeliveryTrip, ToolCall...",
+      "entityId": "Mã đối tượng (Entity ID)",
+      "uuidPlaceholder": "Nhập mã UUID...",
+      "from": "Từ thời điểm",
+      "to": "Đến thời điểm",
+      "moreFilters": "Bộ lọc nâng cao",
+      "apply": "Áp dụng",
+      "reset": "Đặt lại"
+    },
+    "table": {
+      "occurredAt": "Thời điểm",
+      "actor": "Tác nhân",
+      "action": "Hành động",
+      "entity": "Đối tượng",
+      "service": "Dịch vụ nguồn",
+      "outcome": "Kết quả",
+      "correlation": "Chuỗi truy vết",
+      "detail": "Chi tiết"
+    },
+    "actions": {
+      "refresh": "Làm mới",
+      "retry": "Thử lại",
+      "inspect": "Xem chi tiết",
+      "copy": "Sao chép",
+      "copied": "Đã chép",
+      "filterByCorrelation": "Lọc theo chuỗi này"
+    },
+    "empty": {
+      "title": "Chưa có bản ghi kiểm toán phù hợp",
+      "description": "Thử điều chỉnh hoặc đặt lại bộ lọc để xem các hoạt động khác trong tổ chức."
+    },
+    "pagination": {
+      "summary": "Tổng {total} bản ghi — Trang {page} / {totalPages}",
+      "previous": "Trước",
+      "next": "Tiếp"
+    },
+    "detail": {
+      "subtitle": "Bản ghi bất biến chỉ đọc, đã lọc bỏ hoàn toàn thông tin nhạy cảm và token.",
+      "tabs": {
+        "overview": "Tổng quan",
+        "diff": "Thay đổi dữ liệu",
+        "chain": "Chuỗi sự kiện ({count})"
+      },
+      "occurredAt": "Thời điểm xảy ra",
+      "ingestedAt": "Thời điểm ghi nhận",
+      "processingLatency": "Độ trễ xử lý sự kiện",
+      "latencyValue": "{ms} ms",
+      "entity": "Đối tượng tác động",
+      "actorId": "Mã tác nhân",
+      "sourceEventId": "Mã sự kiện nguồn",
+      "correlationId": "Mã truy vết (Correlation ID)",
+      "causationId": "Mã nguyên nhân (Causation ID)"
+    },
+    "diff": {
+      "title": "So sánh dữ liệu trước và sau",
+      "tableMode": "Bảng so sánh",
+      "jsonMode": "JSON",
+      "field": "Trường dữ liệu",
+      "before": "Trước thay đổi",
+      "after": "Sau thay đổi",
+      "noChanges": "Sự kiện này không có dữ liệu chi tiết trước/sau.",
+      "metadata": "Siêu dữ liệu (Metadata)",
+      "changeTypes": {
+        "added": "Thêm mới",
+        "removed": "Đã xóa",
+        "changed": "Thay đổi",
+        "unchanged": "Giữ nguyên"
+      }
+    },
+    "chain": {
+      "description": "Toàn bộ chuỗi sự kiện xuyên dịch vụ chia sẻ cùng mã truy vết (sắp xếp theo thứ tự thời gian). Chọn một bước để xem chi tiết.",
+      "empty": "Không tìm thấy sự kiện liên quan nào trong chuỗi truy vết này."
+    },
+    "errors": {
+      "loadFailed": "Không thể tải danh sách nhật ký kiểm toán. Vui lòng thử lại.",
+      "loadChainFailed": "Không thể tải chuỗi sự kiện truy vết. Vui lòng thử lại."
     }
   }
 }

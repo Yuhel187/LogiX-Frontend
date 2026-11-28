@@ -48,6 +48,7 @@ import { cn } from "@/lib/utils";
 import { getOrganizationMembersApi, removeMemberApi } from "../../api/auth.api";
 import {
   getInvitationsApi,
+  getInvitationLinkApi,
   resendInvitationApi,
   revokeInvitationApi,
   deleteInvitationApi,
@@ -170,12 +171,11 @@ export function UnifiedMembersView({ tenantId }: UnifiedMembersViewProps) {
   const handleCopyInviteLink = async (inv: InvitationItem) => {
     setActionLoadingId(inv.id);
     try {
-      const res = await resendInvitationApi(inv.id, tenantId);
+      const res = await getInvitationLinkApi(inv.id, tenantId);
       if (res.inviteLink) {
         await navigator.clipboard.writeText(res.inviteLink);
         toast.success(t("tenant.copyInviteLinkSuccess"));
       }
-      await loadData();
     } catch (err: unknown) {
       const msg = formatIdentityError(err, t, "tenant.copyInviteLinkError");
       toast.error(msg);

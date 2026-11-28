@@ -27,6 +27,22 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
                   {children}
                 </main>
               </div>
+      <CopilotChatProvider>
+        <SidebarProvider>
+          <div className="flex h-dvh w-full overflow-hidden bg-background">
+            {/* Left Sidebar Navigation */}
+            <AppSidebar />
+
+            {/* Right Area: Header + Main View Area */}
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden min-w-0">
+              <AppHeader />
+              <main
+                id="main-content"
+                className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin focus:outline-hidden"
+              >
+                {children}
+              </main>
+            </div>
 
               {/* Copilot AI Slide Bar */}
               <LogixCopilotSidebar />

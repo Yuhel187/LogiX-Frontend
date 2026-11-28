@@ -16,6 +16,8 @@ import {
   ShieldAlert,
   Lock,
   LogOut,
+  FileText,
+  Sparkles,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -34,8 +36,10 @@ import { WORKSPACE_HOME_ROUTE } from "@/lib/config/routes";
 import { OrgLogo } from "@/components/shared/org-fallback-icon";
 import { DetailPageSkeleton } from "@/components/shared/page-skeletons";
 import {
+  IAM_PERMISSIONS,
   LegalProfileForm,
   RoleListView,
+  TenantAiInstructionsForm,
   UnifiedMembersView,
   formatIdentityError,
 } from "@/features/identity";
@@ -67,6 +71,7 @@ function GeneralSettingsForm({
     leaveOrganization,
     tenants,
     isSuperAdmin,
+    hasPermission,
   } = useAuth();
   const { t } = useTranslation();
   const router = useRouter();
@@ -74,7 +79,10 @@ function GeneralSettingsForm({
   // Kiểm tra quyền hạn: Tuyệt đối chỉ SUPER ADMIN hoặc OWNER mới có quyền xóa
   const isOwner = tenant.role === "OWNER";
   const canDeleteOrg = isSuperAdmin || isOwner;
-  const canEdit = isSuperAdmin || isOwner || tenant.role === "ADMIN";
+  const canEdit =
+    isSuperAdmin ||
+    isOwner ||
+    hasPermission(IAM_PERMISSIONS.ORGANIZATION_MANAGE);
   const hasMembership = tenant.role !== "SUPER_ADMIN";
 
   // Quy tắc rời tổ chức (đồng bộ với backend): không phải OWNER, còn tổ chức khác, không phải tổ chức mặc định
@@ -302,13 +310,10 @@ function GeneralSettingsForm({
         </form>
       </div>
 
-      <LegalProfileForm
-        key={tenant.id}
+      <ModelConfigSettings
+        key={`model-${tenant.id}`}
         tenantId={tenant.id}
-        role={tenant.role}
       />
-
-      <ModelConfigSettings tenantId={tenant.id} />
 
       {/* Thiết lập tổ chức mặc định */}
       <div className="pt-6 border-t border-border/60 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
@@ -562,15 +567,19 @@ function GeneralSettingsForm({
 // MAIN DETAIL PAGE CONTENT
 // ==========================================
 function OrganizationDetailContent({ orgId }: { orgId: string }) {
-  const { activeTenant, tenants, isLoading } = useAuth();
+  const { activeTenant, tenants, isLoading, isSuperAdmin } = useAuth();
   const { t } = useTranslation();
 
   // Active tab: default is "members"
-  const [activeTab, setActiveTab] = useState<"members" | "roles" | "general">(
-    "members",
-  );
+  const [activeTab, setActiveTab] = useState<
+    "members" | "roles" | "legal-profile" | "ai-instructions" | "general"
+  >("members");
 
   const currentTenant = activeTenant?.id === orgId ? activeTenant : null;
+  const canAccessRolesTab =
+    Boolean(currentTenant) && (isSuperAdmin || currentTenant?.role === "OWNER");
+  const effectiveTab =
+    activeTab === "roles" && !canAccessRolesTab ? "members" : activeTab;
 
   const isDefaultTenant = tenants.some(
     (item) => item.id === currentTenant?.id && item.isDefault,
@@ -594,8 +603,8 @@ function OrganizationDetailContent({ orgId }: { orgId: string }) {
       </div>
 
       {currentTenant ? (
-        <div className="w-full rounded-2xl border border-border/70 bg-card shadow-xs overflow-hidden">
-          {/* Top Tabs Bar: Gồm 3 tab tinh gọn (Thành viên & Lời mời, Vai trò, Cài đặt chung) */}
+        <div className="w-full rounded-2xl border border-border/70 bg-card shadow-xs">
+          {/* Top Tabs Bar: 5 tab tách biệt rõ ràng */}
           <div className="flex items-center gap-2 sm:gap-6 px-6 sm:px-8 pt-4 sm:pt-6 border-b border-border/60 overflow-x-auto scrollbar-none">
             {/* Tab 1: Thành viên & Lời mời */}
             <button
@@ -612,22 +621,54 @@ function OrganizationDetailContent({ orgId }: { orgId: string }) {
               <span>{t("tenant.tabMembers")}</span>
             </button>
 
-            {/* Tab 2: Phân quyền & Vai trò */}
+            {/* Tab 2: Phân quyền & Vai trò (Chỉ dành cho OWNER và SUPER_ADMIN) */}
+            {canAccessRolesTab ? (
+              <button
+                type="button"
+                onClick={() => setActiveTab("roles")}
+                className={cn(
+                  "flex items-center gap-2 pb-3.5 px-1 text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap",
+                  effectiveTab === "roles"
+                    ? "border-emerald-600 text-emerald-600 dark:text-emerald-400 dark:border-emerald-400"
+                    : "border-transparent text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <ShieldCheck className="size-4" />
+                <span>{t("iam.roles.title")}</span>
+              </button>
+            ) : null}
+
+            {/* Tab 3: Hồ sơ pháp lý */}
             <button
               type="button"
-              onClick={() => setActiveTab("roles")}
+              onClick={() => setActiveTab("legal-profile")}
               className={cn(
                 "flex items-center gap-2 pb-3.5 px-1 text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap",
-                activeTab === "roles"
+                activeTab === "legal-profile"
                   ? "border-emerald-600 text-emerald-600 dark:text-emerald-400 dark:border-emerald-400"
                   : "border-transparent text-muted-foreground hover:text-foreground",
               )}
             >
-              <ShieldCheck className="size-4" />
-              <span>{t("iam.roles.title")}</span>
+              <FileText className="size-4" />
+              <span>{t("tenant.tabLegalProfile")}</span>
             </button>
 
-            {/* Tab 3: Cài đặt chung */}
+            {/* Tab 4: Chỉ dẫn AI */}
+            <button
+              type="button"
+              onClick={() => setActiveTab("ai-instructions")}
+              className={cn(
+                "flex items-center gap-2 pb-3.5 px-1 text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap",
+                activeTab === "ai-instructions"
+                  ? "border-emerald-600 text-emerald-600 dark:text-emerald-400 dark:border-emerald-400"
+                  : "border-transparent text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <Sparkles className="size-4" />
+              <span>{t("tenant.tabAiInstructions")}</span>
+            </button>
+
+            {/* Tab 5: Cài đặt chung */}
             <button
               type="button"
               onClick={() => setActiveTab("general")}
@@ -645,10 +686,21 @@ function OrganizationDetailContent({ orgId }: { orgId: string }) {
 
           {/* Tab Content */}
           <div className="p-6 sm:p-8">
-            {activeTab === "members" ? (
+            {effectiveTab === "members" ? (
               <UnifiedMembersView tenantId={currentTenant.id} />
-            ) : activeTab === "roles" ? (
+            ) : effectiveTab === "roles" && canAccessRolesTab ? (
               <RoleListView tenantId={currentTenant.id} />
+            ) : effectiveTab === "legal-profile" ? (
+              <LegalProfileForm
+                key={`legal-${currentTenant.id}`}
+                tenantId={currentTenant.id}
+                role={currentTenant.role}
+              />
+            ) : effectiveTab === "ai-instructions" ? (
+              <TenantAiInstructionsForm
+                key={`ai-${currentTenant.id}`}
+                tenantId={currentTenant.id}
+              />
             ) : (
               <GeneralSettingsForm
                 key={

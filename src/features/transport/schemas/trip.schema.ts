@@ -355,3 +355,32 @@ export const tripListParamsSchema = z
     { message: "plannedStartFrom must not be after plannedStartTo." }
   );
 export type TripListParams = z.input<typeof tripListParamsSchema>;
+
+export const busyDriverSchema = z
+  .object({
+    driverId: uuid,
+    tripId: uuid,
+    tripNumber: z.string(),
+    status: tripStatusSchema,
+  })
+  .strict();
+
+export const busyVehicleSchema = z
+  .object({
+    vehicleId: uuid,
+    tripId: uuid,
+    tripNumber: z.string(),
+    status: tripStatusSchema,
+  })
+  .strict();
+
+export const tripResourceAvailabilitySchema = z
+  .object({
+    busyDrivers: z.array(busyDriverSchema),
+    busyVehicles: z.array(busyVehicleSchema),
+  })
+  .strict();
+
+export type BusyDriver = z.infer<typeof busyDriverSchema>;
+export type BusyVehicle = z.infer<typeof busyVehicleSchema>;
+export type TripResourceAvailability = z.infer<typeof tripResourceAvailabilitySchema>;

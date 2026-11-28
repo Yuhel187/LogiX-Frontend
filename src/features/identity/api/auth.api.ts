@@ -4,6 +4,7 @@ import {
   switchTenantResponseSchema,
   orgMemberSchema,
   effectivePermissionsSchema,
+  tenantAiInstructionsViewSchema,
   type AuthResponse,
   type EffectivePermissions,
   type LoginCredentials,
@@ -15,6 +16,8 @@ import {
   type UpdateOrganizationData,
   type OrganizationDetail,
   type LegalProfile,
+  type TenantAiInstructionsView,
+  type UpdateTenantAiInstructionsData,
   type TenantListItem,
   type UpdateProfileData,
   type ChangePasswordData,
@@ -316,6 +319,65 @@ export async function updateOrganizationApi(
   );
 
   return handleResponse(response);
+}
+
+export async function getTenantAiInstructionsApi(
+  tenantId: string,
+  accessToken?: string,
+): Promise<TenantAiInstructionsView> {
+  const response = await authFetch(
+    `${API_BASE_URL}/auth/organizations/${tenantId}/ai-instructions`,
+    {
+      method: "GET",
+      accessToken,
+    },
+  );
+
+  return tenantAiInstructionsViewSchema.parse(
+    await handleResponse<unknown>(response),
+  );
+}
+
+export async function updateTenantAiInstructionsApi(
+  tenantId: string,
+  data: UpdateTenantAiInstructionsData,
+  accessToken?: string,
+): Promise<TenantAiInstructionsView & { message?: string }> {
+  const response = await authFetch(
+    `${API_BASE_URL}/auth/organizations/${tenantId}/ai-instructions`,
+    {
+      method: "PUT",
+      accessToken,
+      body: JSON.stringify(data),
+    },
+  );
+
+  const raw = await handleResponse<Record<string, unknown>>(response);
+  const parsed = tenantAiInstructionsViewSchema.parse(raw);
+  return {
+    ...parsed,
+    message: typeof raw.message === "string" ? raw.message : undefined,
+  };
+}
+
+export async function resetTenantAiInstructionsApi(
+  tenantId: string,
+  accessToken?: string,
+): Promise<TenantAiInstructionsView & { message?: string }> {
+  const response = await authFetch(
+    `${API_BASE_URL}/auth/organizations/${tenantId}/ai-instructions`,
+    {
+      method: "DELETE",
+      accessToken,
+    },
+  );
+
+  const raw = await handleResponse<Record<string, unknown>>(response);
+  const parsed = tenantAiInstructionsViewSchema.parse(raw);
+  return {
+    ...parsed,
+    message: typeof raw.message === "string" ? raw.message : undefined,
+  };
 }
 
 export async function setDefaultTenantApi(

@@ -19,7 +19,69 @@
     "deleteChat": "Delete conversation",
     "delete": "Delete",
     "cancel": "Cancel",
-    "closeHistory": "Close history"
+    "closeHistory": "Close history",
+    "management": {
+      "navTitle": "AI Conversations",
+      "title": "AI Conversation Management",
+      "description": "Review, search, and govern AI conversation history across your organization.",
+      "refresh": "Refresh",
+      "retry": "Retry",
+      "searchPlaceholder": "Search by title or thread ID...",
+      "scopeLabel": "Scope",
+      "scopeOrg": "Entire organization",
+      "scopeMine": "My conversations",
+      "statusLabel": "Status",
+      "statusAll": "All statuses",
+      "status": {
+        "ACTIVE": "Active",
+        "ARCHIVED": "Archived"
+      },
+      "roles": {
+        "USER": "User",
+        "ASSISTANT": "LogiX Copilot",
+        "TOOL": "System tool",
+        "SYSTEM": "System"
+      },
+      "columns": {
+        "title": "Conversation title",
+        "user": "User",
+        "status": "Status",
+        "messages": "Messages",
+        "lastActivity": "Last activity",
+        "actions": "Actions"
+      },
+      "untitled": "Untitled conversation",
+      "unknownUser": "Unknown user",
+      "empty": "No conversations match the current filters.",
+      "loadError": "Failed to load AI conversations.",
+      "loadDetailError": "Failed to load conversation details.",
+      "detailLoading": "Loading conversation details...",
+      "noMessages": "No stored messages in this conversation.",
+      "readOnlyBadge": "Read-only",
+      "viewDetail": "View details",
+      "titleLabel": "Conversation title",
+      "rename": "Rename",
+      "archive": "Archive",
+      "restore": "Restore",
+      "delete": "Delete",
+      "confirmDeleteButton": "Confirm delete",
+      "resumeInCopilot": "Continue in Copilot",
+      "executions": "AI runs",
+      "lastModel": "Latest model",
+      "tokens": "Tokens (in / out)",
+      "renameSuccess": "Conversation title updated.",
+      "archiveSuccess": "Conversation archived.",
+      "restoreSuccess": "Conversation restored to active.",
+      "deleteSuccess": "Conversation deleted.",
+      "actionError": "Failed to update conversation.",
+      "paginationSummary": "Showing {count} of {total} conversations (Page {page}/{pages})",
+      "previous": "Previous",
+      "next": "Next",
+      "accessDeniedTitle": "Access denied",
+      "accessDeniedDesc": "You need organization AI conversation read permission (granted by Owner) or Owner / Super Admin access to view this page.",
+      "deleteConfirmTitle": "Delete AI conversation",
+      "deleteConfirmDesc": "Are you sure you want to delete \"{title}\"? This conversation will be removed from the list and cannot be resumed."
+    }
   },
   "admin": {
     "navTitle": "Platform Admin",
@@ -415,7 +477,14 @@
       "poolDescription": "Only available shipments for this warehouse are listed. Their versions are checked when selected.",
       "poolEmpty": "No eligible shipments are available for this warehouse.",
       "selectedCount": "{count} selected · {total} eligible",
-      "demand": "Weight {weight} · volume {volume}"
+      "demand": "Weight {weight} · volume {volume}",
+      "selectAllForRemoval": "Select all shipments to remove from draft trip",
+      "inRouteSequence": "In route · #{sequence}",
+      "notInRouteYet": "Not in route yet",
+      "refreshPool": "Refresh list",
+      "poolEmptyForWarehouse": "No eligible shipments available for warehouse {warehouse}.",
+      "poolEligibilityHint": "Shipments appear here only when READY_TO_SHIP, belonging to this warehouse, and not assigned to another trip.",
+      "openShipmentsPage": "Open Shipments"
     },
     "cancel": {
       "title": "Cancel trip before dispatch",
@@ -518,6 +587,20 @@
       "requiredFields": "Choose a warehouse and enter a valid planned start time.",
       "warehouseLoad": "Unable to load the selected warehouse details.",
       "assignmentLoad": "Unable to load vehicle or Driver options."
+    },
+    "assignment": {
+      "busyTag": "Busy · {tripNumber}",
+      "insufficientCapacityTag": "Insufficient capacity",
+      "vehicleBusyViolation": "This vehicle is currently assigned to active trip {tripNumber}. Choose an available vehicle or unassign it.",
+      "driverBusyViolation": "This driver is currently assigned to active trip {tripNumber}. Choose an available driver or unassign them.",
+      "viewBlockingTrip": "View active trip",
+      "capacityViolation": "Selected vehicle does not have enough capacity for current manifest totals (required {requiredWeight} kg / {requiredVolume} m³, capacity {capacityWeight} kg / {capacityVolume} m³).",
+      "availabilityLoadError": "Could not verify vehicle and driver availability."
+    },
+    "maps": {
+      "navigateStop": "Navigate",
+      "openRoute": "Open route in Google Maps",
+      "openRouteLeg": "Google Maps leg {leg} (#{from}–#{to})"
     }
   },
   "shipments": {
@@ -1040,6 +1123,43 @@
     "saveSettings": "Save Changes",
     "saveSuccess": "Organization settings saved successfully",
     "saveError": "Failed to save settings. Please try again.",
+    "modelConfig": {
+      "title": "AI model",
+      "description": "Choose the default provider and model for this organization’s agent runs.",
+      "active": "Active",
+      "providerLabel": "Provider",
+      "providerPlaceholder": "Select a provider",
+      "providerReady": "Ready",
+      "providerUnavailable": "Not configured",
+      "providerHint": "The provider must have credentials configured in agent-service.",
+      "notConfiguredShort": "not ready",
+      "modelLabel": "Model",
+      "modelPlaceholder": "For example: openai/gpt-4o-mini",
+      "modelHint": "Choose a model from the Google Gemini catalog.",
+      "modelHintGeneric": "Enter a model supported by the selected provider.",
+      "credentialHint": "Credentials are managed by the service environment. The UI never stores an API key.",
+      "noProviderConfigured": "No provider credentials are configured. Configure the agent-service environment first.",
+      "readOnlyNotice": "You can view the configuration. Only administrators with model management permission can change it.",
+      "testButton": "Test connection",
+      "testing": "Testing…",
+      "tested": "Connection tested",
+      "saveButton": "Save model",
+      "saving": "Saving…",
+      "testSuccess": "Provider connection succeeded",
+      "saveSuccess": "Organization model updated",
+      "errors": {
+        "noPermission": "You do not have permission to manage this organization’s model.",
+        "providerNotConfigured": "This provider has no credentials configured in agent-service.",
+        "invalid": "The provider or model is invalid. Check your selection and try again.",
+        "conflict": "This configuration was updated elsewhere. Reload it and review your changes.",
+        "testFailed": "The provider test failed. Check the model and try again.",
+        "network": "Unable to reach agent-service. Check the connection and try again.",
+        "unavailable": "Unable to load model configuration. Please try again."
+      },
+      "modelsLoading": "Loading models…",
+      "modelsEmpty": "No compatible Gemini models were found.",
+      "catalogUnavailable": "Unable to load the model catalog from Google."
+    },
     "freePlan": "Free",
     "noTenants": "You do not belong to any organization",
     "loadingTenants": "Loading organizations...",
@@ -1184,7 +1304,43 @@
     "legalProfileReadonly": "Only Owners or Admins can edit the legal profile.",
     "legalProfileLoadError": "Failed to load the legal profile.",
     "legalProfileSave": "Save legal profile",
-    "legalProfileSaveSuccess": "Legal profile saved"
+    "legalProfileSaveSuccess": "Legal profile saved",
+    "aiInstructionsTitle": "Custom AI Instructions (LogiX Copilot)",
+    "aiInstructionsDesc": "Customize operational context, warehouse conventions, internal terminology, and response tone for this organization's AI assistant.",
+    "aiInstructionsStatusActive": "Active",
+    "aiInstructionsStatusPaused": "Paused",
+    "aiInstructionsStatusDefault": "System Default",
+    "aiInstructionsUpdatedBy": "Updated by {name} · {time}",
+    "aiInstructionsUpdatedAt": "Updated {time}",
+    "aiInstructionsLoading": "Loading AI instructions...",
+    "aiInstructionsLoadError": "Failed to load AI instructions.",
+    "aiInstructionsRetry": "Retry",
+    "aiInstructionsEnabledLabel": "Enable custom instructions",
+    "aiInstructionsEnabledHint": "Turn this off to temporarily fall back to the default system prompt without losing your saved text.",
+    "aiInstructionsPresetsLabel": "Quick presets:",
+    "aiInstructionsPresetWarehouseLabel": "Default warehouse rule",
+    "aiInstructionsPresetWarehouseText": "When checking stock or creating orders without a warehouse specified, ask whether to use the central hub and report quantities in cartons.",
+    "aiInstructionsPresetToneLabel": "Concise bullet tone",
+    "aiInstructionsPresetToneText": "Reply concisely using bullet points, always include document numbers (orders, shipments, trips), and suggest the next operational step.",
+    "aiInstructionsPresetDispatchLabel": "Dispatch guidance",
+    "aiInstructionsPresetDispatchText": "When recommending optimized routes, summarize distance saved and remind dispatchers to verify vehicle capacity before approval.",
+    "aiInstructionsFieldLabel": "Organization instructions",
+    "aiInstructionsPlaceholder": "e.g. Address yourself as North Logistics Assistant. Always specify WH-HN or WH-HCM codes in inventory reports...",
+    "aiInstructionsGuardrailsNote": "Custom instructions apply strictly to business context and tone. Core LogiX guardrails (Prophet/OR-Tools execution, Confirmation Gate, RBAC enforcement, and tenant isolation) remain immutable and cannot be overridden.",
+    "aiInstructionsSaveButton": "Save instructions",
+    "aiInstructionsRevertButton": "Revert",
+    "aiInstructionsResetButton": "Reset to default",
+    "aiInstructionsResetTitle": "Reset AI instructions to default?",
+    "aiInstructionsResetDesc": "This will clear the organization's custom instructions and restore LogiX Copilot to the default platform configuration.",
+    "aiInstructionsResetConfirm": "Reset to default",
+    "aiInstructionsSaveSuccess": "Organization AI instructions saved.",
+    "aiInstructionsSaveError": "Failed to save AI instructions.",
+    "aiInstructionsResetSuccess": "AI instructions reset to system default.",
+    "aiInstructionsResetError": "Failed to reset AI instructions.",
+    "aiInstructionsMaxLengthError": "Custom AI instructions must not exceed 2000 characters.",
+    "aiInstructionsReadonly": "Read-only mode. You need the AI instructions management permission (iam:ai-instructions:manage) to edit.",
+    "tabLegalProfile": "Legal Profile",
+    "tabAiInstructions": "AI Instructions"
   },
   "account": {
     "pageTitle": "Account Settings",
@@ -1323,7 +1479,8 @@
       "cannotDeleteRoleWithMembers": "This role is currently assigned to {count} members. Please reassign them before deleting.",
       "cannotChangeCode": "Role code cannot be changed once created.",
       "codeValidation": "Code can only contain uppercase letters, numbers, and underscores",
-      "deleteFailed": "Failed to delete role"
+      "deleteFailed": "Failed to delete role",
+      "selectedPermissionsCount": "Selected: {count} permissions"
     },
     "matrix": {
       "title": "Permission Matrix",
@@ -1339,6 +1496,8 @@
         "update": "Edit",
         "delete": "Delete",
         "execute": "Execute / Approve",
+        "approve": "Approve",
+        "complete": "Complete",
         "manage": "Full Access"
       },
       "selectAllModule": "Select all in module",
@@ -1348,20 +1507,38 @@
       "saveSuccess": "Role permissions updated successfully!"
     },
     "modules": {
+      "FULFILLMENT": "Fulfillment & Shipments",
       "INVENTORY": "Warehouse & Inventory",
       "TRANSPORT": "Transportation & Fleet",
+      "MASTER_DATA": "Master Data Catalog",
       "ORDER": "Orders & Contracts",
       "IAM": "Organization & Access Control",
-      "REPORT": "Analytics & Reports"
+      "FORECAST": "Demand Forecasting (Prophet)",
+      "REPORT": "Analytics & Reports",
+      "AGENT": "AI Assistant (LogiX Copilot)",
+      "AUDIT": "Audit Logs"
     },
     "resources": {
+      "shipment": "Shipments",
       "warehouse": "Warehouses & Locations",
       "stock": "Stock & Cycle Count",
       "trip": "Trips & Routes",
-      "vehicle": "Vehicles & Drivers",
+      "route": "Delivery Routes",
+      "driver": "Drivers & Assigned Trips",
+      "vehicle": "Fleet Vehicles",
+      "customer": "Customers & Addresses",
+      "product": "Products (SKU)",
       "sales_order": "Sales Orders",
       "role": "Roles & Permissions",
-      "member": "Organization Members"
+      "member": "Organization Members",
+      "organization": "Organization Profile",
+      "ai_instructions": "Custom AI Instructions",
+      "demand_forecast": "Demand Forecast",
+      "analytics": "Analytics Reports",
+      "export": "Report Export",
+      "conversation": "AI Conversations",
+      "model_config": "AI Model Configuration",
+      "log": "Audit Trail"
     },
     "invitations": {
       "title": "Organization Invitations",
@@ -1433,7 +1610,8 @@
         "organizationLabel": "Organization",
         "verifying": "Verifying invitation link...",
         "successMessage": "Welcome to {tenantName}! Redirecting to workspace..."
-      }
+      },
+      "singleEmailMultiRoleNote": "You can select multiple roles at once; only a single invitation email will be sent."
     }
   },
   "inventory": {
@@ -2366,6 +2544,116 @@
         "s6Title": "6. 72-Hour Data Breach Response Protocol (GDPR Article 33)",
         "s6Body": "LogiX maintains transactional Outbox/Inbox idempotency and continuous security monitoring. In the event of a confirmed personal data breach, LogiX will immediately execute containment procedures and notify affected Organizations and competent data protection authorities within a maximum of 72 hours of discovery."
       }
+    }
+  },
+  "audit": {
+    "navTitle": "Audit Logs",
+    "pageTitle": "Audit Logs",
+    "pageDescription": "Inspect immutable audit records across business operations, access control changes, and AI assistant tool calls.",
+    "accessDeniedTitle": "Audit Logs access denied",
+    "accessDeniedDesc": "Your account does not have permission to view audit logs. Contact your organization Owner to request access.",
+    "common": {
+      "empty": "—",
+      "systemActor": "System"
+    },
+    "outcomes": {
+      "SUCCESS": "Success",
+      "DENIED": "Denied",
+      "FAILED": "Failed"
+    },
+    "actorTypes": {
+      "USER": "User",
+      "SYSTEM": "System",
+      "AGENT": "AI Agent"
+    },
+    "filters": {
+      "action": "Action",
+      "actionPlaceholder": "e.g. ORDER_CONFIRMED, INVENTORY_ADJUSTED...",
+      "outcome": "Outcome",
+      "allOutcomes": "All outcomes",
+      "actorType": "Actor type",
+      "allActorTypes": "All actors",
+      "sourceService": "Source service",
+      "allServices": "All services",
+      "correlationId": "Correlation ID",
+      "actorId": "Actor ID",
+      "entityType": "Entity type",
+      "entityTypePlaceholder": "SalesOrder, Role, DeliveryTrip, ToolCall...",
+      "entityId": "Entity ID",
+      "uuidPlaceholder": "Enter UUID...",
+      "from": "From",
+      "to": "To",
+      "moreFilters": "Advanced filters",
+      "apply": "Apply",
+      "reset": "Reset"
+    },
+    "table": {
+      "occurredAt": "Timestamp",
+      "actor": "Actor",
+      "action": "Action",
+      "entity": "Entity",
+      "service": "Source service",
+      "outcome": "Outcome",
+      "correlation": "Correlation",
+      "detail": "Detail"
+    },
+    "actions": {
+      "refresh": "Refresh",
+      "retry": "Retry",
+      "inspect": "Inspect",
+      "copy": "Copy",
+      "copied": "Copied",
+      "filterByCorrelation": "Filter by chain"
+    },
+    "empty": {
+      "title": "No matching audit records",
+      "description": "Adjust or reset your filters to inspect other activities within your organization."
+    },
+    "pagination": {
+      "summary": "{total} records — Page {page} of {totalPages}",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "detail": {
+      "subtitle": "Immutable read-only record with secrets and tokens automatically redacted.",
+      "tabs": {
+        "overview": "Overview",
+        "diff": "Data changes",
+        "chain": "Event chain ({count})"
+      },
+      "occurredAt": "Occurred at",
+      "ingestedAt": "Ingested at",
+      "processingLatency": "Event processing latency",
+      "latencyValue": "{ms} ms",
+      "entity": "Target entity",
+      "actorId": "Actor ID",
+      "sourceEventId": "Source event ID",
+      "correlationId": "Correlation ID",
+      "causationId": "Causation ID"
+    },
+    "diff": {
+      "title": "Before & after comparison",
+      "tableMode": "Diff table",
+      "jsonMode": "JSON",
+      "field": "Field",
+      "before": "Before",
+      "after": "After",
+      "noChanges": "This event does not include before/after payload snapshots.",
+      "metadata": "Metadata",
+      "changeTypes": {
+        "added": "Added",
+        "removed": "Removed",
+        "changed": "Changed",
+        "unchanged": "Unchanged"
+      }
+    },
+    "chain": {
+      "description": "Cross-service event timeline sharing this correlation ID in chronological order. Select any step to inspect its details.",
+      "empty": "No related events found for this correlation ID."
+    },
+    "errors": {
+      "loadFailed": "Unable to load audit logs. Please try again.",
+      "loadChainFailed": "Unable to load correlation event chain. Please try again."
     }
   }
 }

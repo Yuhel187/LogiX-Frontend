@@ -106,6 +106,7 @@ be safe to deploy as-is.
   same change); colors/spacing come from theme tokens; statuses, permission
   codes, and error codes come from typed constants traceable to the backend
   contract, not repeated string literals.
+- **New RBAC permissions & Permission Matrix parity:** Whenever a new backend permission code is wired into the frontend, define its typed constant in the owning feature (`src/features/<domain>/constants/`), keep UI gates fail-closed (never widen access beyond backend RBAC), and if a new `module` or `resource` is introduced, add `iam.modules.<MODULE>` and `iam.resources.<resource>` to all `vi.json` and `en.json` locale files (`src/locales/` and `src/lib/i18n/locales/`) so the Role Permission Matrix never renders raw keys.
 
 **No dangerous fallbacks (fail fast, fail closed)**
 

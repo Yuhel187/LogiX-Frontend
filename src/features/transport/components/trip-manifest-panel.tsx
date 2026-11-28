@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import Link from "next/link";
+import { AlertCircle, CheckCircle2, Clock, ExternalLink, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -42,6 +43,7 @@ interface TripManifestPanelProps {
   trip: TripDetail;
   scope: MutationScope;
   canUpdate: boolean;
+  activeRouteStopOrder?: Map<string, number> | null;
   onReload: () => void;
 }
 
@@ -49,6 +51,7 @@ export function TripManifestPanel({
   trip,
   scope,
   canUpdate,
+  activeRouteStopOrder = null,
   onReload,
 }: TripManifestPanelProps) {
   const { t, locale } = useTranslation();
@@ -85,7 +88,7 @@ export function TripManifestPanel({
   const activeMemberships = trip.shipments.filter(
     (membership) => membership.state === "ACTIVE"
   );
-  const poolKey = `${trip.warehouseId}:${page}:${retryPool}`;
+  const poolKey = `${trip.warehouseId}:${trip.version}:${page}:${retryPool}`;
   const currentPool = poolResult?.key === poolKey ? poolResult : null;
   const eligible = currentPool?.items ?? [];
   const totalEligible = currentPool?.total ?? 0;
@@ -144,8 +147,14 @@ export function TripManifestPanel({
     }
     setOperationMessage(t("transport.operations.completed"));
     setOperationError(null);
-    if (kind === "add") setSelected(new Map());
+    if (kind === "add") {
+      if (page > 1 && selected.size >= eligible.length) {
+        setPage((value) => Math.max(1, value - 1));
+      }
+      setSelected(new Map());
+    }
     if (kind === "remove") setSelectedMemberships(new Set());
+    setRetryPool((value) => value + 1);
     onReload();
   };
 
@@ -325,6 +334,29 @@ export function TripManifestPanel({
         <Table aria-label={t("transport.manifest.title")}>
           <TableHeader>
             <TableRow>
+              {tripActive && canUpdate ? (
+                <TableHead className="w-10">
+                  <input
+                    type="checkbox"
+                    aria-label={t("transport.manifest.selectAllForRemoval")}
+                    checked={
+                      activeMemberships.length > 0 &&
+                      activeMemberships.every((m) => selectedMemberships.has(m.id))
+                    }
+                    disabled={isOperationPending || activeMemberships.length === 0}
+                    onChange={(event) => {
+                      if (event.target.checked) {
+                        setSelectedMemberships(
+                          new Set(activeMemberships.map((m) => m.id)),
+                        );
+                      } else {
+                        setSelectedMemberships(new Set());
+                      }
+                    }}
+                    className="size-4 accent-primary"
+                  />
+                </TableHead>
+              ) : null}
               <TableHead>{t("transport.columns.shipment")}</TableHead>
               <TableHead>{t("transport.fields.status")}</TableHead>
               <TableHead>{t("transport.fields.recipient")}</TableHead>
@@ -346,11 +378,18 @@ export function TripManifestPanel({
               const snapshot = membership.shipmentSnapshot;
               const effective =
                 membership.state === "ACTIVE" && stop?.deletedAt === null;
+              const routeSequence =
+                stop?.approvedSequence ??
+                (stop && activeRouteStopOrder ? activeRouteStopOrder.get(stop.id) ?? null : null);
+              const isSyncedWithRoute = effective && routeSequence !== null;
+              const routePlanExists =
+                Boolean(trip.approvedRoutePlanId) ||
+                (activeRouteStopOrder !== null && activeRouteStopOrder.size > 0);
               return (
                 <TableRow key={membership.id} className={!effective ? "opacity-70" : ""}>
-                  <TableCell className="min-w-40">
-                    <div className="flex items-center gap-2">
-                      {effective && canUpdate ? (
+                  {tripActive && canUpdate ? (
+                    <TableCell className="w-10">
+                      {effective ? (
                         <input
                           type="checkbox"
                           aria-label={t("transport.manifest.selectForRemoval", {
@@ -364,10 +403,12 @@ export function TripManifestPanel({
                           className="size-4 accent-primary"
                         />
                       ) : null}
-                      <span className="font-medium">
-                        {snapshot?.shipmentNumber ?? t("transport.manifest.snapshotUnavailable")}
-                      </span>
-                    </div>
+                    </TableCell>
+                  ) : null}
+                  <TableCell className="min-w-40">
+                    <span className="font-medium">
+                      {snapshot?.shipmentNumber ?? t("transport.manifest.snapshotUnavailable")}
+                    </span>
                   </TableCell>
                   <TableCell>
                     <span className="rounded-full border px-2 py-1 text-xs">
@@ -393,20 +434,40 @@ export function TripManifestPanel({
                   <TableCell className="text-right tabular-nums">
                     {formatDecimal(membership.volume, locale)}
                   </TableCell>
-                  <TableCell>
-                    {stop?.plannedSequence ?? "—"}
+                  <TableCell className="whitespace-nowrap">
                     {stop?.deletedAt ? (
-                      <span className="ml-2 text-xs text-muted-foreground">
+                      <span className="text-xs text-muted-foreground">
                         {t("transport.manifest.removed")}
                       </span>
-                    ) : null}
+                    ) : isSyncedWithRoute ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                        <CheckCircle2 aria-hidden="true" className="size-3.5" />
+                        <span>
+                          {t("transport.manifest.inRouteSequence", {
+                            sequence: routeSequence,
+                          })}
+                        </span>
+                      </span>
+                    ) : routePlanExists && effective ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">
+                        <Clock aria-hidden="true" className="size-3.5" />
+                        <span>{t("transport.manifest.notInRouteYet")}</span>
+                      </span>
+                    ) : (
+                      <span className="tabular-nums text-muted-foreground">
+                        {stop?.plannedSequence ? `#${stop.plannedSequence}` : "—"}
+                      </span>
+                    )}
                   </TableCell>
                 </TableRow>
               );
             })}
             {trip.shipments.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
+                <TableCell
+                  colSpan={tripActive && canUpdate ? 8 : 7}
+                  className="py-8 text-center text-muted-foreground"
+                >
                   {t("transport.manifest.empty")}
                 </TableCell>
               </TableRow>
@@ -430,11 +491,26 @@ export function TripManifestPanel({
 
       {tripActive ? (
         <section className="min-w-0 space-y-3 rounded-lg border bg-card p-4">
-          <header>
-            <h3 className="font-semibold">{t("transport.manifest.addShipments")}</h3>
-            <p className="text-sm text-muted-foreground">
-              {t("transport.manifest.poolDescription")}
-            </p>
+          <header className="flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <h3 className="font-semibold">{t("transport.manifest.addShipments")}</h3>
+              <p className="text-sm text-muted-foreground">
+                {t("transport.manifest.poolDescription")}
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={loadingPool}
+              onClick={() => setRetryPool((value) => value + 1)}
+            >
+              <RefreshCw
+                aria-hidden="true"
+                className={loadingPool ? "size-3.5 animate-spin" : "size-3.5"}
+              />
+              {t("transport.manifest.refreshPool")}
+            </Button>
           </header>
           {poolError !== null ? (
             <Alert variant="destructive">
@@ -487,9 +563,24 @@ export function TripManifestPanel({
               ))}
             </ul>
           ) : poolError === null ? (
-            <p className="rounded-md border p-4 text-sm text-muted-foreground">
-              {t("transport.manifest.poolEmpty")}
-            </p>
+            <div className="space-y-3 rounded-md border border-dashed bg-muted/20 p-4 text-sm">
+              <p className="font-medium text-foreground">
+                {t("transport.manifest.poolEmptyForWarehouse", {
+                  warehouse: `${trip.depotSnapshot.code} · ${trip.depotSnapshot.name}`,
+                })}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {t("transport.manifest.poolEligibilityHint")}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button asChild variant="outline" size="sm">
+                  <Link href="/shipments" className="inline-flex items-center gap-1.5">
+                    <span>{t("transport.manifest.openShipmentsPage")}</span>
+                    <ExternalLink aria-hidden="true" className="size-3.5" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
           ) : null}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <Label>

@@ -22,6 +22,7 @@ import { useAuth } from "@/lib/auth";
 import { useTranslation } from "@/lib/i18n";
 
 const DEFAULT_SIDEBAR_WIDTH = 400;
+const HIDE_TOOL_RESULTS_CONFIG = { render: () => <></> };
 
 export interface LogixCopilotSidebarProps {
   defaultOpen?: boolean;
@@ -64,11 +65,7 @@ function LogixCopilotSidebarContent({
       : !isProduction;
 
   useDefaultRenderTool(
-    showToolResults
-      ? undefined
-      : {
-          render: () => <></>,
-        }
+    showToolResults ? undefined : HIDE_TOOL_RESULTS_CONFIG
   );
 
   useInterrupt({
@@ -84,10 +81,20 @@ function LogixCopilotSidebarContent({
     },
   });
 
+  const fetchThreadsRef = React.useRef(fetchThreads);
+  React.useEffect(() => {
+    fetchThreadsRef.current = fetchThreads;
+  }, [fetchThreads]);
+
   const handleOpenHistory = React.useCallback(() => {
     setIsHistoryOpen(true);
-    void fetchThreads();
-  }, [fetchThreads]);
+    void fetchThreadsRef.current();
+  }, []);
+
+  const handleHeaderNewChat = React.useCallback(() => {
+    onNewChat();
+    void fetchThreadsRef.current();
+  }, [onNewChat]);
 
   const headerSlot = React.useMemo(
     () => ({
@@ -99,9 +106,8 @@ function LogixCopilotSidebarContent({
         title?: React.ReactNode;
       }) => (
         <div
-          className={`flex w-full items-center justify-between border-b border-border/80 ${
-            isExpanded ? "px-6 sm:px-10 py-4" : "px-4 sm:px-5 py-3.5"
-          } bg-background/95 backdrop-blur-md shrink-0 transition-colors`}
+          className={`flex w-full items-center justify-between border-b border-border/80 ${isExpanded ? "px-6 sm:px-10 py-4" : "px-4 sm:px-5 py-3.5"
+            } bg-background/95 backdrop-blur-md shrink-0 transition-colors`}
         >
           {/* Brand & AI Status */}
           <div className="flex items-center gap-3 min-w-0">
@@ -140,9 +146,8 @@ function LogixCopilotSidebarContent({
 
             <div className="flex items-center gap-2 min-w-0">
               <span
-                className={`font-bold ${
-                  isExpanded ? "text-lg sm:text-xl" : "text-base sm:text-lg"
-                } text-foreground tracking-tight truncate`}
+                className={`font-bold ${isExpanded ? "text-lg sm:text-xl" : "text-base sm:text-lg"
+                  } text-foreground tracking-tight truncate`}
               >
                 {title || t("chat.appTitle") || "LogiX Copilot"}
               </span>
@@ -168,10 +173,7 @@ function LogixCopilotSidebarContent({
             {/* New Thread Button */}
             <button
               type="button"
-              onClick={() => {
-                onNewChat();
-                void fetchThreads();
-              }}
+              onClick={handleHeaderNewChat}
               className="h-9 w-9 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer shrink-0"
               title={t("chat.newChat") || "Cuộc trò chuyện mới"}
               aria-label="New chat thread"
@@ -192,7 +194,7 @@ function LogixCopilotSidebarContent({
         </div>
       ),
     }),
-    [fetchThreads, handleOpenHistory, isExpanded, onNewChat, setIsExpanded, t]
+    [handleHeaderNewChat, handleOpenHistory, isExpanded, setIsExpanded, t]
   );
 
   const labelsSlot = React.useMemo(
@@ -294,11 +296,18 @@ export function LogixCopilotSidebar({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isExpanded]);
 
-  // Listen for programmatic open events (e.g. from header button or global command palette)
+  // Listen for programmatic open events (e.g. from header button, command palette, or Conversation Management Center)
   React.useEffect(() => {
     const handleOpenRequest = (event: Event) => {
-      const customEvent = event as CustomEvent<{ prompt?: string }>;
+      const customEvent = event as CustomEvent<{ prompt?: string; threadId?: string }>;
       const promptText = customEvent.detail?.prompt?.trim();
+      const targetThreadId = customEvent.detail?.threadId?.trim();
+
+      if (targetThreadId) {
+        saveThreadId(targetThreadId);
+        setThreadId(targetThreadId);
+        setChatResetVersion((v) => v + 1);
+      }
 
       const openSidebarIfClosed = () => {
         const toggleBtn = document.querySelector(
