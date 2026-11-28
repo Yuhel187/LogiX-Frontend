@@ -4,6 +4,7 @@ import "./globals.css";
 import "@copilotkit/react-core/v2/styles.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/shared/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 import { LanguageProvider } from "@/lib/i18n";
 import { AuthProvider } from "@/lib/auth";
 import { DynamicTenantHead } from "@/components/shared/dynamic-tenant-head";
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           enableSystem
           disableTransitionOnChange
         >
+          <Toaster position="top-right" richColors closeButton />
           <LanguageProvider>
             <AuthProvider>
               <DynamicTenantHead />

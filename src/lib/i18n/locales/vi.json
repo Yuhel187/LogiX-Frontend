@@ -2404,5 +2404,21 @@
         "s6Body": "LogiX duy trì cơ chế kiểm soát tính nhất quán dữ liệu (Outbox/Inbox Idempotency) và giám sát an ninh liên tục. Trong trường hợp xảy ra sự cố xâm phạm hoặc rò rỉ dữ liệu cá nhân, LogiX cam kết kích hoạt quy trình khoanh vùng khắc phục ngay lập tức và thông báo bằng văn bản cho Tổ chức bị ảnh hưởng cùng cơ quan chuyên trách bảo vệ dữ liệu trong vòng tối đa 72 giờ kể từ khi phát hiện."
       }
     }
+  },
+  "notifications": {
+    "title": "Thông báo",
+    "empty": "Chưa có thông báo nào",
+    "emptyDesc": "Thông báo vận hành và cập nhật theo thời gian thực sẽ xuất hiện tại đây.",
+    "loading": "Đang tải thông báo...",
+    "loadError": "Không thể tải danh sách thông báo.",
+    "retry": "Thử lại",
+    "markAllRead": "Đọc tất cả",
+    "markAllReadSuccess": "Đã đánh dấu tất cả thông báo là đã đọc.",
+    "archive": "Lưu trữ thông báo",
+    "actionError": "Không thể cập nhật trạng thái thông báo. Vui lòng thử lại.",
+    "viewDetail": "Xem chi tiết",
+    "realtimeConnected": "Trực tuyến (Real-time)",
+    "realtimeReconnecting": "Đang kết nối lại...",
+    "refresh": "Làm mới thông báo"
   }
 }

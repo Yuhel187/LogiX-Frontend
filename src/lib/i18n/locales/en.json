@@ -2404,5 +2404,21 @@
         "s6Body": "LogiX maintains transactional Outbox/Inbox idempotency and continuous security monitoring. In the event of a confirmed personal data breach, LogiX will immediately execute containment procedures and notify affected Organizations and competent data protection authorities within a maximum of 72 hours of discovery."
       }
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications yet",
+    "emptyDesc": "Real-time operational updates and alerts will appear here.",
+    "loading": "Loading notifications...",
+    "loadError": "Unable to load notifications.",
+    "retry": "Retry",
+    "markAllRead": "Mark all read",
+    "markAllReadSuccess": "All notifications marked as read.",
+    "archive": "Archive notification",
+    "actionError": "Unable to update notification status. Please try again.",
+    "viewDetail": "View details",
+    "realtimeConnected": "Live (Real-time)",
+    "realtimeReconnecting": "Reconnecting...",
+    "refresh": "Refresh notifications"
   }
 }
