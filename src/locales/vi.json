@@ -1515,7 +1515,8 @@
       "IAM": "Quản trị Tổ chức & Phân quyền",
       "FORECAST": "Dự báo Nhu cầu (AI Prophet)",
       "REPORT": "Báo cáo & Thống kê",
-      "AGENT": "Trợ lý AI (LogiX Copilot)"
+      "AGENT": "Trợ lý AI (LogiX Copilot)",
+      "AUDIT": "Nhật ký Kiểm toán"
     },
     "resources": {
       "shipment": "Lô giao hàng",
@@ -1536,7 +1537,8 @@
       "analytics": "Báo cáo phân tích",
       "export": "Xuất dữ liệu báo cáo",
       "conversation": "Hội thoại AI",
-      "model_config": "Cấu hình mô hình AI"
+      "model_config": "Cấu hình mô hình AI",
+      "log": "Nhật ký kiểm toán"
     },
     "invitations": {
       "title": "Lời mời Tham gia Tổ chức",
@@ -2542,6 +2544,116 @@
         "s6Title": "6. Quy trình Ứng phó & Thông báo Sự cố Dữ liệu trong 72 Giờ (Điều 33 GDPR)",
         "s6Body": "LogiX duy trì cơ chế kiểm soát tính nhất quán dữ liệu (Outbox/Inbox Idempotency) và giám sát an ninh liên tục. Trong trường hợp xảy ra sự cố xâm phạm hoặc rò rỉ dữ liệu cá nhân, LogiX cam kết kích hoạt quy trình khoanh vùng khắc phục ngay lập tức và thông báo bằng văn bản cho Tổ chức bị ảnh hưởng cùng cơ quan chuyên trách bảo vệ dữ liệu trong vòng tối đa 72 giờ kể từ khi phát hiện."
       }
+    }
+  },
+  "audit": {
+    "navTitle": "Nhật ký kiểm toán",
+    "pageTitle": "Nhật ký kiểm toán",
+    "pageDescription": "Tra cứu nhật ký kiểm toán bất biến cho các thao tác nghiệp vụ, phân quyền và trợ lý AI trong tổ chức.",
+    "accessDeniedTitle": "Không có quyền truy cập Nhật ký kiểm toán",
+    "accessDeniedDesc": "Tài khoản của bạn chưa được cấp quyền xem nhật ký kiểm toán. Vui lòng liên hệ Chủ sở hữu tổ chức để được phân quyền.",
+    "common": {
+      "empty": "—",
+      "systemActor": "Hệ thống"
+    },
+    "outcomes": {
+      "SUCCESS": "Thành công",
+      "DENIED": "Bị từ chối",
+      "FAILED": "Thất bại"
+    },
+    "actorTypes": {
+      "USER": "Người dùng",
+      "SYSTEM": "Hệ thống",
+      "AGENT": "Trợ lý AI"
+    },
+    "filters": {
+      "action": "Hành động",
+      "actionPlaceholder": "Ví dụ: ORDER_CONFIRMED, INVENTORY_ADJUSTED...",
+      "outcome": "Kết quả",
+      "allOutcomes": "Tất cả kết quả",
+      "actorType": "Loại tác nhân",
+      "allActorTypes": "Tất cả tác nhân",
+      "sourceService": "Dịch vụ nguồn",
+      "allServices": "Tất cả dịch vụ",
+      "correlationId": "Mã truy vết (Correlation ID)",
+      "actorId": "Mã tác nhân (Actor ID)",
+      "entityType": "Loại đối tượng",
+      "entityTypePlaceholder": "SalesOrder, Role, DeliveryTrip, ToolCall...",
+      "entityId": "Mã đối tượng (Entity ID)",
+      "uuidPlaceholder": "Nhập mã UUID...",
+      "from": "Từ thời điểm",
+      "to": "Đến thời điểm",
+      "moreFilters": "Bộ lọc nâng cao",
+      "apply": "Áp dụng",
+      "reset": "Đặt lại"
+    },
+    "table": {
+      "occurredAt": "Thời điểm",
+      "actor": "Tác nhân",
+      "action": "Hành động",
+      "entity": "Đối tượng",
+      "service": "Dịch vụ nguồn",
+      "outcome": "Kết quả",
+      "correlation": "Chuỗi truy vết",
+      "detail": "Chi tiết"
+    },
+    "actions": {
+      "refresh": "Làm mới",
+      "retry": "Thử lại",
+      "inspect": "Xem chi tiết",
+      "copy": "Sao chép",
+      "copied": "Đã chép",
+      "filterByCorrelation": "Lọc theo chuỗi này"
+    },
+    "empty": {
+      "title": "Chưa có bản ghi kiểm toán phù hợp",
+      "description": "Thử điều chỉnh hoặc đặt lại bộ lọc để xem các hoạt động khác trong tổ chức."
+    },
+    "pagination": {
+      "summary": "Tổng {total} bản ghi — Trang {page} / {totalPages}",
+      "previous": "Trước",
+      "next": "Tiếp"
+    },
+    "detail": {
+      "subtitle": "Bản ghi bất biến chỉ đọc, đã lọc bỏ hoàn toàn thông tin nhạy cảm và token.",
+      "tabs": {
+        "overview": "Tổng quan",
+        "diff": "Thay đổi dữ liệu",
+        "chain": "Chuỗi sự kiện ({count})"
+      },
+      "occurredAt": "Thời điểm xảy ra",
+      "ingestedAt": "Thời điểm ghi nhận",
+      "processingLatency": "Độ trễ xử lý sự kiện",
+      "latencyValue": "{ms} ms",
+      "entity": "Đối tượng tác động",
+      "actorId": "Mã tác nhân",
+      "sourceEventId": "Mã sự kiện nguồn",
+      "correlationId": "Mã truy vết (Correlation ID)",
+      "causationId": "Mã nguyên nhân (Causation ID)"
+    },
+    "diff": {
+      "title": "So sánh dữ liệu trước và sau",
+      "tableMode": "Bảng so sánh",
+      "jsonMode": "JSON",
+      "field": "Trường dữ liệu",
+      "before": "Trước thay đổi",
+      "after": "Sau thay đổi",
+      "noChanges": "Sự kiện này không có dữ liệu chi tiết trước/sau.",
+      "metadata": "Siêu dữ liệu (Metadata)",
+      "changeTypes": {
+        "added": "Thêm mới",
+        "removed": "Đã xóa",
+        "changed": "Thay đổi",
+        "unchanged": "Giữ nguyên"
+      }
+    },
+    "chain": {
+      "description": "Toàn bộ chuỗi sự kiện xuyên dịch vụ chia sẻ cùng mã truy vết (sắp xếp theo thứ tự thời gian). Chọn một bước để xem chi tiết.",
+      "empty": "Không tìm thấy sự kiện liên quan nào trong chuỗi truy vết này."
+    },
+    "errors": {
+      "loadFailed": "Không thể tải danh sách nhật ký kiểm toán. Vui lòng thử lại.",
+      "loadChainFailed": "Không thể tải chuỗi sự kiện truy vết. Vui lòng thử lại."
     }
   }
 }
