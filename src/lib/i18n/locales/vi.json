@@ -2546,6 +2546,21 @@
       }
     }
   },
+  "notifications": {
+    "title": "Thông báo",
+    "empty": "Chưa có thông báo nào",
+    "emptyDesc": "Thông báo vận hành và cập nhật theo thời gian thực sẽ xuất hiện tại đây.",
+    "loading": "Đang tải thông báo...",
+    "loadError": "Không thể tải danh sách thông báo.",
+    "retry": "Thử lại",
+    "markAllRead": "Đọc tất cả",
+    "markAllReadSuccess": "Đã đánh dấu tất cả thông báo là đã đọc.",
+    "archive": "Lưu trữ thông báo",
+    "actionError": "Không thể cập nhật trạng thái thông báo. Vui lòng thử lại.",
+    "viewDetail": "Xem chi tiết",
+    "realtimeConnected": "Trực tuyến (Real-time)",
+    "realtimeReconnecting": "Đang kết nối lại...",
+    "refresh": "Làm mới thông báo"
   "audit": {
     "navTitle": "Nhật ký kiểm toán",
     "pageTitle": "Nhật ký kiểm toán",

@@ -2546,6 +2546,21 @@
       }
     }
   },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications yet",
+    "emptyDesc": "Real-time operational updates and alerts will appear here.",
+    "loading": "Loading notifications...",
+    "loadError": "Unable to load notifications.",
+    "retry": "Retry",
+    "markAllRead": "Mark all read",
+    "markAllReadSuccess": "All notifications marked as read.",
+    "archive": "Archive notification",
+    "actionError": "Unable to update notification status. Please try again.",
+    "viewDetail": "View details",
+    "realtimeConnected": "Live (Real-time)",
+    "realtimeReconnecting": "Reconnecting...",
+    "refresh": "Refresh notifications"
   "audit": {
     "navTitle": "Audit Logs",
     "pageTitle": "Audit Logs",
