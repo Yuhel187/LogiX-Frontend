@@ -2561,6 +2561,7 @@
     "realtimeConnected": "Trực tuyến (Real-time)",
     "realtimeReconnecting": "Đang kết nối lại...",
     "refresh": "Làm mới thông báo"
+  },
   "audit": {
     "navTitle": "Nhật ký kiểm toán",
     "pageTitle": "Nhật ký kiểm toán",

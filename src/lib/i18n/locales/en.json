@@ -2561,6 +2561,7 @@
     "realtimeConnected": "Live (Real-time)",
     "realtimeReconnecting": "Reconnecting...",
     "refresh": "Refresh notifications"
+  },
   "audit": {
     "navTitle": "Audit Logs",
     "pageTitle": "Audit Logs",
