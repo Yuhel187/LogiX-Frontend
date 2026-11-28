@@ -9,6 +9,7 @@ import {
   ClipboardList,
   LayoutDashboard,
   MapPinned,
+  Megaphone,
   Package,
   PackageOpen,
   Route,
@@ -34,13 +35,14 @@ import { useSidebar } from "@/components/shared/sidebar-context";
 import { useTranslation } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
 import { TenantSwitcher } from "@/components/shared/tenant-switcher";
-import { WORKSPACE_HOME_ROUTE } from "@/lib/config/routes";
+import { BROADCASTS_ROUTE, WORKSPACE_HOME_ROUTE } from "@/lib/config/routes";
 import { ORDER_PERMISSIONS } from "@/features/orders";
 import { SHIPMENT_PERMISSIONS } from "@/features/shipments";
 import { DRIVER_PERMISSIONS } from "@/features/master-data";
 import { TRANSPORT_PERMISSIONS } from "@/features/transport";
 import { AGENT_CONVERSATION_PERMISSIONS } from "@/features/chat/constants/conversation-permissions";
 import { AUDIT_PERMISSIONS } from "@/features/audit";
+import { NOTIFICATION_BROADCAST_PERMISSIONS } from "@/features/notifications";
 
 interface NavItem {
   title: string;
@@ -109,6 +111,15 @@ export function AppSidebar() {
             href: "/audit-logs",
             icon: ScrollText,
             permission: AUDIT_PERMISSIONS.LOG_READ,
+          },
+          {
+            title: t("notifications.broadcast.navTitle"),
+            href: BROADCASTS_ROUTE,
+            icon: Megaphone,
+            anyPermissions: [
+              NOTIFICATION_BROADCAST_PERMISSIONS.READ,
+              NOTIFICATION_BROADCAST_PERMISSIONS.SEND,
+            ],
           },
         ],
       },

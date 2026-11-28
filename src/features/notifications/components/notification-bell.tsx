@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { enUS, vi } from "date-fns/locale";
@@ -24,7 +25,10 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/lib/auth";
+import { BROADCASTS_ROUTE } from "@/lib/config/routes";
 import { useTranslation } from "@/lib/i18n";
+import { NOTIFICATION_BROADCAST_PERMISSIONS } from "../constants/notification-permissions";
 import {
   getSafeNotificationLink,
   NOTIFICATION_SEVERITIES,
@@ -95,6 +99,7 @@ function formatRelativeTime(createdAt: string, locale: string): string {
 
 export function NotificationBell() {
   const { t, locale } = useTranslation();
+  const { isSuperAdmin, hasAnyPermission } = useAuth();
   const router = useRouter();
   const {
     items,
@@ -108,6 +113,13 @@ export function NotificationBell() {
     archive,
   } = useNotifications();
   const [open, setOpen] = React.useState(false);
+
+  const canAccessBroadcastCenter =
+    isSuperAdmin ||
+    hasAnyPermission([
+      NOTIFICATION_BROADCAST_PERMISSIONS.READ,
+      NOTIFICATION_BROADCAST_PERMISSIONS.SEND,
+    ]);
 
   const badgeText = unreadCount > 99 ? "99+" : String(unreadCount);
 
@@ -306,7 +318,7 @@ export function NotificationBell() {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-border/60 px-3 py-2 text-[11px] text-muted-foreground">
+        <div className="flex items-center justify-between gap-2 border-t border-border/60 px-3 py-2 text-[11px] text-muted-foreground">
           <span className="inline-flex items-center gap-1.5">
             <span
               className={cn(
@@ -318,6 +330,19 @@ export function NotificationBell() {
               ? t("notifications.realtimeConnected")
               : t("notifications.realtimeReconnecting")}
           </span>
+          {canAccessBroadcastCenter && (
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="h-6 px-2 text-[11px] font-medium text-primary hover:text-primary"
+            >
+              <Link href={BROADCASTS_ROUTE} onClick={() => setOpen(false)}>
+                <Megaphone className="size-3 mr-1" aria-hidden="true" />
+                <span>{t("notifications.broadcast.openCenter")}</span>
+              </Link>
+            </Button>
+          )}
         </div>
       </DropdownMenuContent>
     </DropdownMenu>
